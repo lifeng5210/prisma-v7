@@ -649,8 +649,8 @@ importers:
         specifier: ^4.20251014.0
         version: 4.20251117.0
       '@codspeed/benchmark.js-plugin':
-        specifier: 4.0.0
-        version: 4.0.0(benchmark@2.1.4)
+        specifier: 5.7.1
+        version: 5.7.1(benchmark@2.1.4)
       '@faker-js/faker':
         specifier: 9.6.0
         version: 9.6.0
@@ -1010,8 +1010,8 @@ importers:
         version: 14.0.0
     devDependencies:
       '@codspeed/benchmark.js-plugin':
-        specifier: 4.0.0
-        version: 4.0.0(benchmark@2.1.4)
+        specifier: 5.7.1
+        version: 5.7.1(benchmark@2.1.4)
       '@prisma/get-dmmf':
         specifier: workspace:*
         version: link:../get-dmmf
@@ -1396,8 +1396,8 @@ importers:
         version: link:../debug
     devDependencies:
       '@codspeed/benchmark.js-plugin':
-        specifier: 4.0.0
-        version: 4.0.0(benchmark@2.1.4)
+        specifier: 5.7.1
+        version: 5.7.1(benchmark@2.1.4)
       '@types/node':
         specifier: ~20.19.24
         version: 20.19.25
@@ -2335,13 +2335,13 @@ packages:
   '@cloudflare/workers-types@4.20251117.0':
     resolution: {integrity: sha512-4U6phQE/qbmWuJX/0cTk3iOx9KyhWmo34okKb2BSS09UMRWLCwML+P3dnHxCHnSQij8c0orvdzMr9hyqgJGNgw==}
 
-  '@codspeed/benchmark.js-plugin@4.0.0':
-    resolution: {integrity: sha512-1nzkRfvsA2rI1NsqYmkXEnQ/P3NL2JlAqRs/RLWLyeGtmE+4JN8w4ndgUpeb3g9Q+Kki/njmPUf7YsHUAQpUXA==}
+  '@codspeed/benchmark.js-plugin@5.7.1':
+    resolution: {integrity: sha512-kvnLDOU6v65Lj7bvm6WwN/GF6MVMUDY8btEYwKNeLrZk2T+Anz7696spc6JeXvNSYxDVZiyxaHHHIi2dS89sqQ==}
     peerDependencies:
       benchmark: ^2.1.0
 
-  '@codspeed/core@4.0.0':
-    resolution: {integrity: sha512-B3zwdwLG8rcV0ORfYKX1wDP6ZCWf9C6ySidSf61q2vm9v5Lj2cWwRvj7vX+w/UyFHWKjp/zSyWTEed/r3Fv4Tg==}
+  '@codspeed/core@5.7.1':
+    resolution: {integrity: sha512-7mrFkqaY14rXu3XHv3o7bK3btLK0LFRxfeK3bQC8dLduI/Ty9eq8Hv8rx04FAY/onQbRTx3rUUQg5xprYHpATQ==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -4961,6 +4961,9 @@ packages:
   axios@1.13.6:
     resolution: {integrity: sha512-ChTCHMouEe2kn713WHbQGcuYrr6fXTBiu460OTwWrWob16g1bXn4vtz07Ope7ewMozJAnEquLk5lWQWtBig9DQ==}
 
+  axios@1.18.1:
+    resolution: {integrity: sha512-3nTvFlvpn9Zu/RkHUqtc7/+al4UpRW5az71ap5zccp6e8RAYEzhMTecX8Dz1wWDYrPpUoB1HAQEGEAEvUr7S9g==}
+
   b4a@1.6.4:
     resolution: {integrity: sha512-fpWrvyVHEKyeEvbKZTVOeZF3VSKKWtJxFIxX/jaVPf+cLbGUSitjb49pHLqPV2BUNNZ0LcoeEGfE/YCpyDYHIw==}
 
@@ -6094,12 +6097,25 @@ packages:
       debug:
         optional: true
 
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
   form-data@4.0.5:
     resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
+    engines: {node: '>= 6'}
+
+  form-data@4.0.6:
+    resolution: {integrity: sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==}
     engines: {node: '>= 6'}
 
   format-util@1.0.5:
@@ -6293,6 +6309,10 @@ packages:
 
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
+    engines: {node: '>= 0.4'}
+
+  hasown@2.0.4:
+    resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
   hono@4.12.23:
@@ -7308,8 +7328,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-gyp-build@4.6.0:
-    resolution: {integrity: sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==}
+  node-gyp-build@4.8.4:
+    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
   node-gyp@8.4.1:
@@ -7794,6 +7814,10 @@ packages:
 
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
 
   pump@3.0.2:
     resolution: {integrity: sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==}
@@ -9490,23 +9514,25 @@ snapshots:
 
   '@cloudflare/workers-types@4.20251117.0': {}
 
-  '@codspeed/benchmark.js-plugin@4.0.0(benchmark@2.1.4)':
+  '@codspeed/benchmark.js-plugin@5.7.1(benchmark@2.1.4)':
     dependencies:
-      '@codspeed/core': 4.0.0
+      '@codspeed/core': 5.7.1
       benchmark: 2.1.4
       lodash: 4.18.1
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  '@codspeed/core@5.7.1':
+    dependencies:
+      axios: 1.18.1
+      find-up: 6.3.0
+      form-data: 4.0.6
+      node-gyp-build: 4.8.4
       stack-trace: 1.0.0-pre2
     transitivePeerDependencies:
       - debug
-
-  '@codspeed/core@4.0.0':
-    dependencies:
-      axios: 1.13.6
-      find-up: 6.3.0
-      form-data: 4.0.5
-      node-gyp-build: 4.6.0
-    transitivePeerDependencies:
-      - debug
+      - supports-color
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -11897,7 +11923,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   agent-base@7.1.0:
     dependencies:
@@ -12046,6 +12071,16 @@ snapshots:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+
+  axios@1.18.1:
+    dependencies:
+      follow-redirects: 1.16.0
+      form-data: 4.0.6
+      https-proxy-agent: 5.0.1
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
 
   b4a@1.6.4: {}
 
@@ -12784,7 +12819,7 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
 
   esbuild-register@3.6.0(esbuild@0.25.5):
     dependencies:
@@ -13322,6 +13357,8 @@ snapshots:
 
   follow-redirects@1.15.11: {}
 
+  follow-redirects@1.16.0: {}
+
   foreground-child@3.3.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -13333,6 +13370,14 @@ snapshots:
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
       hasown: 2.0.2
+      mime-types: 2.1.35
+
+  form-data@4.0.6:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      hasown: 2.0.4
       mime-types: 2.1.35
 
   format-util@1.0.5: {}
@@ -13400,7 +13445,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       math-intrinsics: 1.1.0
 
   get-package-type@0.1.0: {}
@@ -13520,6 +13565,10 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  hasown@2.0.4:
+    dependencies:
+      function-bind: 1.1.2
+
   hono@4.12.23: {}
 
   hosted-git-info@2.8.9: {}
@@ -13563,7 +13612,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   https-proxy-agent@7.0.6(supports-color@10.2.2):
     dependencies:
@@ -14812,7 +14860,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-gyp-build@4.6.0: {}
+  node-gyp-build@4.8.4: {}
 
   node-gyp@8.4.1:
     dependencies:
@@ -15287,6 +15335,8 @@ snapshots:
       ipaddr.js: 1.9.1
 
   proxy-from-env@1.1.0: {}
+
+  proxy-from-env@2.1.0: {}
 
   pump@3.0.2:
     dependencies:
