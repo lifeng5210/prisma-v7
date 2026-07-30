@@ -655,8 +655,8 @@ importers:
         specifier: 9.6.0
         version: 9.6.0
       '@fast-check/jest':
-        specifier: 2.0.3
-        version: 2.0.3(@jest/expect@29.7.0)(@jest/globals@29.7.0)
+        specifier: 2.2.0
+        version: 2.2.0(@jest/expect@29.7.0)(@jest/globals@29.7.0)
       '@hono/node-server':
         specifier: ^1.19.14
         version: 1.19.14(hono@4.12.23)
@@ -3031,10 +3031,10 @@ packages:
     resolution: {integrity: sha512-3vm4by+B5lvsFPSyep3ELWmZfE3kicDtmemVpuwl1yH7tqtnHdsA6hG8fbXedMVdkzgtvzWoRgjSB4Q+FHnZiw==}
     engines: {node: '>=18.0.0', npm: '>=9.0.0'}
 
-  '@fast-check/jest@2.0.3':
-    resolution: {integrity: sha512-3bRtz5kmM2GyLSm9qkDEepeulPaMWZMjjXhOl1G6TCuIghDCPN75pKi2FjXVhkRjTZc6TlMjrcX4f0rTGwM2bQ==}
+  '@fast-check/jest@2.2.0':
+    resolution: {integrity: sha512-DXDqX3wOZjuQulN+fOB6Z2I/7ib+ypxyAn1fQdQ2wSiTzAPKYdqaaBQ9lPk2/Zg0wh8sABt40nwW3ZtNhFe9rQ==}
     peerDependencies:
-      '@fast-check/worker': '>=0.0.7 <0.5.0'
+      '@fast-check/worker': '>=0.0.7 <0.7.0'
       '@jest/expect': '>=28.0.0'
       '@jest/globals': '>=25.5.2'
     peerDependenciesMeta:
@@ -5962,10 +5962,6 @@ packages:
     resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
     engines: {node: '>=8.0.0'}
 
-  fast-check@3.3.0:
-    resolution: {integrity: sha512-Zu6tZ4g0T4H9Tiz3tdNPEHrSbuICj7yhdOM9RCZKNMkpjZ9avDV3ORklXaEmh4zvkX24/bGZ9DxKKqWfXttUqw==}
-    engines: {node: '>=8.0.0'}
-
   fast-check@4.3.0:
     resolution: {integrity: sha512-JVw/DJSxVKl8uhCb7GrwanT9VWsCIdBkK3WpP37B/Au4pyaspriSjtrY2ApbSFwTg3ViPfniT13n75PhzE7VEQ==}
     engines: {node: '>=12.17.0'}
@@ -7801,9 +7797,6 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
-
-  pure-rand@5.0.3:
-    resolution: {integrity: sha512-9N8x1h8dptBQpHyC7aZMS+iNOAm97WMGY0AFrguU1cpfW3I5jINkWe5BIY5md0ofy+1TCIELsVcm/GJXZSaPbw==}
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
@@ -9907,10 +9900,10 @@ snapshots:
 
   '@faker-js/faker@9.6.0': {}
 
-  '@fast-check/jest@2.0.3(@jest/expect@29.7.0)(@jest/globals@29.7.0)':
+  '@fast-check/jest@2.2.0(@jest/expect@29.7.0)(@jest/globals@29.7.0)':
     dependencies:
       '@jest/globals': 29.7.0
-      fast-check: 3.3.0
+      fast-check: 4.3.0
     optionalDependencies:
       '@jest/expect': 29.7.0
 
@@ -13187,10 +13180,6 @@ snapshots:
     dependencies:
       pure-rand: 6.1.0
 
-  fast-check@3.3.0:
-    dependencies:
-      pure-rand: 5.0.3
-
   fast-check@4.3.0:
     dependencies:
       pure-rand: 7.0.1
@@ -15294,8 +15283,6 @@ snapshots:
       once: 1.4.0
 
   punycode@2.3.1: {}
-
-  pure-rand@5.0.3: {}
 
   pure-rand@6.1.0: {}
 
