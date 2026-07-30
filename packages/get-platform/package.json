@@ -14,7 +14,7 @@
   },
   "bugs": "https://github.com/prisma/prisma/issues",
   "devDependencies": {
-    "@codspeed/benchmark.js-plugin": "4.0.0",
+    "@codspeed/benchmark.js-plugin": "5.7.1",
     "@types/node": "~20.19.24",
     "benchmark": "2.1.4",
     "escape-string-regexp": "5.0.0",

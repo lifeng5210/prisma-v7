@@ -41,7 +41,7 @@
   "devDependencies": {
     "@prisma/get-dmmf": "workspace:*",
     "@prisma/param-graph-builder": "workspace:*",
-    "@codspeed/benchmark.js-plugin": "4.0.0",
+    "@codspeed/benchmark.js-plugin": "5.7.1",
     "@types/benchmark": "2.1.5",
     "@types/node": "~20.19.24",
     "benchmark": "2.1.4"
