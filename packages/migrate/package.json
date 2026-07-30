@@ -42,7 +42,7 @@
     "ora": "8.2.0",
     "pg": "8.14.1",
     "strip-indent": "4.0.0",
-    "tempy": "1.0.1",
+    "tempy": "3.2.0",
     "ts-pattern": "5.9.0",
     "typescript": "5.4.5"
   },
