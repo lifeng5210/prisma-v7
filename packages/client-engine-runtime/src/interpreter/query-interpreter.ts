@@ -572,6 +572,7 @@ export class QueryInterpreter {
       case 'prisma+postgres':
         return 32766
       case 'mysql':
+      case 'kingbase-mysql':
         return 65535
       case 'sqlite':
         return 999

@@ -12,6 +12,8 @@ export const completionConfigPaths: CompletionValue[] = [
 export const completionDatasourceUrls: CompletionValue[] = [
   { value: 'postgresql://', description: 'PostgreSQL connection string' },
   { value: 'mysql://', description: 'MySQL connection string' },
+  { value: 'kingbase-mysql://', description: 'Kingbase MySQL connection string' },
+  { value: 'kingbase://', description: 'Kingbase MySQL connection string (alias)' },
   { value: 'file:', description: 'SQLite connection string' },
   { value: 'mongodb://', description: 'MongoDB connection string' },
   { value: 'sqlserver://', description: 'SQL Server connection string' },
@@ -68,6 +70,7 @@ export const completionDatabaseSchemas: CompletionValue[] = [
 export const completionDatasourceProviders: CompletionValue[] = [
   { value: 'postgresql', description: 'PostgreSQL' },
   { value: 'mysql', description: 'MySQL' },
+  { value: 'kingbase-mysql', description: 'Kingbase MySQL' },
   { value: 'sqlite', description: 'SQLite' },
   { value: 'mongodb', description: 'MongoDB' },
   { value: 'sqlserver', description: 'SQL Server' },

@@ -6,7 +6,7 @@ exports[`introspection: create bigint data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
@@ -24,13 +24,13 @@ exports[`introspection: create with data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -43,13 +43,13 @@ exports[`introspection: create with empty data and SQL default: datamodel 1`] = 
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @default("alice", map: "DF__teams__name__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name String @default("alice", map: "DF__teams__name__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -62,15 +62,15 @@ exports[`introspection: delete where composite PK: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
 }
@@ -85,14 +85,14 @@ exports[`introspection: delete where composite unique: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @sqlserver.VarChar(32)
-  name  String @sqlserver.VarChar(32)
+  email String @db.VarChar(32)
+  name  String @db.VarChar(32)
 
   @@unique([email, name], map: "u_const")
 }
@@ -107,13 +107,13 @@ exports[`introspection: findMany - email text: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int     @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String? @sqlserver.VarChar(32)
+  email String? @db.VarChar(32)
 }
 "
 `;
@@ -126,13 +126,13 @@ exports[`introspection: findMany - email varchar(50) not null unique: datamodel 
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  email String @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -145,13 +145,13 @@ exports[`introspection: findMany orderBy asc: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -165,13 +165,13 @@ exports[`introspection: findMany orderBy desc: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -185,13 +185,13 @@ exports[`introspection: findMany where OR[contains, contains] : datamodel 1`] = 
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -205,13 +205,13 @@ exports[`introspection: findMany where contains and boolean: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -225,14 +225,14 @@ exports[`introspection: findMany where contains: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model crons {
   id        Int     @id(map: "PK__crons__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
-  frequency String? @sqlserver.VarChar(32)
+  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @db.VarChar(32)
+  frequency String? @db.VarChar(32)
 }
 "
 `;
@@ -245,13 +245,13 @@ exports[`introspection: findMany where datetime exact: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -264,14 +264,14 @@ exports[`introspection: findMany where datetime gt than now: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id         Int      @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title      String   @sqlserver.VarChar(32)
-  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @sqlserver.DateTime
+  title      String   @db.VarChar(32)
+  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @db.DateTime
 }
 "
 `;
@@ -284,13 +284,13 @@ exports[`introspection: findMany where datetime gt: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -303,14 +303,14 @@ exports[`introspection: findMany where datetime gte than now: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id         Int      @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title      String   @sqlserver.VarChar(32)
-  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @sqlserver.DateTime
+  title      String   @db.VarChar(32)
+  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @db.DateTime
 }
 "
 `;
@@ -323,13 +323,13 @@ exports[`introspection: findMany where datetime gte: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -342,14 +342,14 @@ exports[`introspection: findMany where datetime lt than now: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id         Int      @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title      String   @sqlserver.VarChar(32)
-  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @sqlserver.DateTime
+  title      String   @db.VarChar(32)
+  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @db.DateTime
 }
 "
 `;
@@ -362,13 +362,13 @@ exports[`introspection: findMany where datetime lt: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -381,14 +381,14 @@ exports[`introspection: findMany where datetime lte - check instanceof Date: dat
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id         Int      @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title      String   @sqlserver.VarChar(32)
-  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @sqlserver.DateTime
+  title      String   @db.VarChar(32)
+  created_at DateTime @default(now(), map: "DF__posts__created_at__CustomNameToAvoidRandomNumber") @db.DateTime
 }
 "
 `;
@@ -401,13 +401,13 @@ exports[`introspection: findMany where datetime lte: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -420,13 +420,13 @@ exports[`introspection: findMany where datetime not: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -439,13 +439,13 @@ exports[`introspection: findMany where decimal: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model exercises {
   id       Int     @id(map: "PK__exercises__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  distance Decimal @sqlserver.Decimal(5, 3)
+  distance Decimal @db.Decimal(5, 3)
 }
 "
 `;
@@ -458,14 +458,14 @@ exports[`introspection: findMany where empty in[]: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
   token Int    @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber")
-  name  String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
 }
 "
 `;
@@ -478,14 +478,14 @@ exports[`introspection: findMany where empty notIn[]: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
   token Int    @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber")
-  name  String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
 }
 "
 `;
@@ -498,14 +498,14 @@ exports[`introspection: findMany where endsWith: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model crons {
   id        Int     @id(map: "PK__crons__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
-  frequency String? @sqlserver.VarChar(32)
+  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @db.VarChar(32)
+  frequency String? @db.VarChar(32)
 }
 "
 `;
@@ -518,14 +518,14 @@ exports[`introspection: findMany where id empty in[] and token in[]: datamodel 1
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
   token Int    @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber")
-  name  String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
 }
 "
 `;
@@ -538,14 +538,14 @@ exports[`introspection: findMany where in[integer]: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
   token Int    @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber")
-  name  String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
 }
 "
 `;
@@ -558,14 +558,14 @@ exports[`introspection: findMany where in[string]: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model crons {
   id        Int     @id(map: "PK__crons__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
-  frequency String? @sqlserver.VarChar(32)
+  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @db.VarChar(32)
+  frequency String? @db.VarChar(32)
 }
 "
 `;
@@ -578,14 +578,14 @@ exports[`introspection: findMany where notIn[]: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
   token Int    @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber")
-  name  String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
 }
 "
 `;
@@ -598,13 +598,13 @@ exports[`introspection: findMany where null: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model events {
   id   Int       @id(map: "PK__events__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  time DateTime? @sqlserver.DateTime
+  time DateTime? @db.DateTime
 }
 "
 `;
@@ -617,14 +617,14 @@ exports[`introspection: findMany where startsWith: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model crons {
   id        Int     @id(map: "PK__crons__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
-  frequency String? @sqlserver.VarChar(32)
+  job       String  @unique(map: "UQ__crons__CustomNameToAvoidRandomNumber") @db.VarChar(32)
+  frequency String? @db.VarChar(32)
 }
 "
 `;
@@ -637,13 +637,13 @@ exports[`introspection: findMany where unique: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  email String @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -656,20 +656,20 @@ exports[`introspection: findUnique where PK with include: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id      Int    @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
   user_id Int
-  title   String @sqlserver.VarChar(32)
+  title   String @db.VarChar(32)
   users   users  @relation(fields: [user_id], references: [id], map: "FK_UserId")
 }
 
 model users {
   id    Int     @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  email String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
   posts posts[]
 }
 "
@@ -683,14 +683,14 @@ exports[`introspection: findUnique where PK with select: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id    Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber")
-  name  String @unique(map: "UQ__teams__name__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
-  email String @unique(map: "UQ__teams__email__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name  String @unique(map: "UQ__teams__name__CustomNameToAvoidRandomNumber") @db.VarChar(32)
+  email String @unique(map: "UQ__teams__email__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -703,13 +703,13 @@ exports[`introspection: findUnique where PK: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber")
-  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -722,7 +722,7 @@ exports[`introspection: findUnique where composite PK with foreign key: datamode
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
@@ -751,15 +751,15 @@ exports[`introspection: findUnique where composite PK: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
 }
@@ -774,14 +774,14 @@ exports[`introspection: findUnique where composite unique: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @sqlserver.VarChar(32)
-  name  String @sqlserver.VarChar(32)
+  email String @db.VarChar(32)
+  name  String @db.VarChar(32)
 
   @@unique([email, name], map: "u_const")
 }
@@ -796,13 +796,13 @@ exports[`introspection: findUnique where decimal - default value: datamodel 1`] 
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model exercises {
   id       Int     @id(map: "PK__exercises__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  distance Decimal @unique(map: "UQ__exercises_CustomNameToAvoidRandomNumber") @default(12.3, map: "DF__exercises__active__CustomNameToAvoidRandomNumber") @sqlserver.Decimal(5, 3)
+  distance Decimal @unique(map: "UQ__exercises_CustomNameToAvoidRandomNumber") @default(12.3, map: "DF__exercises__active__CustomNameToAvoidRandomNumber") @db.Decimal(5, 3)
 }
 "
 `;
@@ -815,13 +815,13 @@ exports[`introspection: findUnique where decimal: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model exercises {
   id       Int     @id(map: "PK__exercises__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  distance Decimal @unique(map: "UQ__exercises_CustomNameToAvoidRandomNumber") @sqlserver.Decimal(5, 3)
+  distance Decimal @unique(map: "UQ__exercises_CustomNameToAvoidRandomNumber") @db.Decimal(5, 3)
 }
 "
 `;
@@ -834,15 +834,15 @@ exports[`introspection: findUnique where unique composite (PK is a composite): d
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
   @@unique([value, email], map: "u_const")
@@ -858,16 +858,16 @@ exports[`introspection: findUnique where unique composite: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
   id    Int    @id(map: "PK__variables__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@unique([name, key], map: "u_const")
 }
@@ -882,20 +882,20 @@ exports[`introspection: findUnique where unique with foreign key and unpack: dat
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id      Int    @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
   user_id Int
-  title   String @sqlserver.VarChar(32)
+  title   String @db.VarChar(32)
   users   users  @relation(fields: [user_id], references: [id], map: "FK_UserId")
 }
 
 model users {
   id    Int     @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String  @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  email String  @unique(map: "UQ__users_CustomNameToAvoidRandomNumber") @db.VarChar(32)
   posts posts[]
 }
 "
@@ -909,13 +909,13 @@ exports[`introspection: findUnique where unique: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  email String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -928,15 +928,15 @@ exports[`introspection: update where composite PK: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
 }
@@ -951,14 +951,14 @@ exports[`introspection: update where composite unique: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model users {
   id    Int    @id(map: "PK__users__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  email String @sqlserver.VarChar(32)
-  name  String @sqlserver.VarChar(32)
+  email String @db.VarChar(32)
+  name  String @db.VarChar(32)
 
   @@unique([email, name], map: "u_const")
 }
@@ -973,7 +973,7 @@ exports[`introspection: update where integer data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
@@ -992,13 +992,13 @@ exports[`introspection: update where with boolean data and select: datamodel 1`]
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id     Int     @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name   String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name   String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
   active Boolean @default(true, map: "DF__teams__active__CustomNameToAvoidRandomNumber")
 }
 "
@@ -1012,13 +1012,13 @@ exports[`introspection: update where with boolean data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id     Int     @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name   String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name   String  @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
   active Boolean @default(true, map: "DF__teams__active__CustomNameToAvoidRandomNumber")
 }
 "
@@ -1032,13 +1032,13 @@ exports[`introspection: update where with numeric data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -1051,13 +1051,13 @@ exports[`introspection: update where with string data: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @sqlserver.VarChar(32)
+  name String @unique(map: "UQ__teams__CustomNameToAvoidRandomNumber") @db.VarChar(32)
 }
 "
 `;
@@ -1070,13 +1070,13 @@ exports[`introspection: updateMany where null - check findMany: datamodel 1`] = 
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int     @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String? @sqlserver.VarChar(32)
+  name String? @db.VarChar(32)
 }
 "
 `;
@@ -1089,13 +1089,13 @@ exports[`introspection: updateMany where with string data - check findMany: data
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @sqlserver.VarChar(32)
+  name String @db.VarChar(32)
 }
 "
 `;
@@ -1108,13 +1108,13 @@ exports[`introspection: updateMany where with string data - check returned count
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model teams {
   id   Int    @id(map: "PK__teams__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  name String @sqlserver.VarChar(32)
+  name String @db.VarChar(32)
 }
 "
 `;
@@ -1127,13 +1127,13 @@ exports[`introspection: upsert (create): datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -1147,13 +1147,13 @@ exports[`introspection: upsert (update): datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model posts {
   id        Int     @id(map: "PK__posts__CustomNameToAvoidRandomNumber") @default(autoincrement())
-  title     String  @sqlserver.VarChar(32)
+  title     String  @db.VarChar(32)
   published Boolean @default(false, map: "DF__posts__published__CustomNameToAvoidRandomNumber")
 }
 "
@@ -1167,15 +1167,15 @@ exports[`introspection: upsert where composite PK - create: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
 }
@@ -1190,15 +1190,15 @@ exports[`introspection: upsert where composite PK - update: datamodel 1`] = `
   output = "***"
 }
 
-datasource sqlserver {
+datasource db {
   provider = "sqlserver"
 }
 
 model variables {
-  name  String @sqlserver.VarChar(32)
-  key   String @sqlserver.VarChar(32)
-  value String @sqlserver.VarChar(32)
-  email String @sqlserver.VarChar(32)
+  name  String @db.VarChar(32)
+  key   String @db.VarChar(32)
+  value String @db.VarChar(32)
+  email String @db.VarChar(32)
 
   @@id([name, key], map: "pk_const")
 }

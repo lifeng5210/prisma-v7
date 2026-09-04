@@ -52,7 +52,7 @@ async function copyClientWasmRuntime() {
   const clientPath = path.join(__dirname, '..', '..', 'client')
   const clientRuntimePath = path.join(clientPath, 'runtime')
 
-  for (const provider of ['cockroachdb', 'mysql', 'postgresql', 'sqlite', 'sqlserver']) {
+  for (const provider of ['cockroachdb', 'kingbase-mysql', 'mysql', 'postgresql', 'sqlite', 'sqlserver']) {
     for (const build of ['fast', 'small']) {
       const baseName = `query_compiler_${build}_bg.${provider}`
 

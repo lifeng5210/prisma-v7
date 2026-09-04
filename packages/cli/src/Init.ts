@@ -160,6 +160,8 @@ export const defaultPort = (datasourceProvider: ConnectorType) => {
   switch (datasourceProvider) {
     case 'mysql':
       return 3306
+    case 'kingbase-mysql':
+      return 54321
     case 'sqlserver':
       return 1433
     case 'mongodb':
@@ -187,6 +189,8 @@ export const defaultURL = (
       return `postgresql://johndoe:randompassword@localhost:${port}/mydb?schema=${schema}`
     case 'mysql':
       return `mysql://johndoe:randompassword@localhost:${port}/mydb`
+    case 'kingbase-mysql':
+      return `kingbase-mysql://johndoe:randompassword@localhost:${port}/mydb?schema=${schema}`
     case 'sqlserver':
       return `sqlserver://localhost:${port};database=mydb;user=SA;password=randompassword;`
     case 'mongodb':
@@ -284,7 +288,7 @@ export class Init implements Command {
 
              -h, --help   Display this help message
                    --db   Provisions a fully managed Prisma Postgres database on the Prisma Data Platform.
-  --datasource-provider   Define the datasource provider to use: postgresql, mysql, sqlite, sqlserver, mongodb or cockroachdb
+  --datasource-provider   Define the datasource provider to use: postgresql, mysql, kingbase-mysql, sqlite, sqlserver, mongodb or cockroachdb
    --generator-provider   Define the generator provider to use. Default: \`prisma-client\`
       --preview-feature   Define a preview feature to use.
                --output   Define Prisma Client generator output path to use.
@@ -773,6 +777,7 @@ Learn more: ${link('https://pris.ly/getting-started')}
 const DATASOURCE_PROVIDERS = [
   'postgresql',
   'mysql',
+  'kingbase-mysql',
   'sqlite',
   'sqlserver',
   'mongodb',

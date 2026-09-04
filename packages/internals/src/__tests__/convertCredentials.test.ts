@@ -54,3 +54,18 @@ for (const uri of notIdenticalUris) {
     expect(uriFromCredentials).toMatchSnapshot()
   })
 }
+
+test('Kingbase MySQL accepts both URL protocols', () => {
+  const canonical = uriToCredentials('kingbase-mysql://user:password@localhost:54321/mydb?schema=public')
+  const alias = uriToCredentials('kingbase://user:password@localhost:54321/mydb?schema=public')
+
+  expect(canonical.type).toBe('kingbase-mysql')
+  expect(alias).toMatchObject({
+    type: 'kingbase-mysql',
+    host: 'localhost',
+    port: 54321,
+    database: 'mydb',
+    schema: 'public',
+  })
+  expect(credentialsToUri(alias)).toBe('kingbase-mysql://user:password@localhost:54321/mydb?schema=public')
+})

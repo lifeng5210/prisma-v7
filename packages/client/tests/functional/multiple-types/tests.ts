@@ -17,7 +17,7 @@ testMatrix.setupTestSuite(
     })
 
     function getAllEntries() {
-      if (provider === Providers.MYSQL) {
+      if (provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL) {
         return prisma.$queryRaw`SELECT * FROM \`TestModel\`;`
       } else {
         return prisma.$queryRaw`SELECT * FROM "TestModel";`

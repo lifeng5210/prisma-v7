@@ -171,8 +171,10 @@ export async function setupTestSuiteDatabase({
     } else {
       const dbPushParams = [] as string[]
 
-      // we reuse and clean the db when it is explicitly required
-      if (process.env.TEST_REUSE_DATABASE === 'true') {
+      if (suiteConfig.matrixOptions.provider === Providers.KINGBASE_MYSQL) {
+        await resetKingbaseMysqlSchema(datasourceInfo.databaseUrl)
+      } else if (process.env.TEST_REUSE_DATABASE === 'true') {
+        // We reuse and clean the database when it is explicitly required.
         dbPushParams.push('--force-reset')
       }
 
@@ -329,6 +331,10 @@ export async function dropTestSuiteDatabase({
     return await prepareD1Database({ cfWorkerBindings: cfWorkerBindings! })
   }
 
+  if (suiteConfig.matrixOptions.provider === Providers.KINGBASE_MYSQL) {
+    return await dropKingbaseMysqlSchema(datasourceInfo.databaseUrl)
+  }
+
   try {
     const consoleInfoMock = jest.spyOn(console, 'info').mockImplementation()
     const runtimeConfig = buildPrismaConfig({ suiteConfig, suiteMeta, datasourceInfo })
@@ -456,6 +462,8 @@ function getDbUrl(provider: Providers): string {
       return requireEnvVariable('TEST_FUNCTIONAL_COCKROACH_URI')
     case Providers.SQLSERVER:
       return requireEnvVariable('TEST_FUNCTIONAL_MSSQL_URI')
+    case Providers.KINGBASE_MYSQL:
+      return requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI')
     default:
       return assertNever(provider, `No URL for provider ${provider} configured`)
   }
@@ -476,6 +484,7 @@ function getDbUrlFromFlavor(driverAdapterOrFlavor: `${AdapterProviders}` | undef
       .with(AdapterProviders.JS_PG, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_URI'))
       .with(AdapterProviders.JS_NEON, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_16_URI'))
       .with(AdapterProviders.JS_PLANETSCALE, () => requireEnvVariable('TEST_FUNCTIONAL_VITESS_8_URI'))
+      .with(AdapterProviders.JS_KB, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI'))
       .with(AdapterProviders.JS_LIBSQL, () => requireEnvVariable('TEST_FUNCTIONAL_LIBSQL_FILE_URI'))
       .with(AdapterProviders.JS_BETTER_SQLITE3, () => requireEnvVariable('TEST_FUNCTIONAL_BETTER_SQLITE3_FILE_URI'))
       .otherwise(() => getDbUrl(provider))
@@ -500,4 +509,44 @@ function requireEnvVariable(varName: string): string {
     )
   }
   return value
+}
+
+async function resetKingbaseMysqlSchema(databaseUrl: string): Promise<void> {
+  const schema = getKingbaseMysqlSchema(databaseUrl)
+  const { PrismaKb } = require('@prisma/adapter-kb') as typeof import('@prisma/adapter-kb')
+  const adapter = await new PrismaKb(getKingbaseMysqlAdminUrl(databaseUrl)).connect()
+
+  try {
+    await adapter.underlyingDriver().query(`DROP SCHEMA IF EXISTS ${schema} CASCADE; CREATE SCHEMA ${schema};`)
+  } finally {
+    await adapter.dispose()
+  }
+}
+
+async function dropKingbaseMysqlSchema(databaseUrl: string): Promise<void> {
+  const schema = getKingbaseMysqlSchema(databaseUrl)
+  const { PrismaKb } = require('@prisma/adapter-kb') as typeof import('@prisma/adapter-kb')
+  const adapter = await new PrismaKb(getKingbaseMysqlAdminUrl(databaseUrl)).connect()
+
+  try {
+    await adapter.underlyingDriver().query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`)
+  } finally {
+    await adapter.dispose()
+  }
+}
+
+function getKingbaseMysqlSchema(databaseUrl: string): string {
+  const schema = new URL(databaseUrl).searchParams.get('schema')
+
+  if (!schema) {
+    throw new Error('Kingbase MySQL functional test URLs must set the schema query parameter')
+  }
+
+  return `"${schema.replaceAll('"', '""')}"`
+}
+
+function getKingbaseMysqlAdminUrl(databaseUrl: string): string {
+  const url = new URL(databaseUrl)
+  url.searchParams.delete('schema')
+  return url.toString()
 }

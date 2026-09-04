@@ -846,16 +846,24 @@ testMatrix.setupTestSuite(
               // @ts-test-if: provider !== Providers.MONGODB
               prisma.$executeRaw`INSERT INTO User (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
             ])
-          : prisma.$transaction([
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$queryRaw`DELETE FROM "User"`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
-            ])
+          : provider === Providers.KINGBASE_MYSQL
+            ? prisma.$transaction([
+                // Kingbase MySQL uses the MySQL backtick identifier syntax.
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
+                prisma.$queryRaw`DELETE FROM \`User\``,
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+              ])
+            : prisma.$transaction([
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$queryRaw`DELETE FROM "User"`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+              ])
 
       await expect(result).rejects.toMatchPrismaErrorSnapshot()
 

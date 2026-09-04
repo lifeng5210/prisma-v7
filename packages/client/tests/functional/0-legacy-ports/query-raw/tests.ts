@@ -53,6 +53,7 @@ testMatrix.setupTestSuite(
         postgresql: [{ '?column?': 1 }],
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
+        'kingbase-mysql': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -77,6 +78,7 @@ testMatrix.setupTestSuite(
         postgresql: [{ number: 1 }],
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
+        'kingbase-mysql': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -93,6 +95,7 @@ testMatrix.setupTestSuite(
         postgresql: [{ number: 1 }],
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
+        'kingbase-mysql': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -110,6 +113,7 @@ testMatrix.setupTestSuite(
         postgresql: [{ '?column?': 1 }],
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
+        'kingbase-mysql': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -130,6 +134,10 @@ testMatrix.setupTestSuite(
       if (provider === Providers.MYSQL) {
         result = await prisma.$queryRawUnsafe(`
           SELECT * FROM User WHERE age >= ${45} AND age <= ${60}
+        `)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRawUnsafe(`
+          SELECT * FROM \`User\` WHERE age >= ${45} AND age <= ${60}
         `)
       } else {
         result = await prisma.$queryRawUnsafe(`
@@ -159,7 +167,11 @@ testMatrix.setupTestSuite(
 
     test('select * via queryRawUnsafe with values', async () => {
       let result: any[] = []
-      if (provider === Providers.MYSQL || driverAdapter === 'js_better_sqlite3') {
+      if (provider === Providers.MYSQL) {
+        result = await prisma.$queryRawUnsafe(`SELECT * FROM User WHERE age >= ? AND age <= ?`, 45, 60)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRawUnsafe(`SELECT * FROM \`User\` WHERE age >= ? AND age <= ?`, 45, 60)
+      } else if (driverAdapter === 'js_better_sqlite3') {
         result = await prisma.$queryRawUnsafe(`SELECT * FROM User WHERE age >= ? AND age <= ?`, 45, 60)
       } else if (provider === Providers.SQLSERVER) {
         result = await prisma.$queryRawUnsafe(`SELECT * FROM "User" WHERE age >= @P1 AND age <= @P2`, 45, 60)
@@ -192,6 +204,10 @@ testMatrix.setupTestSuite(
       if (provider === Providers.MYSQL) {
         result = await prisma.$queryRaw`
           SELECT * FROM User WHERE age >= ${45} AND age <= ${60}
+        `
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw`
+          SELECT * FROM \`User\` WHERE age >= ${45} AND age <= ${60}
         `
       } else {
         result = await prisma.$queryRaw`
@@ -229,6 +245,14 @@ testMatrix.setupTestSuite(
             Prisma.raw('email'),
             Prisma.raw('id'),
           ])} FROM User WHERE age IN (${Prisma.join([45, 60])})
+        `
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw`
+          SELECT ${Prisma.join([
+            Prisma.raw('age'),
+            Prisma.raw('email'),
+            Prisma.raw('id'),
+          ])} FROM \`User\` WHERE age IN (${Prisma.join([45, 60])})
         `
       } else {
         result = await prisma.$queryRaw`
@@ -268,6 +292,14 @@ testMatrix.setupTestSuite(
             Prisma.raw('email'),
             Prisma.raw('id'),
           ])} FROM User WHERE age IN (${Prisma.join([45, 60])})
+        `)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw(Prisma.sql`
+          SELECT ${Prisma.join([
+            Prisma.raw('age'),
+            Prisma.raw('email'),
+            Prisma.raw('id'),
+          ])} FROM \`User\` WHERE age IN (${Prisma.join([45, 60])})
         `)
       } else {
         result = await prisma.$queryRaw(Prisma.sql`

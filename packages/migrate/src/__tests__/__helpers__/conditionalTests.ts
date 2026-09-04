@@ -12,6 +12,7 @@ export type Matrix = {
 
 export const allProviders = {
   mysql: true,
+  'kingbase-mysql': true,
   postgres: true,
   sqlite: true,
   mongodb: true,

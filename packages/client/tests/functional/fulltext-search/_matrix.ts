@@ -27,5 +27,21 @@ export default defineMatrix(() => [
       noResultsQuery: '+April +Smith',
       badQuery: 'John <--> Smith',
     },
+    {
+      provider: Providers.KINGBASE_MYSQL,
+      previewFeatures: '"fullTextSearch", "fullTextIndex"',
+      index: `
+      @@fulltext([name])
+      @@fulltext([name, email])
+      @@fulltext([email])
+      `,
+      // Kingbase implements full-text search using its PostgreSQL-compatible
+      // tsquery syntax, not MySQL BOOLEAN MODE syntax.
+      andQuery: 'John & Smith',
+      orQuery: 'John | April',
+      notQuery: '(John | April) & !Smith',
+      noResultsQuery: 'April & Smith',
+      badQuery: 'John Smith',
+    },
   ],
 ])

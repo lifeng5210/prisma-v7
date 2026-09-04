@@ -12,7 +12,7 @@ declare let Prisma: typeof $.Prisma
 testMatrix.setupTestSuite(
   ({ provider }) => {
     const isMySql = provider === Providers.MYSQL
-    const usesAnonymousParams = [Providers.MYSQL, Providers.SQLITE].includes(provider)
+    const isKingbase = provider === Providers.KINGBASE_MYSQL
 
     beforeEach(async () => {
       await prisma.user.deleteMany()
@@ -53,6 +53,10 @@ testMatrix.setupTestSuite(
         affected = await prisma.$executeRawUnsafe(`
           UPDATE User SET age = ${65} WHERE age >= ${45} AND age <= ${60}
         `)
+      } else if (isKingbase) {
+        affected = await prisma.$executeRawUnsafe(`
+          UPDATE \`User\` SET age = ${65} WHERE age >= ${45} AND age <= ${60}
+        `)
       } else {
         affected = await prisma.$executeRawUnsafe(`
           UPDATE "User" SET age = ${65} WHERE age >= ${45} AND age <= ${60}
@@ -84,9 +88,10 @@ testMatrix.setupTestSuite(
     test('update via queryRawUnsafe with values', async () => {
       let affected: number
 
-      if (usesAnonymousParams) {
-        // eslint-disable-next-line prettier/prettier
+      if (provider === Providers.MYSQL || provider === Providers.SQLITE) {
         affected = await prisma.$executeRawUnsafe(`UPDATE User SET age = ? WHERE age >= ? AND age <= ?`, 65, 45, 60)
+      } else if (isKingbase) {
+        affected = await prisma.$executeRawUnsafe('UPDATE `User` SET age = ? WHERE age >= ? AND age <= ?', 65, 45, 60)
       } else if (provider === Providers.SQLSERVER) {
         affected = await prisma.$executeRawUnsafe(
           `UPDATE "User" SET age = @P1 WHERE age >= @P2 AND age <= @P3`,
@@ -132,6 +137,10 @@ testMatrix.setupTestSuite(
         affected = await prisma.$executeRaw`
           UPDATE User SET age = ${65} WHERE age >= ${45} AND age <= ${60}
         `
+      } else if (isKingbase) {
+        affected = await prisma.$executeRaw`
+          UPDATE \`User\` SET age = ${65} WHERE age >= ${45} AND age <= ${60}
+        `
       } else {
         affected = await prisma.$executeRaw`
           UPDATE "User" SET age = ${65} WHERE age >= ${45} AND age <= ${60}
@@ -167,6 +176,10 @@ testMatrix.setupTestSuite(
         affected = await prisma.$executeRaw`
           UPDATE User SET age = ${65} WHERE age IN (${Prisma.join([45, 60])})
         `
+      } else if (isKingbase) {
+        affected = await prisma.$executeRaw`
+          UPDATE \`User\` SET age = ${65} WHERE age IN (${Prisma.join([45, 60])})
+        `
       } else {
         affected = await prisma.$executeRaw`
           UPDATE "User" SET age = ${65} WHERE age IN (${Prisma.join([45, 60])})
@@ -201,6 +214,10 @@ testMatrix.setupTestSuite(
       if (isMySql) {
         affected = await prisma.$executeRaw(Prisma.sql`
           UPDATE User SET age = ${65} WHERE age IN (${Prisma.join([45, 60])})
+        `)
+      } else if (isKingbase) {
+        affected = await prisma.$executeRaw(Prisma.sql`
+          UPDATE \`User\` SET age = ${65} WHERE age IN (${Prisma.join([45, 60])})
         `)
       } else {
         affected = await prisma.$executeRaw(Prisma.sql`

@@ -12,7 +12,14 @@ const fillPluginDir = path.join('..', '..', 'helpers', 'compile', 'plugins', 'fi
 const functionPolyfillPath = path.join(fillPluginDir, 'fillers', 'function.ts')
 const runtimeDir = path.resolve(__dirname, '..', 'runtime')
 
-const DRIVER_ADAPTER_SUPPORTED_PROVIDERS = ['postgresql', 'sqlite', 'mysql', 'sqlserver', 'cockroachdb'] as const
+const DRIVER_ADAPTER_SUPPORTED_PROVIDERS = [
+  'postgresql',
+  'sqlite',
+  'mysql',
+  'sqlserver',
+  'cockroachdb',
+  'kingbase-mysql',
+] as const
 type DriverAdapterSupportedProvider = (typeof DRIVER_ADAPTER_SUPPORTED_PROVIDERS)[number]
 
 const MODULE_FORMATS = ['esm', 'cjs'] as const

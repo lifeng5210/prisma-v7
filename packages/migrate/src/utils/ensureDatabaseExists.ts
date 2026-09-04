@@ -11,6 +11,7 @@ import { getSocketFromDatabaseCredentials } from './unixSocket'
 export type MigrateAction = 'create' | 'apply' | 'unapply' | 'dev' | 'push'
 export type PrettyProvider =
   | 'MySQL'
+  | 'Kingbase MySQL'
   | 'PostgreSQL'
   | 'Prisma Postgres'
   | 'SQLite'
@@ -196,6 +197,8 @@ export function prettifyProvider(provider: ConnectorType): PrettyProvider {
   switch (provider) {
     case 'mysql':
       return `MySQL`
+    case 'kingbase-mysql':
+      return `Kingbase MySQL`
     case 'postgres':
     case 'postgresql':
       return `PostgreSQL`

@@ -1,3 +1,4 @@
+import { PrismaKb } from '@prisma/adapter-kb'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import { PrismaMssql } from '@prisma/adapter-mssql'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -56,6 +57,13 @@ const defaultFactories: Factory[] = [
     protocols: ['mysql', 'mariadb'],
     create(url) {
       return new PrismaMariaDb(url)
+    },
+  },
+
+  {
+    protocols: ['kingbase', 'kingbase-mysql'],
+    create(url) {
+      return new PrismaKb(url)
     },
   },
 

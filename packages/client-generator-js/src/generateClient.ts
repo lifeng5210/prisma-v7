@@ -429,6 +429,7 @@ function isWasmEngineSupported(provider: ConnectorType) {
     provider === 'postgres' ||
     provider === 'cockroachdb' ||
     provider === 'mysql' ||
+    provider === 'kingbase-mysql' ||
     provider === 'sqlite' ||
     provider === 'sqlserver'
   )

@@ -48,6 +48,30 @@ Invalid \`prisma.resource.create()\` invocation in
 Unique constraint failed on the constraint: \`Resource_email_key\`"
 `;
 
+exports[`issues.11740-transaction-stored-query (provider=kingbase-mysql, js_kb) stored query trigger .requestTransaction twice should fail 1`] = `
+"
+Invalid \`prisma.resource.create()\` invocation in
+/client/tests/functional/issues/11740-transaction-stored-query/tests.ts:0:0
+
+  XX })
+  XX 
+  XX test('stored query trigger .requestTransaction twice should fail', async () => {
+→ XX   const query = prisma.resource.create(
+Unique constraint failed on the constraint: \`Resource_email_key\`"
+`;
+
+exports[`issues.11740-transaction-stored-query (provider=kingbase-mysql, js_kb) stored query triggered twice should fail but not exit process 1`] = `
+"
+Invalid \`prisma.resource.create()\` invocation in
+/client/tests/functional/issues/11740-transaction-stored-query/tests.ts:0:0
+
+  XX testMatrix.setupTestSuite(
+  XX   () => {
+  XX     test('stored query triggered twice should fail but not exit process', async () => {
+→ XX       const query = prisma.resource.create(
+Unique constraint failed on the constraint: \`Resource_email_key\`"
+`;
+
 exports[`issues.11740-transaction-stored-query (provider=mongodb) stored query trigger .requestTransaction twice should fail 1`] = `
 "
 Invalid \`prisma.resource.create()\` invocation in

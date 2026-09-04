@@ -12,6 +12,8 @@ export function getDriverAdaptersProvider(provider: Provider): SqlDriverAdapter[
       return 'postgres'
     case Provider.MYSQL:
       return 'mysql'
+    case Provider.KINGBASE_MYSQL:
+      return 'kingbase-mysql'
     case Provider.SQLITE:
       return 'sqlite'
     default:
@@ -22,6 +24,9 @@ export function getDriverAdaptersProvider(provider: Provider): SqlDriverAdapter[
 /**
  * Supported providers to use in test matrix.
  */
-export const driverAdaptersTestProviders = [Provider.POSTGRESQL, Provider.MYSQL, Provider.SQLITE].map((provider) => ({
-  provider,
-}))
+export const driverAdaptersTestProviders = [
+  Provider.POSTGRESQL,
+  Provider.MYSQL,
+  Provider.KINGBASE_MYSQL,
+  Provider.SQLITE,
+].map((provider) => ({ provider }))

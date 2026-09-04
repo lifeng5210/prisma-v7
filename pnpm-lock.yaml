@@ -250,6 +250,19 @@ importers:
         specifier: 1.7.5
         version: 1.7.5
 
+  packages/adapter-kb:
+    dependencies:
+      '@prisma/driver-adapter-utils':
+        specifier: workspace:*
+        version: link:../driver-adapter-utils
+      kingbasedb:
+        specifier: 8.22.0
+        version: 8.22.0
+    devDependencies:
+      '@prisma/debug':
+        specifier: workspace:*
+        version: link:../debug
+
   packages/adapter-libsql:
     dependencies:
       '@libsql/client':
@@ -705,6 +718,9 @@ importers:
       '@prisma/adapter-d1':
         specifier: workspace:*
         version: link:../adapter-d1
+      '@prisma/adapter-kb':
+        specifier: workspace:*
+        version: link:../adapter-kb
       '@prisma/adapter-libsql':
         specifier: workspace:*
         version: link:../adapter-libsql
@@ -787,8 +803,8 @@ importers:
         specifier: workspace:*
         version: link:../param-graph-builder
       '@prisma/query-compiler-wasm':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
+        specifier: file:/home/lf/prisma-engines/query-compiler/query-compiler-wasm/pkg
+        version: file:../prisma-engines/query-compiler/query-compiler-wasm/pkg
       '@prisma/query-plan-executor':
         specifier: workspace:*
         version: link:../query-plan-executor
@@ -1376,8 +1392,8 @@ importers:
         specifier: workspace:*
         version: link:../dmmf
       '@prisma/prisma-schema-wasm':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
+        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
+        version: file:../prisma-engines/target/prisma-schema-wasm
       '@streamparser/json':
         specifier: 0.0.22
         version: 0.0.22
@@ -1507,6 +1523,9 @@ importers:
       jest-junit:
         specifier: 17.0.0
         version: 17.0.0
+      kingbasedb:
+        specifier: 8.22.0
+        version: 8.22.0
       mariadb:
         specifier: 3.4.5
         version: 3.4.5
@@ -1565,8 +1584,8 @@ importers:
         specifier: workspace:*
         version: link:../get-platform
       '@prisma/prisma-schema-wasm':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
+        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
+        version: file:../prisma-engines/target/prisma-schema-wasm
       '@prisma/schema-engine-wasm':
         specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
         version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
@@ -1846,6 +1865,9 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.1.0
         version: 2.1.0(@opentelemetry/api@1.9.0)
+      '@prisma/adapter-kb':
+        specifier: workspace:*
+        version: link:../adapter-kb
       '@prisma/adapter-mariadb':
         specifier: workspace:*
         version: link:../adapter-mariadb
@@ -1874,8 +1896,8 @@ importers:
   packages/schema-files-loader:
     dependencies:
       '@prisma/prisma-schema-wasm':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
+        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
+        version: file:../prisma-engines/target/prisma-schema-wasm
       fs-extra:
         specifier: 11.3.0
         version: 11.3.0
@@ -3849,11 +3871,11 @@ packages:
   '@prisma/ppg@1.0.1':
     resolution: {integrity: sha512-rRRXuPPerXwNWjSA3OE0e/bqXSTfsE82EsMvoiluc0fN0DizQSe3937/Tnl5+DPbxY5rdAOlYjWXG0A2wwTbKA==}
 
-  '@prisma/prisma-schema-wasm@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3':
-    resolution: {integrity: sha512-ijAY8XcHDmBKZaazLCPGzQIASpyZHPNlx2xynI3SaLtQFEeHxyfi+ih0J80aDtWriH11782ccHIx+qDtlLxGhw==}
+  '@prisma/prisma-schema-wasm@file:../prisma-engines/target/prisma-schema-wasm':
+    resolution: {directory: ../prisma-engines/target/prisma-schema-wasm, type: directory}
 
-  '@prisma/query-compiler-wasm@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3':
-    resolution: {integrity: sha512-lMIxXT9+RhhVzakLgOQsw+9azUaQQJgTiaWafzm+9xCAbbC7Ovbiflz9vTQ4zGELY1JT6YcdTmA53fnKgBmr2w==}
+  '@prisma/query-compiler-wasm@file:../prisma-engines/query-compiler/query-compiler-wasm/pkg':
+    resolution: {directory: ../prisma-engines/query-compiler/query-compiler-wasm/pkg, type: directory}
 
   '@prisma/query-plan-executor@7.2.0':
     resolution: {integrity: sha512-EOZmNzcV8uJ0mae3DhTsiHgoNCuu1J9mULQpGCh62zN3PxPTd+qI9tJvk5jOst8WHKQNwJWR3b39t0XvfBB0WQ==}
@@ -6837,6 +6859,10 @@ packages:
   kind-of@6.0.3:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
+
+  kingbasedb@8.22.0:
+    resolution: {integrity: sha512-T633sGm9CTyqQ70Fxk34p7XwJzX4UFtL0C9gfz8x5EujHtlH0oRNpkpie2iRvzkHbNzDaOrzWYLR+z5cnZ2x/g==}
+    engines: {node: '>=16.0.0'}
 
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
@@ -10853,9 +10879,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@prisma/prisma-schema-wasm@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3': {}
+  '@prisma/prisma-schema-wasm@file:../prisma-engines/target/prisma-schema-wasm': {}
 
-  '@prisma/query-compiler-wasm@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3': {}
+  '@prisma/query-compiler-wasm@file:../prisma-engines/query-compiler/query-compiler-wasm/pkg': {}
 
   '@prisma/query-plan-executor@7.2.0': {}
 
@@ -14298,6 +14324,8 @@ snapshots:
       json-buffer: 3.0.1
 
   kind-of@6.0.3: {}
+
+  kingbasedb@8.22.0: {}
 
   kleur@3.0.3: {}
 

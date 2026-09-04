@@ -3,6 +3,7 @@
  */
 export type SchemaProvider =
   | 'cockroachdb'
+  | 'kingbase-mysql'
   | 'mongodb'
   | 'mysql'
   | 'postgres'

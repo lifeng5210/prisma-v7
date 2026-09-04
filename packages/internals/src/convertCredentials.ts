@@ -40,6 +40,11 @@ export function credentialsToUri(credentials: DatabaseCredentials): string {
     if (credentials.socket) {
       url.searchParams.set('socket', credentials.socket)
     }
+  } else if (credentials.type === 'kingbase-mysql') {
+    url.pathname = '/' + (credentials.database || '')
+    if (credentials.schema) {
+      url.searchParams.set('schema', credentials.schema)
+    }
   } else if (credentials.type === 'mongodb') {
     url.pathname = '/' + credentials.database
   }
@@ -150,6 +155,8 @@ function databaseTypeToProtocol(databaseType: ConnectorType) {
       return 'postgresql:'
     case 'mysql':
       return 'mysql:'
+    case 'kingbase-mysql':
+      return 'kingbase-mysql:'
     case 'mongodb':
       return 'mongodb:'
     case 'sqlite':
@@ -177,6 +184,9 @@ export function protocolToConnectorType(protocol: string): ConnectorType {
       return 'mongodb'
     case 'mysql:':
       return 'mysql'
+    case 'kingbase-mysql:':
+    case 'kingbase:':
+      return 'kingbase-mysql'
     case 'file:':
       return 'sqlite'
     case 'sqlserver:':

@@ -5,7 +5,7 @@ import { join } from 'path'
 import stripAnsi from 'strip-ansi'
 import { vi } from 'vitest'
 
-import { defaultEnv, defaultSchema, Init } from '../Init'
+import { defaultEnv, defaultPort, defaultSchema, defaultURL, Init } from '../Init'
 import type { InstallSkillsResult } from '../init/skill-install'
 import { installSkills } from '../init/skill-install'
 
@@ -43,6 +43,13 @@ beforeEach(() => {
   skillsSpinnerMock.start.mockClear()
   skillsSpinnerMock.succeed.mockClear()
   skillsSpinnerMock.fail.mockClear()
+})
+
+test('supports Kingbase MySQL init defaults', () => {
+  expect(defaultPort('kingbase-mysql')).toBe(54321)
+  expect(defaultURL('kingbase-mysql')).toBe(
+    'kingbase-mysql://johndoe:randompassword@localhost:54321/mydb?schema=public',
+  )
 })
 
 test('is schema and env written on disk replace', async () => {

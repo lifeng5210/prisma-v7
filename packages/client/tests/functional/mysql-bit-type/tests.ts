@@ -1,3 +1,4 @@
+import { Providers } from '../_utils/providers'
 import testMatrix from './_matrix'
 // @ts-ignore
 import type { PrismaClient } from './generated/prisma/client'
@@ -5,7 +6,9 @@ import type { PrismaClient } from './generated/prisma/client'
 declare let prisma: PrismaClient
 
 testMatrix.setupTestSuite(
-  () => {
+  ({ provider }) => {
+    const isKingbase = provider === Providers.KINGBASE_MYSQL
+
     describe('bytes field', () => {
       test('all bytes', async () => {
         const bytes = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8])
@@ -38,7 +41,9 @@ testMatrix.setupTestSuite(
               },
             }),
         ).rejects.toThrow(
-          /Out of range value for column 'uint64'|The provided value for the column is too long for the column's type. Column: uint64/,
+          isKingbase
+            ? /The provided value for the column is too long for the column's type. Column: \(not available\)/
+            : /Out of range value for column 'uint64'|The provided value for the column is too long for the column's type. Column: uint64/,
         )
       })
     })
@@ -58,8 +63,8 @@ testMatrix.setupTestSuite(
     })
 
     test('raw query', async () => {
-      const result = (await prisma.$queryRaw`SELECT b'1' AS bit`) as Array<{ bit: Uint8Array }>
-      expect(result[0].bit).toEqual(Uint8Array.from([1]))
+      const result = (await prisma.$queryRaw`SELECT b'1' AS bit`) as Array<{ bit: Uint8Array | boolean }>
+      expect(result[0].bit).toEqual(isKingbase ? true : Uint8Array.from([1]))
     })
   },
   {

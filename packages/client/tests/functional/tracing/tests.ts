@@ -98,9 +98,7 @@ testMatrix.setupTestSuite(
         })
         .filter((span) => span.parentSpanContext?.spanId === rootSpan.spanContext().spanId)
 
-      const tree: Tree = {
-        name: rootSpan.name,
-      }
+      const tree: Tree = { name: rootSpan.name }
 
       if (childrenSpans.length > 0) {
         tree.children = childrenSpans.map((span) => buildTree(span, spans))
@@ -118,7 +116,7 @@ testMatrix.setupTestSuite(
     }
 
     const isMongoDb = provider === Providers.MONGODB
-    const isMySql = provider === Providers.MYSQL
+    const isMySql = provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL
     const isSqlServer = provider === Providers.SQLSERVER
     const usesJsDrivers = driverAdapter !== undefined || clientEngineExecutor === 'remote'
 
@@ -237,6 +235,9 @@ testMatrix.setupTestSuite(
       return expect.toSatisfy((dbSystem) => {
         if (provider === Providers.SQLSERVER) {
           return dbSystem === 'mssql'
+        }
+        if (provider === Providers.KINGBASE_MYSQL) {
+          return dbSystem === 'mysql'
         }
         return dbSystem === provider
       })

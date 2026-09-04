@@ -17,6 +17,7 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@prisma/adapter-pg": "workspace:*",
+    "@prisma/adapter-kb": "workspace:*",
     "@prisma/adapter-mariadb": "workspace:*",
     "@prisma/adapter-mssql": "workspace:*",
     "@prisma/client-engine-runtime": "workspace:*",

@@ -270,6 +270,19 @@ export function setupTestSuiteClientDriverAdapter({
     }
   }
 
+  if (driverAdapter === AdapterProviders.JS_KB) {
+    const { PrismaKb } = require('@prisma/adapter-kb') as typeof import('@prisma/adapter-kb')
+    const schema = new URL(datasourceInfo.databaseUrl).searchParams.get('schema')
+
+    if (!schema) {
+      throw new Error('Kingbase MySQL functional test URLs must set the schema query parameter')
+    }
+
+    return {
+      adapter: new PrismaKb(datasourceInfo.databaseUrl, { schema }),
+    }
+  }
+
   if (driverAdapter === 'js_mariadb') {
     const { PrismaMariaDb } = require('@prisma/adapter-mariadb') as typeof import('@prisma/adapter-mariadb')
 

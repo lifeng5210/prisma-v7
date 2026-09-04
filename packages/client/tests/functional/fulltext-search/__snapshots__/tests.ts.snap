@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`fulltext-search (provider=kingbase-mysql, js_kb) bad query 1`] = `"syntax error in tsquery: "John Smith""`;
+
 exports[`fulltext-search (provider=mysql) bad query 1`] = `"syntax error, unexpected '-'"`;
 
 exports[`fulltext-search (provider=mysql, js_mariadb) bad query 1`] = `"syntax error, unexpected '-'"`;
