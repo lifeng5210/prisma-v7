@@ -70,10 +70,15 @@ describe('Kingbase error conversion', () => {
     expect(() => convertDriverError(new Error('programming error'))).toThrow('programming error')
   })
 
-  test('maps TLS errors', () => {
-    expect(convertDriverError({ code: 'CERT_HAS_EXPIRED', message: 'certificate expired' })).toEqual({
+  test.each([
+    ['CERT_HAS_EXPIRED', 'certificate expired'],
+    ['DEPTH_ZERO_SELF_SIGNED_CERT', 'self-signed certificate'],
+    ['ERR_TLS_CERT_ALTNAME_INVALID', 'hostname does not match certificate'],
+    [undefined, 'The server does not support SSL connections'],
+  ])('maps TLS error %s', (code, message) => {
+    expect(convertDriverError({ code, message })).toEqual({
       kind: 'TlsConnectionError',
-      reason: 'certificate expired',
+      reason: message,
     })
   })
 

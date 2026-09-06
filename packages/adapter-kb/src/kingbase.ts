@@ -80,6 +80,7 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
   constructor(
     protected readonly client: Client,
     protected readonly adapterOptions?: PrismaKbOptions,
+    private readonly pool?: KingbasePool,
   ) {}
 
   async queryRaw(query: SqlQuery): Promise<SqlResultSet> {
@@ -125,26 +126,36 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
    * checked-out client.
    */
   private async performQueryRaw(query: SqlQuery): Promise<{ result: QueryResult; lastInsertId?: string }> {
-    if (!isInsertQuery(query.sql) || !isPool(this.client)) {
+    if (!isInsertQuery(query.sql)) {
       return { result: await this.performIO(query) }
     }
 
-    const connection = await this.client.connect().catch((error) => this.onError(error))
+    if (!this.pool) {
+      return this.performInsertQuery(query, this.client)
+    }
+
+    const connection = await this.pool.connect().catch((error) => this.onError(error))
     let releaseError: Error | undefined
 
     try {
-      const result = await this.performIO(query, connection)
-      const lastInsertId =
-        normalizeLastInsertId(result.insertId ?? result.lastInsertId) ??
-        (await this.fetchLastInsertId(query.sql, connection))
-
-      return { result, lastInsertId }
+      return await this.performInsertQuery(query, connection)
     } catch (error) {
       releaseError = error instanceof Error ? error : undefined
       throw error
     } finally {
       connection.release(releaseError)
     }
+  }
+
+  private async performInsertQuery(
+    query: SqlQuery,
+    client: KingbaseQueryableClient,
+  ): Promise<{ result: QueryResult; lastInsertId?: string }> {
+    const result = await this.performIO(query, client)
+    const lastInsertId =
+      normalizeLastInsertId(result.insertId ?? result.lastInsertId) ?? (await this.fetchLastInsertId(query.sql, client))
+
+    return { result, lastInsertId }
   }
 
   /**
@@ -255,7 +266,7 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
     protected readonly kbOptions?: PrismaKbOptions,
     private readonly release?: () => Promise<void>,
   ) {
-    super(client, kbOptions)
+    super(client, kbOptions, client)
   }
 
   async startTransaction(isolationLevel?: IsolationLevel): Promise<Transaction> {
@@ -301,6 +312,9 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
   getConnectionInfo(): ConnectionInfo {
     return {
       schemaName: this.kbOptions?.schema,
+      // Kingbase accepts at most i16::MAX bind parameters, even though its
+      // MySQL-compatible SQL dialect otherwise follows MySQL semantics.
+      maxBindValues: 32767,
       supportsRelationJoins: false,
     }
   }
@@ -448,8 +462,21 @@ function normalizeConnectionString(connectionString: string): string {
       // The Prisma provider name is not a driver URL scheme. kingbasedb's
       // connection-string parser accepts the Kingbase scheme, not postgres://.
       url.protocol = 'kingbase:'
-      return url.toString()
     }
+
+    // `sslaccept` is a Prisma/MySQL connection parameter, while kingbasedb
+    // uses the PostgreSQL-compatible `sslmode` parameter. Translate it before
+    // handing the URL to the driver so strict mode cannot silently disable
+    // certificate verification.
+    const sslAccept = url.searchParams.get('sslaccept')
+    if (sslAccept !== null) {
+      if (url.searchParams.get('sslmode') !== 'disable') {
+        url.searchParams.set('sslmode', sslAccept === 'accept_invalid_certs' ? 'no-verify' : 'verify-full')
+      }
+      url.searchParams.delete('sslaccept')
+    }
+
+    return url.toString()
   } catch {
     // Let kingbasedb report malformed connection strings with its own error.
   }

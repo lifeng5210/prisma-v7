@@ -572,8 +572,11 @@ export class QueryInterpreter {
       case 'prisma+postgres':
         return 32766
       case 'mysql':
-      case 'kingbase-mysql':
         return 65535
+      case 'kingbase-mysql':
+        // Kingbase's PostgreSQL-wire Bind message stores the parameter count in
+        // a signed 16-bit field, unlike MySQL's unsigned 16-bit limit.
+        return 32767
       case 'sqlite':
         return 999
       case 'sqlserver':

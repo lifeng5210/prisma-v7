@@ -95,6 +95,37 @@ test('merges chunked query results without overflowing the stack', async () => {
   expect(result).toHaveLength(rowsPerLaterChunk)
 })
 
+test('uses the Kingbase bind parameter limit when the adapter does not override it', async () => {
+  const maxBindValues = 32767
+  const queryRaw = vi.fn().mockResolvedValue(resultSetWithRows(0))
+  const queryable: SqlQueryable = {
+    provider: 'kingbase-mysql',
+    adapterName: 'test',
+    queryRaw,
+    executeRaw: () => Promise.resolve(0),
+  }
+  const interpreter = QueryInterpreter.forSql({
+    tracingHelper: noopTracingHelper,
+    provider: 'kingbase-mysql',
+  })
+
+  await interpreter.run(
+    statementNode(
+      'query',
+      Array.from({ length: maxBindValues + 1 }, (_, index) => index),
+    ),
+    {
+      queryable,
+      transactionManager: { enabled: false },
+      scope: {},
+    },
+  )
+
+  expect(queryRaw).toHaveBeenCalledTimes(2)
+  expect(queryRaw.mock.calls[0][0].args).toHaveLength(maxBindValues)
+  expect(queryRaw.mock.calls[1][0].args).toHaveLength(1)
+})
+
 class MockTransactionAdapter implements SqlDriverAdapter {
   adapterName = 'mock-adapter'
   provider = 'postgres' as const

@@ -5,6 +5,8 @@ import { PrismaKbAdapterFactory, rewriteQuestionMarkPlaceholders, splitStatement
 
 type MockConnection = {
   query: ReturnType<typeof vi.fn>
+  connect: ReturnType<typeof vi.fn>
+  end: ReturnType<typeof vi.fn>
   release: ReturnType<typeof vi.fn>
   on: ReturnType<typeof vi.fn>
   off: ReturnType<typeof vi.fn>
@@ -27,6 +29,8 @@ const query: SqlQuery = {
 function createPool(): { pool: MockPool; connection: MockConnection } {
   const connection: MockConnection = {
     query: vi.fn().mockResolvedValue({ fields: [], rows: [], rowCount: 0 }),
+    connect: vi.fn().mockRejectedValue(new Error('an active transaction connection must not be reconnected')),
+    end: vi.fn().mockResolvedValue(undefined),
     release: vi.fn(),
     on: vi.fn(),
     off: vi.fn(),
@@ -66,6 +70,7 @@ describe('PrismaKbAdapterFactory', () => {
       rowMode: 'array',
     })
     expect(adapter.provider).toBe('kingbase-mysql')
+    expect(adapter.getConnectionInfo()).toMatchObject({ maxBindValues: 32767 })
 
     await adapter.dispose()
     expect(pool.off).toHaveBeenCalled()
@@ -139,6 +144,74 @@ describe('PrismaKbAdapterFactory', () => {
     await transaction.rollback()
     expect(connection.query).not.toHaveBeenCalledWith({ text: 'ROLLBACK', values: [], rowMode: 'array' })
     expect(connection.release).toHaveBeenCalledOnce()
+  })
+
+  test('translates strict sslaccept to certificate-verifying driver settings', async () => {
+    const adapter = await new PrismaKbAdapterFactory(
+      'kingbase-mysql://user:password@localhost:54321/app?sslaccept=strict',
+    ).connect()
+    const pool = adapter.underlyingDriver() as unknown as {
+      options: { connectionString: string }
+    }
+    const url = new URL(pool.options.connectionString)
+
+    expect(url.protocol).toBe('kingbase:')
+    expect(url.searchParams.get('sslaccept')).toBeNull()
+    expect(url.searchParams.get('sslmode')).toBe('verify-full')
+
+    await adapter.dispose()
+  })
+
+  test('translates accept_invalid_certs sslaccept to the driver no-verify mode', async () => {
+    const adapter = await new PrismaKbAdapterFactory(
+      'kingbase-mysql://user:password@localhost:54321/app?sslaccept=accept_invalid_certs',
+    ).connect()
+    const pool = adapter.underlyingDriver() as unknown as {
+      options: { connectionString: string }
+    }
+    const url = new URL(pool.options.connectionString)
+
+    expect(url.searchParams.get('sslaccept')).toBeNull()
+    expect(url.searchParams.get('sslmode')).toBe('no-verify')
+
+    await adapter.dispose()
+  })
+
+  test('reads LAST_INSERT_ID on the active transaction connection without reconnecting it', async () => {
+    const { pool, connection } = createPool()
+    connection.query
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 })
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
+      .mockResolvedValueOnce({
+        fields: [{ name: 'LAST_INSERT_ID()', dataTypeID: 20 }],
+        rows: [[42]],
+        rowCount: 1,
+      })
+    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const transaction = await adapter.startTransaction()
+
+    await expect(
+      transaction.queryRaw({
+        sql: 'INSERT INTO `UserTest` (`id`) VALUES (?)',
+        args: [1],
+        argTypes: [{ scalarType: 'int', arity: 'scalar' }],
+      }),
+    ).resolves.toMatchObject({ lastInsertId: '42' })
+
+    expect(pool.connect).toHaveBeenCalledOnce()
+    expect(connection.connect).not.toHaveBeenCalled()
+    expect(connection.query).toHaveBeenNthCalledWith(2, {
+      text: 'INSERT INTO `UserTest` (`id`) VALUES ($1)',
+      values: [1],
+      rowMode: 'array',
+    })
+    expect(connection.query).toHaveBeenNthCalledWith(3, {
+      text: 'SELECT LAST_INSERT_ID()',
+      values: [],
+      rowMode: 'array',
+    })
+
+    await transaction.rollback()
   })
 
   test('does not rewrite question marks inside SQL literals, identifiers, or comments', () => {
