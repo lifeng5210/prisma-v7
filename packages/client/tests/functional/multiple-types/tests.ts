@@ -11,6 +11,7 @@ declare let Prisma: typeof PrismaNamespace
 testMatrix.setupTestSuite(
   ({ driverAdapter, provider }) => {
     const isD1 = driverAdapter === 'js_d1'
+    const usesOracleRawNumericDecimals = provider === Providers.KINGBASE_ORACLE
 
     beforeEach(async () => {
       await prisma.testModel.deleteMany()
@@ -131,7 +132,7 @@ testMatrix.setupTestSuite(
         {
           id: expect.anything(),
           string: 'str',
-          int: 42,
+          int: usesOracleRawNumericDecimals ? new Prisma.Decimal('42') : 42,
           // TODO: replace with exact value and remove next assert after
           // https://github.com/facebook/jest/issues/11617 is fixed
           // see client/tests/functional/raw-queries/typed-results/tests.ts
@@ -162,7 +163,7 @@ testMatrix.setupTestSuite(
         },
       ])
 
-      if (isD1 || provider === Providers.MYSQL) {
+      if (isD1 || provider === Providers.MYSQL || usesOracleRawNumericDecimals) {
         expect(resultFromQueryRaw).not.toEqual(resultFromFindMany)
       } else {
         expect(resultFromQueryRaw).toStrictEqual(resultFromFindMany)
@@ -229,7 +230,7 @@ testMatrix.setupTestSuite(
         {
           id: expect.anything(),
           string: 'str',
-          int: 42,
+          int: usesOracleRawNumericDecimals ? new Prisma.Decimal('42') : 42,
           // TODO: replace with exact value and remove next assert after
           // https://github.com/facebook/jest/issues/11617 is fixed
           // see client/tests/functional/raw-queries/typed-results/tests.ts
@@ -242,7 +243,7 @@ testMatrix.setupTestSuite(
         },
       ])
       // TODO?
-      if (isD1 || provider === Providers.MYSQL) {
+      if (isD1 || provider === Providers.MYSQL || usesOracleRawNumericDecimals) {
         expect(resultFromQueryRaw).not.toEqual(resultFromFindMany)
       } else {
         expect(resultFromQueryRaw).toStrictEqual(resultFromFindMany)

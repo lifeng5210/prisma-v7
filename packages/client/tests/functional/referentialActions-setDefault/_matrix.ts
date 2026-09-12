@@ -7,6 +7,7 @@ const driverAdapters = [
   Providers.SQLSERVER,
   Providers.SQLITE,
   Providers.MYSQL, // SetDefault is silently interpreted as NoAction by InnoDB on MySQL 8+
+  Providers.KINGBASE_ORACLE,
 ] as const
 
 const providersMatrix = driverAdapters.map((provider) => ({

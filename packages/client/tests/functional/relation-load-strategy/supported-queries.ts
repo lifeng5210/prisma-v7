@@ -9,7 +9,12 @@ import testMatrix from './_matrix'
 // @ts-ignore
 import type { Prisma as PrismaNamespace, PrismaClient } from './generated/prisma/client'
 
-let prisma: PrismaClient<'query'>
+// @only-ts-generator
+type LogPrismaClient = PrismaClient<'query'>
+// @only-js-generator
+type LogPrismaClient = PrismaClient<{ log: [{ emit: 'event'; level: 'query' }] }>
+
+let prisma: LogPrismaClient
 declare const newPrismaClient: NewPrismaClient<typeof prisma, typeof PrismaClient>
 
 testMatrix.setupTestSuite(

@@ -369,20 +369,22 @@ testMatrix.setupTestSuite(({ provider }, _suiteMeta, _clientMeta, cliMeta) => {
         `)
     })
 
-    testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB].includes(provider))('createMany', async () => {
-      await expect(
-        prisma.user.createMany({
-          // @ts-expect-error
-          relationLoadStrategy: 'query',
-          data: [{ login: 'user' }],
-        }),
-      ).rejects.toMatchPrismaErrorInlineSnapshot(`
+    testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB, Providers.KINGBASE_ORACLE].includes(provider))(
+      'createMany',
+      async () => {
+        await expect(
+          prisma.user.createMany({
+            // @ts-expect-error
+            relationLoadStrategy: 'query',
+            data: [{ login: 'user' }],
+          }),
+        ).rejects.toMatchPrismaErrorInlineSnapshot(`
           "
           Invalid \`prisma.user.createMany()\` invocation in
           /client/tests/functional/relation-load-strategy-unsupported/preview-feature-disabled.ts:0:0
 
-            XX 
-            XX testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB].includes(provider))('createMany', async () => {
+            XX 'createMany',
+            XX async () => {
             XX   await expect(
           → XX     prisma.user.createMany({
                       relationLoadStrategy: "query",
@@ -397,6 +399,17 @@ testMatrix.setupTestSuite(({ provider }, _suiteMeta, _clientMeta, cliMeta) => {
 
           Unknown argument \`relationLoadStrategy\`. Available options are marked with ?."
         `)
+      },
+    )
+
+    testIf(provider === Providers.KINGBASE_ORACLE)('createMany (kingbase oracle)', async () => {
+      await expect(
+        prisma.user.createMany({
+          // @ts-expect-error relationLoadStrategy is intentionally unsupported here.
+          relationLoadStrategy: 'query',
+          data: [{ login: 'user' }],
+        }),
+      ).rejects.toThrow('Unknown argument `relationLoadStrategy`')
     })
 
     testIf([Providers.SQLSERVER, Providers.MONGODB].includes(provider))('createMany (sqlserver, mongodb)', async () => {

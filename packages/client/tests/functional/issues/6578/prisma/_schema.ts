@@ -4,12 +4,16 @@ import testMatrix from '../_matrix'
 
 export default testMatrix.setupSchema(({ provider }) => {
   const compatibleTypes =
-    provider !== Providers.SQLITE
+    provider === Providers.KINGBASE_ORACLE
       ? `
+          date DateTime @db.Date
+        `
+      : provider !== Providers.SQLITE
+        ? `
           date DateTime @db.Date 
           time DateTime @db.Time
         `
-      : ''
+        : ''
 
   return /* Prisma */ `
     generator client {

@@ -48,12 +48,20 @@ testMatrix.setupTestSuite(
             dateTime: date,
           },
         })
+      } else if (provider === Providers.KINGBASE_ORACLE) {
+        await _prisma.user.create({
+          // @ts-test-if: provider === Providers.KINGBASE_ORACLE
+          data: {
+            dateTime: date,
+            date: date,
+          },
+        })
       } else {
         await _prisma.user.create({
           data: {
             dateTime: date,
-            // @ts-test-if: provider !== Providers.SQLITE
             date: date,
+            // @ts-test-if: provider !== Providers.SQLITE && provider !== Providers.KINGBASE_ORACLE
             time: date,
           },
         })
@@ -70,6 +78,8 @@ testMatrix.setupTestSuite(
 
       if (provider === Providers.SQLITE) {
         expect(params).toHaveLength(3)
+      } else if (provider === Providers.KINGBASE_ORACLE) {
+        expect(params).toHaveLength(4)
       } else {
         expect(params).toHaveLength(5)
       }

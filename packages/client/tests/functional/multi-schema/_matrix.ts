@@ -10,6 +10,9 @@ export default defineMatrix(() => [
     {
       provider: Providers.SQLSERVER,
     },
+    {
+      provider: Providers.KINGBASE_ORACLE,
+    },
   ],
   [
     {

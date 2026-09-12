@@ -6,6 +6,7 @@ export default defineMatrix(() => [
     ({ provider }) =>
       provider !== Providers.MYSQL &&
       provider !== Providers.KINGBASE_MYSQL &&
+      provider !== Providers.KINGBASE_ORACLE &&
       provider !== Providers.SQLITE &&
       provider !== Providers.SQLSERVER,
   ),

@@ -120,7 +120,7 @@ testMatrix.setupTestSuite(({ provider, driverAdapter, clientEngineExecutor }) =>
         // Driver adapters do not issue BEGIN through the query engine.
         expect(logs.shift()?.query).toContain('BEGIN')
       }
-      if (['postgresql', 'cockroachdb', 'sqlite'].includes(provider)) {
+      if (['postgresql', 'cockroachdb', 'sqlite', 'kingbase-oracle'].includes(provider)) {
         expect(logs).toHaveLength(3)
         expect(logs.shift()?.query).toContain('INSERT')
         expect(logs.shift()?.query).toContain('SELECT')
