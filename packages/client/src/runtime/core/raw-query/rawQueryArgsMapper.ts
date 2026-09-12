@@ -71,7 +71,8 @@ export const rawQueryArgsMapper =
 
         case 'cockroachdb':
         case 'postgresql':
-        case 'postgres': {
+        case 'postgres':
+        case 'kingbase-oracle': {
           queryString = args.text
 
           parameters = {

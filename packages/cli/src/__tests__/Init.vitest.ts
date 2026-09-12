@@ -52,6 +52,13 @@ test('supports Kingbase MySQL init defaults', () => {
   )
 })
 
+test('supports Kingbase Oracle init defaults', () => {
+  expect(defaultPort('kingbase-oracle')).toBe(54325)
+  expect(defaultURL('kingbase-oracle')).toBe(
+    'kingbase-oracle://johndoe:randompassword@localhost:54325/mydb?schema=public',
+  )
+})
+
 test('is schema and env written on disk replace', async () => {
   const recordedStdout = (await Init.new().parse([], defaultTestConfig())).toString()
   expect(stripAnsi(recordedStdout)).toMatchSnapshot()

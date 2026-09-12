@@ -19,7 +19,11 @@ export default testMatrix.setupSchema(({ provider }) => {
 
     fields.push('enum Enum')
 
-    if (provider !== Providers.MYSQL && provider !== Providers.KINGBASE_MYSQL) {
+    if (
+      provider !== Providers.MYSQL &&
+      provider !== Providers.KINGBASE_MYSQL &&
+      provider !== Providers.KINGBASE_ORACLE
+    ) {
       fields.push('enumList Enum[]')
     }
   }

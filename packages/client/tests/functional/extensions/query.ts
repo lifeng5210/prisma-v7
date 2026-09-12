@@ -1288,13 +1288,13 @@ testMatrix.setupTestSuite(
 
                 return data
               },
-              // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+              // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
               async createManyAndReturn({ args, query, operation }) {
                 const data = await query(args)
 
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(operation).toEqualTypeOf<'createManyAndReturn'>()
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserCreateManyAndReturnArgs>()
                 expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                 expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1399,9 +1399,9 @@ testMatrix.setupTestSuite(
               async updateManyAndReturn({ args, query, operation }) {
                 const data = await query(args)
 
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(operation).toEqualTypeOf<'updateManyAndReturn'>()
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserUpdateManyAndReturnArgs>()
                 expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                 expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1459,14 +1459,14 @@ testMatrix.setupTestSuite(
 
                   return data
                 }
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 if (operation === 'createManyAndReturn') {
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   const data = await query(args)
 
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(operation).toEqualTypeOf<'createManyAndReturn'>()
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserCreateManyAndReturnArgs>()
                   expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                   expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1570,14 +1570,14 @@ testMatrix.setupTestSuite(
 
                   return data
                 }
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 if (operation === 'updateManyAndReturn') {
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   const data = await query(args)
 
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(operation).toEqualTypeOf<'updateManyAndReturn'>()
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserUpdateManyAndReturnArgs>()
                   expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                   expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1641,14 +1641,14 @@ testMatrix.setupTestSuite(
 
                   return data
                 }
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 if (model === 'User' && operation === 'createManyAndReturn') {
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   const data = await query(args)
 
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(operation).toEqualTypeOf<'createManyAndReturn'>()
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserCreateManyAndReturnArgs>()
                   expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                   expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1752,14 +1752,14 @@ testMatrix.setupTestSuite(
 
                   return data
                 }
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 if (model === 'User' && operation === 'updateManyAndReturn') {
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   const data = await query(args)
 
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(operation).toEqualTypeOf<'updateManyAndReturn'>()
-                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                  // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                   expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserUpdateManyAndReturnArgs>()
                   expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                   expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1825,15 +1825,15 @@ testMatrix.setupTestSuite(
 
                 return data
               },
-              // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+              // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
               async createManyAndReturn({ args, query, operation, model }) {
                 if (model !== 'User') return query(args)
 
                 const data = await query(args)
 
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(operation).toEqualTypeOf<'createManyAndReturn'>()
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserCreateManyAndReturnArgs>()
                 expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                 expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1964,9 +1964,9 @@ testMatrix.setupTestSuite(
 
                 const data = await query(args)
 
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(operation).toEqualTypeOf<'updateManyAndReturn'>()
-                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+                // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
                 expectTypeOf(args).toEqualTypeOf<PrismaNamespace.UserUpdateManyAndReturnArgs>()
                 expectTypeOf(data).toMatchTypeOf<OptionalDeep<User>[]>()
                 expectTypeOf(data[0].posts).toMatchTypeOf<OptionalDeep<Post>[] | undefined>()
@@ -1988,7 +1988,7 @@ testMatrix.setupTestSuite(
 
               // This MYSQL & SQLSERVER does not make sense...
               // This was added to avoid a "Unused '@ts-expect-error' directive." error.
-              // @ts-test-if: provider === Providers.MONGODB || provider === Providers.MYSQL || provider === Providers.SQLSERVER
+              // @ts-test-if: provider === Providers.MONGODB || provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL || provider === Providers.SQLSERVER
               async aggregateRaw({ args, query, operation, model }) {
                 if (model !== 'User') return query(args)
 

@@ -76,14 +76,39 @@ describe('PrismaKbAdapterFactory', () => {
     expect(pool.off).toHaveBeenCalled()
   })
 
-  test('reads LAST_INSERT_ID on the same connection as a pooled insert', async () => {
+  test('configures every external pool connection with the selected schema', async () => {
     const { pool, connection } = createPool()
-    connection.query.mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 }).mockResolvedValueOnce({
-      fields: [{ name: 'LAST_INSERT_ID()', dataTypeID: 20 }],
-      rows: [[42]],
+    connection.query.mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 }).mockResolvedValueOnce({
+      fields: [{ name: 'id', dataTypeID: 23 }],
+      rows: [[1]],
       rowCount: 1,
     })
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+
+    await expect(adapter.queryRaw(query)).resolves.toMatchObject({ rows: [[1]] })
+
+    expect(pool.query).not.toHaveBeenCalled()
+    expect(connection.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
+    expect(connection.query).toHaveBeenNthCalledWith(2, {
+      text: 'SELECT id FROM `UserTest` WHERE id = $1',
+      values: [1],
+      rowMode: 'array',
+    })
+    expect(connection.release).toHaveBeenCalledOnce()
+    expect(adapter.underlyingDriver()).toBe(pool)
+  })
+
+  test('reads LAST_INSERT_ID on the same connection as a pooled insert', async () => {
+    const { pool, connection } = createPool()
+    connection.query
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 })
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
+      .mockResolvedValueOnce({
+        fields: [{ name: 'LAST_INSERT_ID()', dataTypeID: 20 }],
+        rows: [[42]],
+        rowCount: 1,
+      })
+    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await expect(
       adapter.queryRaw({
@@ -94,12 +119,13 @@ describe('PrismaKbAdapterFactory', () => {
     ).resolves.toMatchObject({ lastInsertId: '42' })
 
     expect(pool.query).not.toHaveBeenCalled()
-    expect(connection.query).toHaveBeenNthCalledWith(1, {
+    expect(connection.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
+    expect(connection.query).toHaveBeenNthCalledWith(2, {
       text: 'INSERT INTO `UserTest` (`id`) VALUES ($1)',
       values: [1],
       rowMode: 'array',
     })
-    expect(connection.query).toHaveBeenNthCalledWith(2, {
+    expect(connection.query).toHaveBeenNthCalledWith(3, {
       text: 'SELECT LAST_INSERT_ID()',
       values: [],
       rowMode: 'array',
@@ -114,8 +140,11 @@ describe('PrismaKbAdapterFactory', () => {
       errno: -104,
       syscall: 'read',
     })
-    connection.query.mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 }).mockRejectedValueOnce(error)
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    connection.query
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 })
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
+      .mockRejectedValueOnce(error)
+    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await expect(
       adapter.queryRaw({
@@ -131,9 +160,10 @@ describe('PrismaKbAdapterFactory', () => {
 
   test('starts and releases a transaction connection', async () => {
     const { pool, connection } = createPool()
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
     const transaction = await adapter.startTransaction('READ COMMITTED')
 
+    expect(connection.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
     expect(connection.query).toHaveBeenCalledWith({ text: 'BEGIN', values: [], rowMode: 'array' })
     expect(connection.query).toHaveBeenCalledWith({
       text: 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED',
@@ -182,12 +212,13 @@ describe('PrismaKbAdapterFactory', () => {
     connection.query
       .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
+      .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
       .mockResolvedValueOnce({
         fields: [{ name: 'LAST_INSERT_ID()', dataTypeID: 20 }],
         rows: [[42]],
         rowCount: 1,
       })
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
     const transaction = await adapter.startTransaction()
 
     await expect(
@@ -200,12 +231,12 @@ describe('PrismaKbAdapterFactory', () => {
 
     expect(pool.connect).toHaveBeenCalledOnce()
     expect(connection.connect).not.toHaveBeenCalled()
-    expect(connection.query).toHaveBeenNthCalledWith(2, {
+    expect(connection.query).toHaveBeenNthCalledWith(3, {
       text: 'INSERT INTO `UserTest` (`id`) VALUES ($1)',
       values: [1],
       rowMode: 'array',
     })
-    expect(connection.query).toHaveBeenNthCalledWith(3, {
+    expect(connection.query).toHaveBeenNthCalledWith(4, {
       text: 'SELECT LAST_INSERT_ID()',
       values: [],
       rowMode: 'array',
@@ -231,6 +262,17 @@ describe('PrismaKbAdapterFactory', () => {
       "INSERT INTO t VALUES ('a;b')",
       '-- c;\nSELECT 1',
       '/* d; */ SELECT 2',
+    ])
+  })
+
+  test('does not split on semicolons inside MySQL hash comments', () => {
+    expect(splitStatements('# deployment; note\nSELECT 1;')).toEqual(['# deployment; note\nSELECT 1'])
+  })
+
+  test('does not split on semicolons inside MySQL dollar-quoted strings', () => {
+    expect(splitStatements('SELECT $$a;b$$ AS value; SELECT $tag$c;d$tag$ AS tagged;')).toEqual([
+      'SELECT $$a;b$$ AS value',
+      'SELECT $tag$c;d$tag$ AS tagged',
     ])
   })
 })

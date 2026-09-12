@@ -13,6 +13,17 @@ testMatrix.setupTestSuite(
   ({ provider, driverAdapter }) => {
     const isD1DriverAdapter = driverAdapter === 'js_d1'
 
+    function normalizeOracleRawNumberFields(rows: Array<Record<string, unknown>>) {
+      if (provider !== Providers.KINGBASE_ORACLE) {
+        return rows
+      }
+
+      // A raw Oracle NUMBER is represented as Prisma.Decimal. Model queries
+      // still deserialize the same column to the Prisma Int scalar.
+      expect(rows.map(({ age }) => age)).toEqual([new Prisma.Decimal('60'), new Prisma.Decimal('45')])
+      return rows.map(({ age, ...row }) => ({ ...row, age: Number(age) }))
+    }
+
     beforeAll(async () => {
       await prisma.user.create({
         data: {
@@ -54,6 +65,7 @@ testMatrix.setupTestSuite(
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
         'kingbase-mysql': [{ '?column?': 1 }],
+        'kingbase-oracle': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -79,6 +91,7 @@ testMatrix.setupTestSuite(
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
         'kingbase-mysql': [{ number: 1 }],
+        'kingbase-oracle': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -96,6 +109,7 @@ testMatrix.setupTestSuite(
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
         'kingbase-mysql': [{ number: 1 }],
+        'kingbase-oracle': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -114,6 +128,7 @@ testMatrix.setupTestSuite(
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
         'kingbase-mysql': [{ '?column?': 1 }],
+        'kingbase-oracle': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -146,6 +161,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -180,6 +196,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -216,6 +233,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -265,6 +283,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -312,6 +331,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [

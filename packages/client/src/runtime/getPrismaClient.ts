@@ -427,9 +427,9 @@ If you use Prisma Accelerate instead of connecting to your database directly, pa
         adapter = optionsArg.adapter
 
         // Note:
-        // - `getConfig(..).datasources[0].provider` can be `postgresql`, `postgres`, `mysql`, `kingbase-mysql`, or other known providers
+        // - `getConfig(..).datasources[0].provider` can be `postgresql`, `postgres`, `mysql`, `kingbase-mysql`, `kingbase-oracle`, or other known providers
         // - `getConfig(..).datasources[0].activeProvider`, stored in `config.activeProvider`, can be `postgresql`, `mysql`, or other known providers
-        // - `adapter.provider` can be `postgres`, `mysql`, `kingbase-mysql`, or `sqlite`, and changing this requires changes to Rust as well,
+        // - `adapter.provider` can be `postgres`, `mysql`, `kingbase-mysql`, `kingbase-oracle`, or `sqlite`, and changing this requires changes to Rust as well,
         //    see https://github.com/prisma/prisma-engines/blob/d116c37d7d27aee74fdd840fc85ab2b45407e5ce/query-engine/driver-adapters/src/types.rs#L22-L23.
         //
         // TODO: Normalize these provider names once and for all in Prisma 6.

@@ -20,9 +20,11 @@ export function checkMissingProviders({
 }) {
   const suiteConfigProviders = suiteConfigs.map(({ matrixOptions: { provider } }) => provider)
 
-  // Kingbase is exercised through the JavaScript adapter when a matrix opts
+  // Kingbase is exercised through a JavaScript adapter when a matrix opts
   // into it. Do not require every existing provider-specific matrix to add it.
-  const requiredProviders = Object.values(Providers).filter((provider) => provider !== Providers.KINGBASE_MYSQL)
+  const requiredProviders = Object.values(Providers).filter(
+    (provider) => provider !== Providers.KINGBASE_MYSQL && provider !== Providers.KINGBASE_ORACLE,
+  )
 
   const missingProviders = requiredProviders.reduce((acc, provider) => {
     if (suiteConfigProviders.includes(provider)) return acc

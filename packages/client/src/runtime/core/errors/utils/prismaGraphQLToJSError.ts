@@ -31,7 +31,8 @@ function getKnownErrorMessage(userFacingError: RequestError['user_facing_error']
     (activeProvider === 'postgresql' ||
       activeProvider === 'postgres' ||
       activeProvider === 'mysql' ||
-      activeProvider === 'kingbase-mysql') &&
+      activeProvider === 'kingbase-mysql' ||
+      activeProvider === 'kingbase-oracle') &&
     userFacingError.error_code === TOO_MANY_CONNECTIONS_ERROR
   ) {
     message +=

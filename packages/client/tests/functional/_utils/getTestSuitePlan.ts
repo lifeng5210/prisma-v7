@@ -154,8 +154,11 @@ function shouldSkipSuiteConfig(
     return true
   }
 
-  // Kingbase currently has coverage only through its JavaScript driver adapter.
-  if (provider === Providers.KINGBASE_MYSQL && driverAdapter === undefined) {
+  // Kingbase currently has coverage only through its JavaScript driver adapters.
+  if (
+    (provider === Providers.KINGBASE_MYSQL || provider === Providers.KINGBASE_ORACLE) &&
+    driverAdapter === undefined
+  ) {
     return true
   }
 
@@ -258,6 +261,7 @@ const excludeEnvToProviderFlavorMap = {
   TEST_SKIP_MSSQL: AdapterProviders.JS_MSSQL,
   TEST_SKIP_MARIADB: AdapterProviders.JS_MARIADB,
   TEST_SKIP_KB: AdapterProviders.JS_KB,
+  TEST_SKIP_KB_ORACLE: AdapterProviders.JS_KB_ORACLE,
   TEST_SKIP_PG_COCKROACHDB: AdapterProviders.JS_PG_COCKROACHDB,
 }
 

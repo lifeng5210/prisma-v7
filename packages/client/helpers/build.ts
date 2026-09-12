@@ -19,6 +19,7 @@ const DRIVER_ADAPTER_SUPPORTED_PROVIDERS = [
   'sqlserver',
   'cockroachdb',
   'kingbase-mysql',
+  'kingbase-oracle',
 ] as const
 type DriverAdapterSupportedProvider = (typeof DRIVER_ADAPTER_SUPPORTED_PROVIDERS)[number]
 

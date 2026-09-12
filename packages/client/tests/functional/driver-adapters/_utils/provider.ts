@@ -14,6 +14,8 @@ export function getDriverAdaptersProvider(provider: Provider): SqlDriverAdapter[
       return 'mysql'
     case Provider.KINGBASE_MYSQL:
       return 'kingbase-mysql'
+    case Provider.KINGBASE_ORACLE:
+      return 'kingbase-oracle'
     case Provider.SQLITE:
       return 'sqlite'
     default:
@@ -28,5 +30,6 @@ export const driverAdaptersTestProviders = [
   Provider.POSTGRESQL,
   Provider.MYSQL,
   Provider.KINGBASE_MYSQL,
+  Provider.KINGBASE_ORACLE,
   Provider.SQLITE,
 ].map((provider) => ({ provider }))

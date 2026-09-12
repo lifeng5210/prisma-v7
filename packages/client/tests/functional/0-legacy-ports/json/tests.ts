@@ -69,7 +69,7 @@ testMatrix.setupTestSuite(
       expect(result[0]).toHaveProperty('requiredJson')
     })
 
-    testIf(['mysql', 'postgresql', 'cockroachdb', 'sqlite'].includes(suiteConfig.provider))(
+    testIf(['mysql', 'postgresql', 'cockroachdb', 'kingbase-oracle', 'sqlite'].includes(suiteConfig.provider))(
       'select required json with where path',
       async () => {
         let result
@@ -86,11 +86,15 @@ testMatrix.setupTestSuite(
           })
         }
 
-        if (suiteConfig.provider === Providers.POSTGRESQL || suiteConfig.provider === Providers.COCKROACHDB) {
+        if (
+          suiteConfig.provider === Providers.POSTGRESQL ||
+          suiteConfig.provider === Providers.COCKROACHDB ||
+          suiteConfig.provider === Providers.KINGBASE_ORACLE
+        ) {
           result = await prisma.resource.findMany({
             where: {
               requiredJson: {
-                // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB
+                // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE
                 path: ['bar', 'baz'],
                 equals: 'qux',
               },

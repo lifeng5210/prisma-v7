@@ -6,6 +6,7 @@ export const MAX_BIND_VALUES_BY_PROVIDER: Record<Providers, number> = {
   [Providers.COCKROACHDB]: 32766,
   [Providers.MYSQL]: 65535,
   [Providers.KINGBASE_MYSQL]: 32767,
+  [Providers.KINGBASE_ORACLE]: 32767,
   [Providers.SQLITE]: 999,
   [Providers.SQLSERVER]: 2099,
   [Providers.MONGODB]: -1,

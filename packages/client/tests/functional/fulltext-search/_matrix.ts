@@ -43,5 +43,17 @@ export default defineMatrix(() => [
       noResultsQuery: 'April & Smith',
       badQuery: 'John Smith',
     },
+    {
+      provider: Providers.KINGBASE_ORACLE,
+      previewFeatures: '"fullTextSearch"',
+      // Oracle-mode full-text search uses tsquery syntax and does not require
+      // Prisma to manage a @@fulltext index.
+      index: '',
+      andQuery: 'John & Smith',
+      orQuery: 'John | April',
+      notQuery: '(John | April) & !Smith',
+      noResultsQuery: 'April & Smith',
+      badQuery: 'John Smith',
+    },
   ],
 ])

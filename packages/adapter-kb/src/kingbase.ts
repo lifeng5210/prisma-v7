@@ -265,6 +265,7 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
     client: KingbasePool,
     protected readonly kbOptions?: PrismaKbOptions,
     private readonly release?: () => Promise<void>,
+    private readonly underlyingPool: KingbasePool = client,
   ) {
     super(client, kbOptions, client)
   }
@@ -324,7 +325,7 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
   }
 
   underlyingDriver(): KingbasePool {
-    return this.client
+    return this.underlyingPool
   }
 }
 
@@ -355,21 +356,30 @@ export class PrismaKbAdapterFactory implements SqlDriverAdapterFactory {
       this.externalPoolClaimed = true
     }
 
-    const pool =
+    const underlyingPool =
       poolOrConfig.type === 'pool'
         ? poolOrConfig.pool
         : new runtime.Pool(configureSearchPath(poolOrConfig.config, this.options?.schema))
+    const pool =
+      poolOrConfig.type === 'pool'
+        ? configureExternalKingbasePool(underlyingPool, this.options?.schema)
+        : underlyingPool
     const onPoolError = (error: unknown) => this.options?.onPoolError?.(error)
-    pool.on?.('error', onPoolError)
+    underlyingPool.on?.('error', onPoolError)
 
     return Promise.resolve(
-      new PrismaKbAdapter(pool, this.options, async () => {
-        if (ownsPool) {
-          await pool.end()
-        } else {
-          pool.off?.('error', onPoolError)
-        }
-      }),
+      new PrismaKbAdapter(
+        pool,
+        this.options,
+        async () => {
+          if (ownsPool) {
+            await underlyingPool.end()
+          } else {
+            underlyingPool.off?.('error', onPoolError)
+          }
+        },
+        underlyingPool,
+      ),
     )
   }
 }
@@ -424,10 +434,9 @@ function configureSearchPath(config: PoolConfig, schema: string | undefined): Po
   }
 
   const existingVerify = config.verify
-  const quotedSchema = `"${schema.replaceAll('"', '""')}"`
   const verify: PoolVerifier = (client, callback) => {
     const setSearchPath = () => {
-      void client.query(`SET search_path TO ${quotedSchema}`).then(
+      void setClientSearchPath(client, schema).then(
         () => callback(),
         (error) => callback(error instanceof Error ? error : new Error(String(error))),
       )
@@ -453,6 +462,47 @@ function configureSearchPath(config: PoolConfig, schema: string | undefined): Po
   }
 
   return { ...config, verify }
+}
+
+function configureExternalKingbasePool(pool: KingbasePool, schema: string | undefined): KingbasePool {
+  if (!schema) {
+    return pool
+  }
+
+  const connect = async (): Promise<KingbaseClient> => {
+    const connection = await pool.connect()
+
+    try {
+      await setClientSearchPath(connection, schema)
+      return connection
+    } catch (error) {
+      connection.release(error instanceof Error ? error : new Error(String(error)))
+      throw error
+    }
+  }
+
+  return {
+    async query(query) {
+      const connection = await connect()
+
+      try {
+        const result = await connection.query(query)
+        connection.release()
+        return result
+      } catch (error) {
+        connection.release(error instanceof Error ? error : new Error(String(error)))
+        throw error
+      }
+    },
+    connect,
+    end: () => pool.end(),
+    on: (event, listener) => pool.on?.(event, listener),
+    off: (event, listener) => pool.off?.(event, listener),
+  }
+}
+
+function setClientSearchPath(client: KingbaseQueryableClient, schema: string): Promise<QueryResult> {
+  return client.query(`SET search_path TO "${schema.replaceAll('"', '""')}"`)
 }
 
 function normalizeConnectionString(connectionString: string): string {
@@ -671,6 +721,21 @@ export function splitStatements(script: string): string[] {
           quote = undefined
         }
       }
+      continue
+    }
+
+    if (character === '$') {
+      const end = skipDollarQuote(script, index)
+      if (end !== undefined) {
+        statement += script.slice(index, end)
+        index = end - 1
+        continue
+      }
+    }
+
+    if (character === '#') {
+      statement += character
+      lineComment = true
       continue
     }
 

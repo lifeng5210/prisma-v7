@@ -1158,14 +1158,14 @@ testMatrix.setupTestSuite(
 
       testIsolationLevel(
         'read uncommitted',
-        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB,
+        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB && provider !== Providers.KINGBASE_ORACLE,
         async () => {
           await prisma.$transaction(
             async (tx) => {
               await tx.user.create({ data: { email: 'user@example.com' } })
             },
             {
-              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb'].includes(provider)
+              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb', 'kingbase-oracle'].includes(provider)
               isolationLevel: Prisma.TransactionIsolationLevel.ReadUncommitted,
             },
           )
@@ -1175,14 +1175,14 @@ testMatrix.setupTestSuite(
 
       testIsolationLevel(
         'repeatable read',
-        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB,
+        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB && provider !== Providers.KINGBASE_ORACLE,
         async () => {
           await prisma.$transaction(
             async (tx) => {
               await tx.user.create({ data: { email: 'user@example.com' } })
             },
             {
-              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb'].includes(provider)
+              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb', 'kingbase-oracle'].includes(provider)
               isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
             },
           )
