@@ -200,7 +200,7 @@ export type ConnectionInfo = {
   supportsRelationJoins: boolean
 }
 
-export type Provider = 'mysql' | 'postgres' | 'sqlite' | 'sqlserver' | 'kingbase-mysql'
+export type Provider = 'mysql' | 'postgres' | 'sqlite' | 'sqlserver' | 'kingbase-mysql' | 'kingbase-oracle'
 
 // Current list of official Prisma adapters
 // This list might get outdated over time.

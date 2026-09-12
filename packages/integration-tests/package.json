@@ -45,6 +45,7 @@
     "test:postgresql": "dotenv -e ../../.db.env -- jest integration.postgresql --maxWorkers=1 --silent",
     "test:mysql": "dotenv -e ../../.db.env -- jest integration.mysql --maxWorkers=1 --silent",
     "test:kingbase": "dotenv -e ../../.db.env -- jest integration.kingbase-mysql --maxWorkers=1 --silent",
+    "test:kingbase-oracle": "dotenv -e ../../.db.env -- jest integration.kingbase-oracle --maxWorkers=1 --silent",
     "test:mariadb": "dotenv -e ../../.db.env -- jest integration.mariadb --maxWorkers=1 --silent",
     "test:mssql": "dotenv -e ../../.db.env -- jest integration.mssql --maxWorkers=1 --silent",
     "jest": "dotenv -e ../../.db.env -- jest",

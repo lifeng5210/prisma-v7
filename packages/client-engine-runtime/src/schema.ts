@@ -4,6 +4,7 @@
 export type SchemaProvider =
   | 'cockroachdb'
   | 'kingbase-mysql'
+  | 'kingbase-oracle'
   | 'mongodb'
   | 'mysql'
   | 'postgres'

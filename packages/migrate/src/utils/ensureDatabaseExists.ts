@@ -12,6 +12,7 @@ export type MigrateAction = 'create' | 'apply' | 'unapply' | 'dev' | 'push'
 export type PrettyProvider =
   | 'MySQL'
   | 'Kingbase MySQL'
+  | 'Kingbase Oracle'
   | 'PostgreSQL'
   | 'Prisma Postgres'
   | 'SQLite'
@@ -75,6 +76,10 @@ export function parseDatasourceInfo(
       } else {
         schema = 'public'
       }
+    } else if (['kingbase-mysql', 'kingbase-oracle'].includes(datasource.provider)) {
+      // Kingbase uses a database plus an optional URL-selected schema. Unlike
+      // PostgreSQL, do not claim a default when the URL does not select one.
+      schema = credentials.schema
     }
 
     const datasourceInfo = {
@@ -199,6 +204,8 @@ export function prettifyProvider(provider: ConnectorType): PrettyProvider {
       return `MySQL`
     case 'kingbase-mysql':
       return `Kingbase MySQL`
+    case 'kingbase-oracle':
+      return `Kingbase Oracle`
     case 'postgres':
     case 'postgresql':
       return `PostgreSQL`

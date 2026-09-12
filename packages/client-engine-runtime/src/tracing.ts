@@ -36,6 +36,8 @@ export function providerToOtelSystem(provider: SchemaProvider): string {
       return 'mssql'
     case 'kingbase-mysql':
       return 'mysql'
+    case 'kingbase-oracle':
+      return 'oracle'
     case 'mysql':
     case 'sqlite':
     case 'cockroachdb':

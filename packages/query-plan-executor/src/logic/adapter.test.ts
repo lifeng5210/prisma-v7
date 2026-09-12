@@ -1,3 +1,4 @@
+import { PrismaKb, PrismaKbOracle } from '@prisma/adapter-kb'
 import { PrismaPg } from '@prisma/adapter-pg'
 import {
   ColumnTypeEnum,
@@ -18,6 +19,15 @@ vi.mock('@prisma/adapter-pg', () => {
     }),
   }
 })
+
+vi.mock('@prisma/adapter-kb', () => ({
+  PrismaKb: vi.fn().mockImplementation(function () {
+    return { adapterName: '@prisma/adapter-kb', provider: 'kingbase-mysql' }
+  }),
+  PrismaKbOracle: vi.fn().mockImplementation(function () {
+    return { adapterName: '@prisma/adapter-kb', provider: 'kingbase-oracle' }
+  }),
+}))
 
 describe('createAdapter', () => {
   test('PostgreSQL protocols', () => {
@@ -43,6 +53,16 @@ describe('createAdapter', () => {
       'sqlserver://localhost:1433;database=master;user=SA;password=YourStrong@Passw0rd;trustServerCertificate=true;'
     const adapter = createAdapter(sqlserverUrl)
     expect(adapter.adapterName).toBe('@prisma/adapter-mssql')
+  })
+
+  test('Kingbase protocols select their corresponding dialect adapter', () => {
+    const mysqlAdapter = createAdapter('kingbase-mysql://user:pass@localhost:54321/db')
+    const oracleAdapter = createAdapter('kingbase-oracle://user:pass@localhost:54325/db')
+
+    expect(mysqlAdapter.adapterName).toBe('@prisma/adapter-kb')
+    expect(oracleAdapter.adapterName).toBe('@prisma/adapter-kb')
+    expect(PrismaKb).toHaveBeenCalledWith('kingbase-mysql://user:pass@localhost:54321/db')
+    expect(PrismaKbOracle).toHaveBeenCalledWith('kingbase-oracle://user:pass@localhost:54325/db')
   })
 
   test('unsupported protocol', () => {

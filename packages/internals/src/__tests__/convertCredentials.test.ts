@@ -69,3 +69,19 @@ test('Kingbase MySQL accepts both URL protocols', () => {
   })
   expect(credentialsToUri(alias)).toBe('kingbase-mysql://user:password@localhost:54321/mydb?schema=public')
 })
+
+test('Kingbase Oracle round-trips its URL protocol', () => {
+  const uri = 'kingbase-oracle://user:password@localhost:54325/mydb?schema=public'
+  const credentials = uriToCredentials(uri)
+
+  expect(credentials).toMatchObject({
+    type: 'kingbase-oracle',
+    host: 'localhost',
+    port: 54325,
+    user: 'user',
+    password: 'password',
+    database: 'mydb',
+    schema: 'public',
+  })
+  expect(credentialsToUri(credentials)).toBe(uri)
+})

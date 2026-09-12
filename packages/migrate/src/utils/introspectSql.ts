@@ -5,7 +5,7 @@ import { Migrate } from '../Migrate'
 import { SchemaEngine } from '../SchemaEngine'
 import { EngineArgs } from '../types'
 
-const supportedProviders = ['postgresql', 'cockroachdb', 'mysql', 'kingbase-mysql', 'sqlite']
+const supportedProviders = ['postgresql', 'cockroachdb', 'mysql', 'kingbase-mysql', 'kingbase-oracle', 'sqlite']
 
 export interface IntrospectSqlInput extends EngineArgs.SqlQueryInput {
   fileName: string

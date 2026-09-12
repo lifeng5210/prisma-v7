@@ -19,22 +19,16 @@ const runtimeModule = kingbaseModule as unknown as KingbaseRuntime
 const runtime = runtimeModule.default ?? runtimeModule
 
 export const database = {
-  name: 'kingbase-mysql',
+  name: 'kingbase-oracle',
   datasource: {
     url: (ctx) => getConnectionString(ctx),
   },
   async connect(ctx) {
-    logKingbaseDatabaseStage(ctx, 'creating raw database client')
-    const db = new runtime.Client({ connectionString: getConnectionString(ctx) })
-    logKingbaseDatabaseStage(ctx, 'raw database client created; connecting')
+    const db = new runtime.Client({ connectionString: getDriverConnectionString(ctx) })
     await db.connect()
-    logKingbaseDatabaseStage(ctx, 'raw database client connected; running SELECT 1')
-    await db.query('SELECT 1')
-    logKingbaseDatabaseStage(ctx, 'SELECT 1 completed')
     return db
   },
   async beforeEach(db, sqlScenario, ctx: Context) {
-    logKingbaseDatabaseStage(ctx, 'running database setup SQL')
     try {
       await db.query(`
         DROP SCHEMA IF EXISTS "${ctx.id}" CASCADE;
@@ -42,10 +36,8 @@ export const database = {
         SET search_path TO "${ctx.id}";
         ${sqlScenario}
       `)
-      logKingbaseDatabaseStage(ctx, 'database setup SQL completed')
     } finally {
       await close(db)
-      logKingbaseDatabaseStage(ctx, 'raw database connection closed')
     }
   },
   afterEach: cleanupSchema,
@@ -53,9 +45,9 @@ export const database = {
 } as Input<KingbaseClient>['database']
 
 function getConnectionString(ctx: Context): string {
-  const connectionString = process.env.TEST_KINGBASE_MYSQL_URI
+  const connectionString = process.env.TEST_KINGBASE_ORACLE_URI
   if (!connectionString) {
-    throw new Error('TEST_KINGBASE_MYSQL_URI is not set')
+    throw new Error('TEST_KINGBASE_ORACLE_URI is not set')
   }
 
   const url = new URL(connectionString)
@@ -63,8 +55,16 @@ function getConnectionString(ctx: Context): string {
   return url.toString()
 }
 
-function getCleanupConnectionString(ctx: Context): string {
+function getDriverConnectionString(ctx: Context): string {
   const url = new URL(getConnectionString(ctx))
+  // kingbasedb uses its native wire-protocol scheme. The Prisma datasource
+  // retains `kingbase-oracle` so Schema Engine selects the Oracle connector.
+  url.protocol = 'kingbase:'
+  return url.toString()
+}
+
+function getCleanupConnectionString(ctx: Context): string {
+  const url = new URL(getDriverConnectionString(ctx))
   url.searchParams.delete('schema')
   return url.toString()
 }
@@ -85,11 +85,5 @@ async function close(db: KingbaseClient): Promise<void> {
   if (!db.closed) {
     db.closed = true
     await db.end()
-  }
-}
-
-function logKingbaseDatabaseStage(ctx: Context, stage: string): void {
-  if (process.env.DEBUG_KINGBASE_MYSQL_INTEGRATION === '1') {
-    process.stderr.write(`[kingbase-mysql] ${ctx.scenarioName}: ${stage}\n`)
   }
 }

@@ -1,0 +1,575 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`introspection: CLOB, BLOB, and NUMBER round trip through the Oracle adapter: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model oracle_native_types {
+  id         Int     @id @default(autoincrement())
+  clob_value String  @db.Clob
+  blob_value Bytes
+  amount     Decimal @db.Number(12, 2)
+}
+"
+`;
+
+exports[`introspection: CLOB, BLOB, and NUMBER round trip through the Oracle adapter: warnings 1`] = `null`;
+
+exports[`introspection: JSON paths and JSON field references use Oracle JSONB semantics: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model json_documents {
+  id               Int  @id @default(autoincrement())
+  payload          Json
+  expected_payload Json
+}
+"
+`;
+
+exports[`introspection: JSON paths and JSON field references use Oracle JSONB semantics: warnings 1`] = `null`;
+
+exports[`introspection: Oracle enum values round trip: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model posts {
+  id     Int         @id @default(autoincrement())
+  title  String      @db.VarChar2(50)
+  status post_status @default(DRAFT)
+}
+
+enum post_status {
+  DRAFT
+  PUBLISHED
+}
+"
+`;
+
+exports[`introspection: Oracle enum values round trip: warnings 1`] = `null`;
+
+exports[`introspection: batch transactions commit Oracle writes: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: batch transactions commit Oracle writes: warnings 1`] = `null`;
+
+exports[`introspection: case-insensitive filters use Oracle semantics: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model case_filters {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: case-insensitive filters use Oracle semantics: warnings 1`] = `null`;
+
+exports[`introspection: composite primary key CRUD: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model scores {
+  team_id   Int
+  player_id Int
+  points    Int
+
+  @@id([team_id, player_id])
+}
+"
+`;
+
+exports[`introspection: composite primary key CRUD: warnings 1`] = `null`;
+
+exports[`introspection: composite unique constraints and upsert: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model users {
+  id    Int    @id @default(autoincrement())
+  email String @db.VarChar2(50)
+  name  String @db.VarChar2(50)
+
+  @@unique([email, name])
+}
+"
+`;
+
+exports[`introspection: composite unique constraints and upsert: warnings 1`] = `null`;
+
+exports[`introspection: create with an Oracle SQL default: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @default("Ada") @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: create with an Oracle SQL default: warnings 1`] = `null`;
+
+exports[`introspection: create, update, and delete use identity RETURNING values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: create, update, and delete use identity RETURNING values: warnings 1`] = `null`;
+
+exports[`introspection: createMany and aggregate: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id    Int    @id @default(autoincrement())
+  name  String @db.VarChar2(50)
+  score Int
+}
+"
+`;
+
+exports[`introspection: createMany and aggregate: warnings 1`] = `null`;
+
+exports[`introspection: executeRaw binds Oracle numbered parameters: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: executeRaw binds Oracle numbered parameters: warnings 1`] = `null`;
+
+exports[`introspection: filters and updateMany: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id     Int     @id @default(autoincrement())
+  name   String  @db.VarChar2(50)
+  active Boolean @default(true)
+}
+"
+`;
+
+exports[`introspection: filters and updateMany: warnings 1`] = `null`;
+
+exports[`introspection: findMany orders Oracle rows in both directions: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+  rank Int
+}
+"
+`;
+
+exports[`introspection: findMany orders Oracle rows in both directions: warnings 1`] = `null`;
+
+exports[`introspection: findUnique and select by primary key: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique @db.VarChar2(50)
+  active Boolean @default(true)
+}
+"
+`;
+
+exports[`introspection: findUnique and select by primary key: warnings 1`] = `null`;
+
+exports[`introspection: foreign-key SetDefault updates the dependent row: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model posts {
+  id      Int    @id @default(autoincrement())
+  user_id Int    @default(1)
+  title   String @db.VarChar2(50)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: SetDefault, onUpdate: NoAction)
+}
+
+model users {
+  id    Int     @id @default(autoincrement())
+  email String  @unique @db.VarChar2(50)
+  posts posts[]
+}
+"
+`;
+
+exports[`introspection: foreign-key SetDefault updates the dependent row: warnings 1`] = `null`;
+
+exports[`introspection: full-text search compiles Oracle tsquery filters: datamodel 1`] = `
+"generator client {
+  provider        = "prisma-client-js"
+  output = "***"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model search_documents {
+  id    Int    @id @default(autoincrement())
+  title String @db.VarChar2(100)
+}
+"
+`;
+
+exports[`introspection: full-text search compiles Oracle tsquery filters: warnings 1`] = `null`;
+
+exports[`introspection: implicit many-to-many connect uses an Oracle MERGE source row: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model roles {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar2(50)
+  users users[] @relation("RoleToUser")
+}
+
+model users {
+  id    Int     @id @default(autoincrement())
+  email String  @unique @db.VarChar2(50)
+  roles roles[] @relation("RoleToUser")
+}
+"
+`;
+
+exports[`introspection: implicit many-to-many connect uses an Oracle MERGE source row: warnings 1`] = `null`;
+
+exports[`introspection: in notIn and empty list filters: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: in notIn and empty list filters: warnings 1`] = `null`;
+
+exports[`introspection: interactive transactions roll back: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: interactive transactions roll back: warnings 1`] = `null`;
+
+exports[`introspection: nested relation create uses Oracle RETURNING values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model posts {
+  id      Int    @id @default(autoincrement())
+  user_id Int
+  title   String @db.VarChar2(50)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id    Int     @id @default(autoincrement())
+  email String  @unique @db.VarChar2(50)
+  posts posts[]
+}
+"
+`;
+
+exports[`introspection: nested relation create uses Oracle RETURNING values: warnings 1`] = `null`;
+
+exports[`introspection: null filters and deleteMany: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int     @id @default(autoincrement())
+  name String  @db.VarChar2(50)
+  note String? @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: null filters and deleteMany: warnings 1`] = `null`;
+
+exports[`introspection: pagination uses Oracle OFFSET and FETCH: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: pagination uses Oracle OFFSET and FETCH: warnings 1`] = `null`;
+
+exports[`introspection: raw queries preserve Oracle numbered placeholders: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model raw_queries {
+  id    Int    @id @default(autoincrement())
+  value String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: raw queries preserve Oracle numbered placeholders: warnings 1`] = `null`;
+
+exports[`introspection: relations and fluent relation queries: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model posts {
+  id      Int    @id @default(autoincrement())
+  user_id Int
+  title   String @db.VarChar2(50)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id    Int     @id @default(autoincrement())
+  email String  @unique @db.VarChar2(50)
+  posts posts[]
+}
+"
+`;
+
+exports[`introspection: relations and fluent relation queries: warnings 1`] = `null`;
+
+exports[`introspection: relations include through an Oracle foreign key: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model posts {
+  id      Int    @id @default(autoincrement())
+  user_id Int
+  title   String @db.VarChar2(50)
+  users   users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id    Int     @id @default(autoincrement())
+  email String  @unique @db.VarChar2(50)
+  posts posts[]
+}
+"
+`;
+
+exports[`introspection: relations include through an Oracle foreign key: warnings 1`] = `null`;
+
+exports[`introspection: string filters use Oracle VARCHAR2 semantics: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model teams {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar2(50)
+}
+"
+`;
+
+exports[`introspection: string filters use Oracle VARCHAR2 semantics: warnings 1`] = `null`;
+
+exports[`introspection: timestamp and decimal filters bind Oracle values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model events {
+  id          Int      @id @default(autoincrement())
+  occurred_at DateTime @db.Timestamp(6)
+  amount      Decimal  @db.Number(12, 2)
+}
+"
+`;
+
+exports[`introspection: timestamp and decimal filters bind Oracle values: warnings 1`] = `null`;

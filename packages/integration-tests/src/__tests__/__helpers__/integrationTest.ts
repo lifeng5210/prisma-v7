@@ -6,7 +6,7 @@ import path from 'path'
 import hash from 'string-hash'
 import VError, { MultiError } from 'verror'
 
-import { PrismaKb } from '../../../../adapter-kb/src'
+import { PrismaKb, PrismaKbOracle } from '../../../../adapter-kb/src'
 import { PrismaLibSql } from '../../../../adapter-libsql/src/index-node'
 import { PrismaMariaDb } from '../../../../adapter-mariadb/src'
 import { PrismaMssql } from '../../../../adapter-mssql/src'
@@ -37,6 +37,10 @@ type Scenario = {
    * Name of the test case. Influences the temp dir, snapshot, etc.
    */
   name: string
+  /**
+   * Preview features enabled only for this scenario's generated client.
+   */
+  previewFeatures?: PreviewFeature[]
   /**
    * SQL to put database into pre-test condition.
    */
@@ -94,7 +98,7 @@ type Database<Client> = {
   /**
    * At the end of _each_ test run logic
    */
-  afterEach?: (db: Client) => MaybePromise
+  afterEach?: (db: Client, ctx: Context) => MaybePromise
   /**
    * At the end of _all_ tests run logic to close the database connection.
    */
@@ -135,7 +139,7 @@ type Settings = {
 /**
  * A list of available preview features on Prisma Client.
  */
-type PreviewFeature = ''
+type PreviewFeature = '' | 'fullTextSearch'
 
 /**
  * Settings to add properties on Prisma Client.
@@ -243,6 +247,9 @@ export function runtimeIntegrationTest<Client>(input: Input<Client>) {
         case 'kingbase-mysql':
           adapter = new PrismaKb(connectionString, { schema: ctx.id })
           break
+        case 'kingbase-oracle':
+          adapter = new PrismaKbOracle(connectionString, { schema: ctx.id })
+          break
         case 'postgresql':
           adapter = new PrismaPg({ connectionString }, { schema: ctx.id })
           break
@@ -323,7 +330,7 @@ async function setupScenario(kind: string, input: Input, scenario: Scenario) {
     generator client {
       provider = "prisma-client-js"
       output   = "${ctx.fs.path()}"
-      ${renderPreviewFeatures(input.prismaClientSettings?.previewFeatures)}
+      ${renderPreviewFeatures(scenario.previewFeatures ?? input.prismaClientSettings?.previewFeatures)}
     }
 
     ${datasourceBlock}
@@ -372,7 +379,7 @@ async function teardownScenario(state: ScenarioState) {
 
   // props might be missing if test errors out before they are set.
   if (state.db) {
-    await Promise.resolve(state.input.database.afterEach?.(state.db))
+    await Promise.resolve(state.input.database.afterEach?.(state.db, state.ctx))
       .catch((e) => errors.push(e))
       .then(() => state.prisma?.$disconnect())
       .catch((e) => errors.push(e))
