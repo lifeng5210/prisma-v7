@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/engines",
-  "version": "0.0.0",
+  "version": "7.10.0-kb.1",
   "description": "Native schema-engine downloader for the Prisma Kingbase distribution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,10 +20,10 @@
     "typescript": "5.4.5"
   },
   "dependencies": {
-    "@prisma/debug": "workspace:*",
-    "@prisma-kb/engines-version": "workspace:*",
-    "@prisma/fetch-engine": "workspace:*",
-    "@prisma/get-platform": "workspace:*"
+    "@prisma/debug": "7.10.0",
+    "@prisma-kb/engines-version": "7.10.0-kb.1",
+    "@prisma/fetch-engine": "7.10.0",
+    "@prisma/get-platform": "7.10.0"
   },
   "scripts": {
     "dev": "DEV=true tsx helpers/build.ts",
