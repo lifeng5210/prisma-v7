@@ -1,8 +1,8 @@
 import path from 'node:path'
 
-import { enginesVersion } from '@prisma/engines-version'
 import { Generator, GeneratorConfig, GeneratorManifest, GeneratorOptions } from '@prisma/generator'
 import { BuiltInProvider, parseEnvValue } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines-version'
 
 import { version as clientVersion } from '../package.json'
 import { generateClient } from './generateClient'

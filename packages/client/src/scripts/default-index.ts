@@ -1,4 +1,4 @@
-import { prisma } from '@prisma/engines-version/package.json'
+import { prisma } from '@prisma-kb/engines-version/package.json'
 
 import { clientVersion } from '../runtime/utils/clientVersion'
 

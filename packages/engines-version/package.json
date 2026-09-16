@@ -1,0 +1,25 @@
+{
+  "name": "@prisma-kb/engines-version",
+  "version": "7.10.0-kb.1",
+  "description": "Engine revision metadata for the Prisma Kingbase distribution",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "Apache-2.0",
+  "author": "lifeng5210",
+  "prisma": {
+    "enginesVersion": "5b8c5395cd3894eb88907c3e1e04ad43a669927f"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
+    "directory": "packages/engines-version"
+  },
+  "homepage": "https://github.com/lifeng5210/prisma-v7",
+  "bugs": {
+    "url": "https://github.com/lifeng5210/prisma-v7/issues"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ]
+}

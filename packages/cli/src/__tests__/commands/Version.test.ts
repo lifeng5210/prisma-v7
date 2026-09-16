@@ -1,5 +1,5 @@
-import { enginesVersion } from '@prisma/engines'
 import { jestConsoleContext, jestContext } from '@prisma/get-platform'
+import { enginesVersion } from '@prisma-kb/engines'
 import { version as typeScriptVersion } from 'typescript'
 
 import packageJson from '../../../package.json'
@@ -19,7 +19,7 @@ describe('version', () => {
       Node.js              : NODEJS_VERSION
       TypeScript           : TYPESCRIPT_VERSION
       Query Compiler       : enabled
-      PSL                  : @prisma/prisma-schema-wasm CLI_VERSION.ENGINE_VERSION
+      PSL                  : @prisma-kb/prisma-schema-wasm CLI_VERSION.ENGINE_VERSION
       Schema Engine        : schema-engine-cli ENGINE_VERSION (at sanitized_path/schema-engine-TEST_PLATFORM)
       Default Engines Hash : ENGINE_VERSION
       Studio               : STUDIO_VERSION
@@ -61,8 +61,8 @@ function cleanSnapshot(str: string, versionOverride?: string): string {
   )
 
   // TODO: replace '[a-z0-9]{40}' with 'ENGINE_VERSION'.
-  // Currently, the engine version of @prisma/prisma-schema-wasm isn't necessarily the same as the enginesVersion
-  str = str.replace(/([0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.)([a-z0-9-]+)/g, 'CLI_VERSION.ENGINE_VERSION')
+  // Currently, the engine version of @prisma-kb/prisma-schema-wasm isn't necessarily the same as the enginesVersion.
+  str = str.replace(/([0-9]+\.[0-9]+\.[0-9]+-)([a-z0-9.-]+)/g, 'CLI_VERSION.ENGINE_VERSION')
 
   // Replace locally built prisma-schema-wasm and schema-engine-wasm versions linked via package.json
   str = str.replace(/link:([A-Z]:)?(\/[\w-]+)+/g, 'CLI_VERSION.ENGINE_VERSION')

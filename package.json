@@ -39,7 +39,7 @@
     "@microsoft/api-extractor": "7.52.11",
     "@octokit/graphql": "8.2.1",
     "@octokit/rest": "21.1.1",
-    "@prisma/engines": "workspace:*",
+    "@prisma-kb/engines": "workspace:*",
     "@sindresorhus/slugify": "2.2.1",
     "@size-limit/file": "11.2.0",
     "@slack/webhook": "7.0.5",

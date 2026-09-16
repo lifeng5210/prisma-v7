@@ -38,7 +38,7 @@ importers:
       '@octokit/rest':
         specifier: 21.1.1
         version: 21.1.1
-      '@prisma/engines':
+      '@prisma-kb/engines':
         specifier: workspace:*
         version: link:packages/engines
       '@sindresorhus/slugify':
@@ -443,15 +443,15 @@ importers:
 
   packages/cli:
     dependencies:
+      '@prisma-kb/engines':
+        specifier: workspace:*
+        version: link:../engines
       '@prisma/config':
         specifier: workspace:*
         version: link:../config
       '@prisma/dev':
         specifier: 0.24.17
         version: 0.24.17(typescript@5.4.5)
-      '@prisma/engines':
-        specifier: workspace:*
-        version: link:../engines
       '@prisma/studio-core':
         specifier: 0.33.0
         version: 0.33.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -712,6 +712,15 @@ importers:
       '@planetscale/database':
         specifier: 1.19.0
         version: 1.19.0
+      '@prisma-kb/engines':
+        specifier: workspace:*
+        version: link:../engines
+      '@prisma-kb/engines-version':
+        specifier: workspace:*
+        version: link:../engines-version
+      '@prisma-kb/query-compiler-wasm':
+        specifier: 7.10.0-kb.1
+        version: 7.10.0-kb.1
       '@prisma/adapter-better-sqlite3':
         specifier: workspace:*
         version: link:../adapter-better-sqlite3
@@ -763,12 +772,6 @@ importers:
       '@prisma/driver-adapter-utils':
         specifier: workspace:*
         version: link:../driver-adapter-utils
-      '@prisma/engines':
-        specifier: workspace:*
-        version: link:../engines
-      '@prisma/engines-version':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
       '@prisma/fetch-engine':
         specifier: workspace:*
         version: link:../fetch-engine
@@ -802,9 +805,6 @@ importers:
       '@prisma/param-graph-builder':
         specifier: workspace:*
         version: link:../param-graph-builder
-      '@prisma/query-compiler-wasm':
-        specifier: file:/home/lf/prisma-engines/query-compiler/query-compiler-wasm/pkg
-        version: file:../prisma-engines/query-compiler/query-compiler-wasm/pkg
       '@prisma/query-plan-executor':
         specifier: workspace:*
         version: link:../query-plan-executor
@@ -1049,6 +1049,9 @@ importers:
       '@antfu/ni':
         specifier: 0.21.12
         version: 0.21.12
+      '@prisma-kb/engines-version':
+        specifier: workspace:*
+        version: link:../engines-version
       '@prisma/client-common':
         specifier: workspace:*
         version: link:../client-common
@@ -1058,9 +1061,6 @@ importers:
       '@prisma/dmmf':
         specifier: workspace:*
         version: link:../dmmf
-      '@prisma/engines-version':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
       '@prisma/fetch-engine':
         specifier: workspace:*
         version: link:../fetch-engine
@@ -1122,6 +1122,9 @@ importers:
       '@antfu/ni':
         specifier: 0.21.12
         version: 0.21.12
+      '@prisma-kb/engines-version':
+        specifier: workspace:*
+        version: link:../engines-version
       '@prisma/client-common':
         specifier: workspace:*
         version: link:../client-common
@@ -1131,9 +1134,6 @@ importers:
       '@prisma/dmmf':
         specifier: workspace:*
         version: link:../dmmf
-      '@prisma/engines-version':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
       '@prisma/fetch-engine':
         specifier: workspace:*
         version: link:../fetch-engine
@@ -1244,12 +1244,12 @@ importers:
 
   packages/engines:
     dependencies:
+      '@prisma-kb/engines-version':
+        specifier: workspace:*
+        version: link:../engines-version
       '@prisma/debug':
         specifier: workspace:*
         version: link:../debug
-      '@prisma/engines-version':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
       '@prisma/fetch-engine':
         specifier: workspace:*
         version: link:../fetch-engine
@@ -1275,6 +1275,8 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
+
+  packages/engines-version: {}
 
   packages/fetch-engine:
     dependencies:
@@ -1385,15 +1387,15 @@ importers:
 
   packages/get-dmmf:
     dependencies:
+      '@prisma-kb/prisma-schema-wasm':
+        specifier: 7.10.0-kb.1
+        version: 7.10.0-kb.1
       '@prisma/debug':
         specifier: workspace:*
         version: link:../debug
       '@prisma/dmmf':
         specifier: workspace:*
         version: link:../dmmf
-      '@prisma/prisma-schema-wasm':
-        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
-        version: file:../prisma-engines/target/prisma-schema-wasm
       '@streamparser/json':
         specifier: 0.0.22
         version: 0.0.22
@@ -1553,6 +1555,12 @@ importers:
 
   packages/internals:
     dependencies:
+      '@prisma-kb/engines':
+        specifier: workspace:*
+        version: link:../engines
+      '@prisma-kb/prisma-schema-wasm':
+        specifier: 7.10.0-kb.1
+        version: 7.10.0-kb.1
       '@prisma/config':
         specifier: workspace:*
         version: link:../config
@@ -1565,9 +1573,6 @@ importers:
       '@prisma/driver-adapter-utils':
         specifier: workspace:*
         version: link:../driver-adapter-utils
-      '@prisma/engines':
-        specifier: workspace:*
-        version: link:../engines
       '@prisma/fetch-engine':
         specifier: workspace:*
         version: link:../fetch-engine
@@ -1583,9 +1588,6 @@ importers:
       '@prisma/get-platform':
         specifier: workspace:*
         version: link:../get-platform
-      '@prisma/prisma-schema-wasm':
-        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
-        version: file:../prisma-engines/target/prisma-schema-wasm
       '@prisma/schema-engine-wasm':
         specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
         version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
@@ -1718,6 +1720,9 @@ importers:
 
   packages/migrate:
     dependencies:
+      '@prisma-kb/engines-version':
+        specifier: workspace:*
+        version: link:../engines-version
       '@prisma/client-generator-registry':
         specifier: workspace:*
         version: link:../client-generator-registry
@@ -1730,9 +1735,6 @@ importers:
       '@prisma/driver-adapter-utils':
         specifier: workspace:*
         version: link:../driver-adapter-utils
-      '@prisma/engines-version':
-        specifier: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
-        version: 7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3
       '@prisma/generator':
         specifier: workspace:*
         version: link:../generator
@@ -1895,9 +1897,9 @@ importers:
 
   packages/schema-files-loader:
     dependencies:
-      '@prisma/prisma-schema-wasm':
-        specifier: file:/home/lf/prisma-engines/target/prisma-schema-wasm
-        version: file:../prisma-engines/target/prisma-schema-wasm
+      '@prisma-kb/prisma-schema-wasm':
+        specifier: 7.10.0-kb.1
+        version: 7.10.0-kb.1
       fs-extra:
         specifier: 11.3.0
         version: 11.3.0
@@ -3853,6 +3855,12 @@ packages:
     peerDependencies:
       prettier: '*'
 
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1':
+    resolution: {integrity: sha512-nm7l6Idc82NSr99p3NS9UQhXXST49aUfhVkl+28HG/C4hnH5ZBiUfKJa8aX07p9edZRDD73ZFyeHlWJUWzCD/g==}
+
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.1':
+    resolution: {integrity: sha512-qrkslO2mFLY4gh15yjNqPRo0WOo0ogTHU8ze8QVfyRyIIssUdJBfIonRvLb9Yl2zaogw3En43gi4eCR5rVzTGA==}
+
   '@prisma/debug@7.2.0':
     resolution: {integrity: sha512-YSGTiSlBAVJPzX4ONZmMotL+ozJwQjRmZweQNIq/ER0tQJKJynNkRB3kyvt37eOfsbMCXk3gnLF6J9OJ4QWftw==}
 
@@ -3870,12 +3878,6 @@ packages:
 
   '@prisma/ppg@1.0.1':
     resolution: {integrity: sha512-rRRXuPPerXwNWjSA3OE0e/bqXSTfsE82EsMvoiluc0fN0DizQSe3937/Tnl5+DPbxY5rdAOlYjWXG0A2wwTbKA==}
-
-  '@prisma/prisma-schema-wasm@file:../prisma-engines/target/prisma-schema-wasm':
-    resolution: {directory: ../prisma-engines/target/prisma-schema-wasm, type: directory}
-
-  '@prisma/query-compiler-wasm@file:../prisma-engines/query-compiler/query-compiler-wasm/pkg':
-    resolution: {directory: ../prisma-engines/query-compiler/query-compiler-wasm/pkg, type: directory}
 
   '@prisma/query-plan-executor@7.2.0':
     resolution: {integrity: sha512-EOZmNzcV8uJ0mae3DhTsiHgoNCuu1J9mULQpGCh62zN3PxPTd+qI9tJvk5jOst8WHKQNwJWR3b39t0XvfBB0WQ==}
@@ -5859,6 +5861,7 @@ packages:
   eslint@9.22.0:
     resolution: {integrity: sha512-9V/QURhsRN40xuHXWjV64yvrzMjcz7ZyNoF2jJFmy9j/SLk0u1OLSZgXi28MrXjymnjEGSR80WCdab3RGMDveQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -10840,6 +10843,10 @@ snapshots:
       make-synchronized: 0.4.2
       prettier: 3.5.3
 
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1': {}
+
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.1': {}
+
   '@prisma/debug@7.2.0': {}
 
   '@prisma/dev@0.24.17(typescript@5.4.5)':
@@ -10878,10 +10885,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  '@prisma/prisma-schema-wasm@file:../prisma-engines/target/prisma-schema-wasm': {}
-
-  '@prisma/query-compiler-wasm@file:../prisma-engines/query-compiler/query-compiler-wasm/pkg': {}
 
   '@prisma/query-plan-executor@7.2.0': {}
 

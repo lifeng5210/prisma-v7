@@ -1,6 +1,6 @@
-import { enginesVersion } from '@prisma/engines-version'
 import { Generator, GeneratorConfig, GeneratorManifest, GeneratorOptions } from '@prisma/generator'
 import { parseEnvValue } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines-version'
 import { getTsconfig } from 'get-tsconfig'
 import { bold, dim, green } from 'kleur/colors'
 

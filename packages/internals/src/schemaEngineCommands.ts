@@ -47,8 +47,10 @@ export interface ConnectionError {
 }
 
 function parseJsonFromStderr(stderr: string): SchemaEngineLogLine[] {
-  // split by new line
-  const lines = stderr.split(/\r?\n/).slice(1) // Remove first element
+  // Schema Engine emits one JSON log object per line. Older binaries prefixed
+  // the response with an empty line, but newer binaries can put an ERROR log
+  // directly on the first line, so only discard empty lines.
+  const lines = stderr.split(/\r?\n/).filter((line) => line.trim() !== '')
   const logs: any = []
 
   for (const line of lines) {

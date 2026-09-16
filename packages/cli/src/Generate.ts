@@ -1,6 +1,5 @@
 import { defaultRegistry } from '@prisma/client-generator-registry'
 import type { PrismaConfigInternal } from '@prisma/config'
-import { enginesVersion } from '@prisma/engines'
 import { SqlQueryOutput } from '@prisma/generator'
 import {
   arg,
@@ -20,6 +19,7 @@ import {
   type PrismaConfigWithDatasource,
   validatePrismaConfigWithDatasource,
 } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines'
 import fs from 'fs'
 import { bold, dim, green, red, yellow } from 'kleur/colors'
 import logUpdate from 'log-update'

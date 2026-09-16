@@ -26,7 +26,7 @@ const cliLifecyclePlugin: esbuild.Plugin = {
       // the schema Wasm packages are dependencies of @prisma/internals, so we resolve them from there
       const internalsPath = path.join(__dirname, '..', '..', 'internals')
 
-      const prismaWasmFile = require.resolve('@prisma/prisma-schema-wasm/src/prisma_schema_build_bg.wasm', {
+      const prismaWasmFile = require.resolve('@prisma-kb/prisma-schema-wasm/src/prisma_schema_build_bg.wasm', {
         paths: [internalsPath],
       })
       await fs.promises.copyFile(prismaWasmFile, './build/prisma_schema_build_bg.wasm')
@@ -68,10 +68,13 @@ async function copyClientWasmRuntime() {
         await fs.promises.copyFile(path.join(clientRuntimePath, file), `./build/${file}`)
       }
 
-      // @prisma/query-compiler-wasm is a dependency of @prisma/client, so we resolve it from there
-      const wasmFilePath = require.resolve(`@prisma/query-compiler-wasm/${provider}/query_compiler_${build}_bg.wasm`, {
-        paths: [clientPath],
-      })
+      // @prisma-kb/query-compiler-wasm is a dependency of @prisma/client, so we resolve it from there
+      const wasmFilePath = require.resolve(
+        `@prisma-kb/query-compiler-wasm/${provider}/query_compiler_${build}_bg.wasm`,
+        {
+          paths: [clientPath],
+        },
+      )
 
       await fs.promises.copyFile(wasmFilePath, `./build/${baseName}.wasm`)
     }

@@ -1,7 +1,6 @@
 import path from 'node:path'
 
 import type { PrismaConfigInternal } from '@prisma/config'
-import { enginesVersion } from '@prisma/engines'
 import {
   arg,
   BinaryType,
@@ -17,6 +16,7 @@ import {
   resolveEngine,
   wasm,
 } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines'
 import { bold, dim, red } from 'kleur/colors'
 import os from 'os'
 
@@ -90,7 +90,7 @@ export class Version implements Command {
       ['Node.js', process.version],
       ['TypeScript', typescriptVersion],
       ['Query Compiler', 'enabled'],
-      ['PSL', `@prisma/prisma-schema-wasm ${wasm.prismaSchemaWasmVersion}`],
+      ['PSL', `@prisma-kb/prisma-schema-wasm ${wasm.prismaSchemaWasmVersion}`],
       ...schemaEngineRows,
 
       ['Default Engines Hash', enginesVersion],

@@ -1,9 +1,11 @@
 import Debug from '@prisma/debug'
-import { enginesVersion } from '@prisma/engines-version'
 import { BinaryDownloadConfiguration, BinaryType, download } from '@prisma/fetch-engine'
 import type { BinaryTarget } from '@prisma/get-platform'
+import { enginesVersion } from '@prisma-kb/engines-version'
 import fs from 'fs'
 import path from 'path'
+
+import { configureEnginesMirror } from '../mirror'
 
 const debug = Debug('prisma:download')
 
@@ -13,6 +15,8 @@ const lockFile = path.join(baseDir, 'download-lock')
 
 let createdLockFile = false
 async function main() {
+  configureEnginesMirror()
+
   if (fs.existsSync(lockFile) && parseInt(fs.readFileSync(lockFile, 'utf-8'), 10) > Date.now() - 20_000) {
     debug(`Lock file already exists, so we're skipping the download of the prisma binaries`)
   } else {

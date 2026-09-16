@@ -1,9 +1,11 @@
 import { Debug } from '@prisma/debug'
-import { enginesVersion } from '@prisma/engines-version'
 import type { BinaryPaths, DownloadOptions } from '@prisma/fetch-engine'
 import { BinaryType } from '@prisma/fetch-engine'
 import type { BinaryTarget } from '@prisma/get-platform'
+import { enginesVersion } from '@prisma-kb/engines-version'
 import path from 'path'
+
+import { configureEnginesMirror } from './mirror'
 
 const debug = Debug('prisma:engines')
 export function getEnginesPath() {
@@ -15,6 +17,8 @@ type EnsureSomeBinariesExistInput = {
 }
 
 export async function ensureNeededBinariesExist({ download }: EnsureSomeBinariesExistInput) {
+  configureEnginesMirror()
+
   const binaryDir = path.join(__dirname, '../')
 
   const binaries = {
@@ -36,4 +40,4 @@ export async function ensureNeededBinariesExist({ download }: EnsureSomeBinaries
   })
 }
 
-export { enginesVersion } from '@prisma/engines-version'
+export { enginesVersion } from '@prisma-kb/engines-version'

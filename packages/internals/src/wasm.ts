@@ -1,5 +1,5 @@
-import prismaSchemaWasm from '@prisma/prisma-schema-wasm'
 import type { SchemaEngine as SchemaEngineWasm } from '@prisma/schema-engine-wasm'
+import prismaSchemaWasm from '@prisma-kb/prisma-schema-wasm'
 
 import { WasmPanicRegistry } from './WasmPanicRegistry'
 
@@ -23,5 +23,5 @@ const { dependencies } = require('../package.json')
 export { prismaSchemaWasm, SchemaEngineWasm }
 
 // e.g. 4.3.0-18.a39215673171b87177b86233206a5d65f2558857
-export const prismaSchemaWasmVersion: string = dependencies['@prisma/prisma-schema-wasm']
+export const prismaSchemaWasmVersion: string = dependencies['@prisma-kb/prisma-schema-wasm']
 export const schemaEngineWasmVersion: string = dependencies['@prisma/schema-engine-wasm']

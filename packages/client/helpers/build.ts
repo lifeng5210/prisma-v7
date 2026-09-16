@@ -7,7 +7,7 @@ import { fillPlugin, smallBuffer, smallDecimal } from '../../../helpers/compile/
 import { nodeProtocolPlugin } from '../../../helpers/compile/plugins/nodeProtocolPlugin'
 import { noSideEffectsPlugin } from '../../../helpers/compile/plugins/noSideEffectsPlugin'
 
-const wasmQueryCompilerDir = path.dirname(require.resolve('@prisma/query-compiler-wasm/package.json'))
+const wasmQueryCompilerDir = path.dirname(require.resolve('@prisma-kb/query-compiler-wasm/package.json'))
 const fillPluginDir = path.join('..', '..', 'helpers', 'compile', 'plugins', 'fill-plugin')
 const functionPolyfillPath = path.join(fillPluginDir, 'fillers', 'function.ts')
 const runtimeDir = path.resolve(__dirname, '..', 'runtime')
@@ -79,7 +79,7 @@ function wasmBindgenRuntimeConfig(
   return {
     format,
     name: `query_compiler_${buildType}_bg.${provider}`,
-    entryPoints: [`@prisma/query-compiler-wasm/${provider}/query_compiler_${buildType}_bg.js`],
+    entryPoints: [`@prisma-kb/query-compiler-wasm/${provider}/query_compiler_${buildType}_bg.js`],
     outfile: `runtime/query_compiler_${buildType}_bg.${provider}`,
     outExtension: getOutExtension(format),
     minify: shouldMinify,
