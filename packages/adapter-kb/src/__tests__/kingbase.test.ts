@@ -1,4 +1,4 @@
-import { ColumnTypeEnum, type SqlQuery } from '@prisma/driver-adapter-utils'
+import { ColumnTypeEnum, type SqlQuery } from '@prisma-kb/driver-adapter-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { PrismaKbAdapterFactory, rewriteQuestionMarkPlaceholders, splitStatements } from '../kingbase'

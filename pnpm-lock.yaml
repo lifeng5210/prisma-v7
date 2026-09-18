@@ -252,16 +252,12 @@ importers:
 
   packages/adapter-kb:
     dependencies:
-      '@prisma/driver-adapter-utils':
+      '@prisma-kb/driver-adapter-utils':
         specifier: workspace:*
-        version: link:../driver-adapter-utils
+        version: link:../driver-adapter-utils-kb
       kingbasedb:
         specifier: 8.22.0
         version: 8.22.0
-    devDependencies:
-      '@prisma/debug':
-        specifier: workspace:*
-        version: link:../debug
 
   packages/adapter-libsql:
     dependencies:
@@ -712,6 +708,9 @@ importers:
       '@planetscale/database':
         specifier: 1.19.0
         version: 1.19.0
+      '@prisma-kb/adapter-kb':
+        specifier: workspace:*
+        version: link:../adapter-kb
       '@prisma-kb/engines':
         specifier: workspace:*
         version: link:../engines
@@ -727,9 +726,6 @@ importers:
       '@prisma/adapter-d1':
         specifier: workspace:*
         version: link:../adapter-d1
-      '@prisma/adapter-kb':
-        specifier: workspace:*
-        version: link:../adapter-kb
       '@prisma/adapter-libsql':
         specifier: workspace:*
         version: link:../adapter-libsql
@@ -1241,6 +1237,12 @@ importers:
       '@prisma/debug':
         specifier: workspace:*
         version: link:../debug
+
+  packages/driver-adapter-utils-kb:
+    dependencies:
+      '@prisma/driver-adapter-utils':
+        specifier: 7.10.0
+        version: 7.10.0
 
   packages/engines:
     dependencies:
@@ -1867,9 +1869,12 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.1.0
         version: 2.1.0(@opentelemetry/api@1.9.0)
-      '@prisma/adapter-kb':
+      '@prisma-kb/adapter-kb':
         specifier: workspace:*
         version: link:../adapter-kb
+      '@prisma-kb/driver-adapter-utils':
+        specifier: workspace:*
+        version: link:../driver-adapter-utils-kb
       '@prisma/adapter-mariadb':
         specifier: workspace:*
         version: link:../adapter-mariadb
@@ -1882,9 +1887,6 @@ importers:
       '@prisma/client-engine-runtime':
         specifier: workspace:*
         version: link:../client-engine-runtime
-      '@prisma/driver-adapter-utils':
-        specifier: workspace:*
-        version: link:../driver-adapter-utils
       hono:
         specifier: ^4.12.23
         version: 4.12.23
@@ -3872,6 +3874,9 @@ packages:
 
   '@prisma/dev@0.24.17':
     resolution: {integrity: sha512-UvdZzmpFwknnfreh6Jije84ekkYGPYEJhXG1tFzCsCfQyzJifrOo38eZc0qajzvaC6OLUOrN9ML5XfCnEZL9DA==}
+
+  '@prisma/driver-adapter-utils@7.10.0':
+    resolution: {integrity: sha512-u8zkcRLlaryO652T4qavBg0HmzNW5tSKdsCn6hc1PhWAp/J6k0vrxLuUs+b9o+HcjsK7Dfa01o4OFSn0frauJA==}
 
   '@prisma/engines-version@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3':
     resolution: {integrity: sha512-8OJ6RuZTZ06eFUOtBwxVmv8XMmOW6HWN5F+uxUbZkGxR0Bfab1dfAdXaHPmR5mb59E+fmUo8IOzXlbLY1SClbw==}
@@ -10884,6 +10889,10 @@ snapshots:
       zeptomatch: 2.1.0
     transitivePeerDependencies:
       - typescript
+
+  '@prisma/driver-adapter-utils@7.10.0':
+    dependencies:
+      '@prisma/debug': 7.10.0
 
   '@prisma/engines-version@7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3': {}
 

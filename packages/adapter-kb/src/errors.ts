@@ -1,4 +1,4 @@
-import type { Error as DriverAdapterErrorObject, MappedError } from '@prisma/driver-adapter-utils'
+import type { Error as DriverAdapterErrorObject, MappedError } from '@prisma-kb/driver-adapter-utils'
 
 type KingbaseError = {
   code?: string

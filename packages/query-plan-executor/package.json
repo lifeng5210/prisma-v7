@@ -17,11 +17,11 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@prisma/adapter-pg": "workspace:*",
-    "@prisma/adapter-kb": "workspace:*",
+    "@prisma-kb/adapter-kb": "workspace:*",
     "@prisma/adapter-mariadb": "workspace:*",
     "@prisma/adapter-mssql": "workspace:*",
     "@prisma/client-engine-runtime": "workspace:*",
-    "@prisma/driver-adapter-utils": "workspace:*",
+    "@prisma-kb/driver-adapter-utils": "workspace:*",
     "hono": "^4.12.23",
     "temporal-polyfill": "0.3.0",
     "zod": "4.1.3"

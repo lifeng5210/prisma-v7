@@ -1,5 +1,5 @@
-import { PrismaKb, PrismaKbOracle } from '@prisma/adapter-kb'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
 import {
   ColumnTypeEnum,
   type SqlDriverAdapter,
@@ -7,7 +7,7 @@ import {
   type SqlQuery,
   type SqlResultSet,
   type Transaction,
-} from '@prisma/driver-adapter-utils'
+} from '@prisma-kb/driver-adapter-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { createAdapter } from './adapter'
@@ -20,12 +20,12 @@ vi.mock('@prisma/adapter-pg', () => {
   }
 })
 
-vi.mock('@prisma/adapter-kb', () => ({
+vi.mock('@prisma-kb/adapter-kb', () => ({
   PrismaKb: vi.fn().mockImplementation(function () {
-    return { adapterName: '@prisma/adapter-kb', provider: 'kingbase-mysql' }
+    return { adapterName: '@prisma-kb/adapter-kb', provider: 'kingbase-mysql' }
   }),
   PrismaKbOracle: vi.fn().mockImplementation(function () {
-    return { adapterName: '@prisma/adapter-kb', provider: 'kingbase-oracle' }
+    return { adapterName: '@prisma-kb/adapter-kb', provider: 'kingbase-oracle' }
   }),
 }))
 
@@ -59,8 +59,8 @@ describe('createAdapter', () => {
     const mysqlAdapter = createAdapter('kingbase-mysql://user:pass@localhost:54321/db')
     const oracleAdapter = createAdapter('kingbase-oracle://user:pass@localhost:54325/db')
 
-    expect(mysqlAdapter.adapterName).toBe('@prisma/adapter-kb')
-    expect(oracleAdapter.adapterName).toBe('@prisma/adapter-kb')
+    expect(mysqlAdapter.adapterName).toBe('@prisma-kb/adapter-kb')
+    expect(oracleAdapter.adapterName).toBe('@prisma-kb/adapter-kb')
     expect(PrismaKb).toHaveBeenCalledWith('kingbase-mysql://user:pass@localhost:54321/db')
     expect(PrismaKbOracle).toHaveBeenCalledWith('kingbase-oracle://user:pass@localhost:54325/db')
   })

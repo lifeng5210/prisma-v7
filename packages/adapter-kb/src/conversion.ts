@@ -1,4 +1,4 @@
-import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma/driver-adapter-utils'
+import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 
 /**
  * OIDs shared with PostgreSQL. The values come from postgres-types' generated

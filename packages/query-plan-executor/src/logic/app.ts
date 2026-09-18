@@ -11,7 +11,7 @@ import {
   TransactionManager,
   TransactionOptions,
 } from '@prisma/client-engine-runtime'
-import { ConnectionInfo, Provider, SqlDriverAdapter } from '@prisma/driver-adapter-utils'
+import { ConnectionInfo, Provider, SqlDriverAdapter } from '@prisma-kb/driver-adapter-utils'
 
 import * as log from '../log/facade'
 import { Options } from '../options'

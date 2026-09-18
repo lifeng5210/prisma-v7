@@ -1,4 +1,4 @@
-import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma/driver-adapter-utils'
+import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 
 /** PostgreSQL wire-protocol OIDs exposed by Kingbase Oracle mode. */
 const PostgresTypeId = {

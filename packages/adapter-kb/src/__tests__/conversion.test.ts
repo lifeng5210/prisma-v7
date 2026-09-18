@@ -1,4 +1,4 @@
-import { ColumnTypeEnum } from '@prisma/driver-adapter-utils'
+import { ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 import { describe, expect, test } from 'vitest'
 
 import { fieldToColumnType, mapArg, mapRow } from '../conversion'

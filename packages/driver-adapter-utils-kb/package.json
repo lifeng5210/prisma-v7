@@ -1,7 +1,7 @@
 {
-  "name": "@prisma-kb/adapter-kb",
+  "name": "@prisma-kb/driver-adapter-utils",
   "version": "7.10.0-kb.1",
-  "description": "Prisma's driver adapter for KingbaseES",
+  "description": "Driver adapter utilities with Prisma Kingbase provider types.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -20,27 +20,20 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lifeng5210/prisma-v7.git",
-    "directory": "packages/adapter-kb"
+    "directory": "packages/driver-adapter-utils-kb"
   },
+  "license": "Apache-2.0",
+  "author": "lifeng5210",
+  "sideEffects": false,
   "scripts": {
-    "dev": "DEV=true tsx helpers/build.ts",
     "build": "tsx helpers/build.ts",
-    "test": "vitest run",
     "prepublishOnly": "pnpm run build"
   },
   "files": [
     "dist",
     "README.md"
   ],
-  "keywords": [
-    "kingbase",
-    "prisma",
-    "driver-adapter"
-  ],
-  "license": "Apache-2.0",
-  "sideEffects": false,
   "dependencies": {
-    "@prisma-kb/driver-adapter-utils": "workspace:*",
-    "kingbasedb": "8.22.0"
+    "@prisma/driver-adapter-utils": "7.10.0"
   }
 }

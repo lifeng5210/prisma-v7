@@ -563,7 +563,7 @@ async function connectKingbaseAdmin(
   databaseUrl: string,
   provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
 ) {
-  const { PrismaKb, PrismaKbOracle } = require('@prisma/adapter-kb') as typeof import('@prisma/adapter-kb')
+  const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
   const adminUrl = getKingbaseAdminUrl(databaseUrl)
 
   return provider === Providers.KINGBASE_MYSQL

@@ -177,7 +177,7 @@
     "@planetscale/database": "1.19.0",
     "@prisma/adapter-better-sqlite3": "workspace:*",
     "@prisma/adapter-d1": "workspace:*",
-    "@prisma/adapter-kb": "workspace:*",
+    "@prisma-kb/adapter-kb": "workspace:*",
     "@prisma/adapter-libsql": "workspace:*",
     "@prisma/adapter-mariadb": "workspace:*",
     "@prisma/adapter-mssql": "workspace:*",

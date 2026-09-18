@@ -1,8 +1,8 @@
-import { PrismaKb, PrismaKbOracle } from '@prisma/adapter-kb'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import { PrismaMssql } from '@prisma/adapter-mssql'
 import { PrismaPg } from '@prisma/adapter-pg'
-import type { SqlDriverAdapter, SqlDriverAdapterFactory, Transaction } from '@prisma/driver-adapter-utils'
+import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+import type { SqlDriverAdapter, SqlDriverAdapterFactory, Transaction } from '@prisma-kb/driver-adapter-utils'
 
 export function createAdapter(url: string, supportedFactories: Factory[] = defaultFactories): SqlDriverAdapterFactory {
   const allSupportedProtocols = supportedFactories.flatMap((factory) => factory.protocols)

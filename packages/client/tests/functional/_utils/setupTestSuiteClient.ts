@@ -271,7 +271,7 @@ export function setupTestSuiteClientDriverAdapter({
   }
 
   if (driverAdapter === AdapterProviders.JS_KB || driverAdapter === AdapterProviders.JS_KB_ORACLE) {
-    const { PrismaKb, PrismaKbOracle } = require('@prisma/adapter-kb') as typeof import('@prisma/adapter-kb')
+    const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
     const schema = new URL(datasourceInfo.databaseUrl).searchParams.get('schema')
 
     if (!schema) {

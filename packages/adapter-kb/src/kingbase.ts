@@ -8,8 +8,8 @@ import type {
   SqlResultSet,
   Transaction,
   TransactionOptions,
-} from '@prisma/driver-adapter-utils'
-import { Debug, DriverAdapterError } from '@prisma/driver-adapter-utils'
+} from '@prisma-kb/driver-adapter-utils'
+import { Debug, DriverAdapterError } from '@prisma-kb/driver-adapter-utils'
 // kingbasedb is a pg-compatible driver, but does not currently publish a
 // stable TypeScript module declaration. Keep the runtime dependency isolated
 // behind the small structural interfaces used by this adapter.

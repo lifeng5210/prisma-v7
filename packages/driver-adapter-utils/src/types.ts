@@ -202,7 +202,7 @@ export type ConnectionInfo = {
 
 export type Provider = 'mysql' | 'postgres' | 'sqlite' | 'sqlserver' | 'kingbase-mysql' | 'kingbase-oracle'
 
-// Current list of official Prisma adapters
+// Current list of supported adapters in this distribution.
 // This list might get outdated over time.
 // It's only used for auto-completion and tests.
 const officialPrismaAdapters = [
@@ -211,7 +211,7 @@ const officialPrismaAdapters = [
   '@prisma/adapter-libsql',
   '@prisma/adapter-better-sqlite3',
   '@prisma/adapter-d1',
-  '@prisma/adapter-kb',
+  '@prisma-kb/adapter-kb',
   '@prisma/adapter-pg',
   '@prisma/adapter-mssql',
   '@prisma/adapter-mariadb',
