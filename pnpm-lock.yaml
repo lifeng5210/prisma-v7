@@ -411,7 +411,7 @@ importers:
       pg:
         specifier: 8.14.1
         version: 8.14.1
-      prisma:
+      prisma-kb:
         specifier: workspace:*
         version: link:../cli
     devDependencies:

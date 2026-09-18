@@ -47,15 +47,16 @@ describe('getGlobalLocalVersionMismatchWarning', () => {
     expect(result).toBeNull()
   })
 
-  test('warns when only local prisma differs from the global CLI', async () => {
+  test('warns when only local prisma-kb differs from the global CLI', async () => {
     const result = await buildWarning({
-      getInstalledPackageVersion: (packageName) => Promise.resolve(packageName === 'prisma' ? '7.4.0' : GLOBAL_VERSION),
+      getInstalledPackageVersion: (packageName) =>
+        Promise.resolve(packageName === 'prisma-kb' ? '7.4.0' : GLOBAL_VERSION),
     })
 
-    expect(result).toContain('prisma@7.5.0')
-    expect(result).toContain('prisma@7.4.0')
+    expect(result).toContain('prisma-kb@7.5.0')
+    expect(result).toContain('prisma-kb@7.4.0')
     expect(result).not.toContain('@prisma-kb/client@7.4.0')
-    expect(result).toContain('npx prisma generate')
+    expect(result).toContain('npx prisma-kb generate')
   })
 
   test('warns when only local @prisma-kb/client differs from the global CLI', async () => {
@@ -64,17 +65,17 @@ describe('getGlobalLocalVersionMismatchWarning', () => {
         Promise.resolve(packageName === '@prisma-kb/client' ? '7.4.0' : GLOBAL_VERSION),
     })
 
-    expect(result).toContain('prisma@7.5.0')
+    expect(result).toContain('prisma-kb@7.5.0')
     expect(result).toContain('@prisma-kb/client@7.4.0')
-    expect(result).not.toContain('prisma@7.4.0')
+    expect(result).not.toContain('prisma-kb@7.4.0')
   })
 
   test('warns about both local packages when both differ from the global CLI', async () => {
     const result = await buildWarning({
-      getInstalledPackageVersion: (packageName) => Promise.resolve(packageName === 'prisma' ? '7.4.0' : '7.3.0'),
+      getInstalledPackageVersion: (packageName) => Promise.resolve(packageName === 'prisma-kb' ? '7.4.0' : '7.3.0'),
     })
 
-    expect(result).toContain('prisma@7.4.0')
+    expect(result).toContain('prisma-kb@7.4.0')
     expect(result).toContain('@prisma-kb/client@7.3.0')
   })
 
@@ -101,21 +102,21 @@ describe('getInstalledPackageVersionFromNodeModules', () => {
     await fs.promises.rm(tempDir, { force: true, recursive: true })
   })
 
-  test('reads local prisma and @prisma-kb/client versions from an ancestor node_modules directory', async () => {
+  test('reads local prisma-kb and @prisma-kb/client versions from an ancestor node_modules directory', async () => {
     const schemaRootDir = path.join(tempDir, 'prisma')
     await fs.promises.mkdir(schemaRootDir)
-    await writePackageVersion('prisma', '7.4.0')
+    await writePackageVersion('prisma-kb', '7.4.0')
     await writePackageVersion('@prisma-kb/client', '7.3.0')
 
-    await expect(getInstalledPackageVersionFromNodeModules('prisma', schemaRootDir)).resolves.toBe('7.4.0')
+    await expect(getInstalledPackageVersionFromNodeModules('prisma-kb', schemaRootDir)).resolves.toBe('7.4.0')
     await expect(getInstalledPackageVersionFromNodeModules('@prisma-kb/client', schemaRootDir)).resolves.toBe('7.3.0')
   })
 
   test('returns null when the package cannot be resolved', async () => {
-    await expect(getInstalledPackageVersionFromNodeModules('prisma', tempDir)).resolves.toBeNull()
+    await expect(getInstalledPackageVersionFromNodeModules('prisma-kb', tempDir)).resolves.toBeNull()
   })
 
-  async function writePackageVersion(packageName: 'prisma' | '@prisma-kb/client', version: string): Promise<void> {
+  async function writePackageVersion(packageName: 'prisma-kb' | '@prisma-kb/client', version: string): Promise<void> {
     const packageDir = path.join(tempDir, 'node_modules', ...packageName.split('/'))
     await fs.promises.mkdir(packageDir, { recursive: true })
     await fs.promises.writeFile(path.join(packageDir, 'package.json'), JSON.stringify({ version }), 'utf-8')

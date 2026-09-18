@@ -7,9 +7,9 @@ void executeSteps({
     // We use pnpm because Bun has issues with installing transitive tarball dependencies
     await $`pnpm install`
 
-    // Running `bunx prisma` or `bun run prisma` won't cut it.
+    // Running `bunx prisma-kb` or `bun run prisma-kb` won't cut it.
     // See: https://github.com/oven-sh/bun/issues/3417#issuecomment-1927842420.
-    await $`bun --bun run prisma init --debug`
+    await $`bun --bun run prisma-kb init --debug`
   },
   test: async () => {
     await $`bun test`

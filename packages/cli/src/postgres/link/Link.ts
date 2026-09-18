@@ -136,7 +136,7 @@ Link a local project to a Prisma Postgres database.
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma postgres link [options]
+  ${dim('$')} prisma-kb postgres link [options]
 
 ${bold('Options')}
 
@@ -148,10 +148,10 @@ ${bold('Options')}
 ${bold('Examples')}
 
   Interactive (opens browser, lets you pick project & database)
-  ${dim('$')} prisma postgres link
+  ${dim('$')} prisma-kb postgres link
 
   Non-interactive with explicit credentials
-  ${dim('$')} prisma postgres link --api-key "<your-api-key>" --database "db_..."
+  ${dim('$')} prisma-kb postgres link --api-key "<your-api-key>" --database "db_..."
 `)
 
   public async parse(argv: string[], _config: PrismaConfigInternal, baseDir: string): Promise<string | Error> {

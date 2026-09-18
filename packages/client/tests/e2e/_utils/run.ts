@@ -146,7 +146,6 @@ async function main() {
   const dockerVolumeOptions = process.platform === 'linux' ? ':z' : ''
   const dockerVolume = (source: string, target: string) => `${source}:${target}${dockerVolumeOptions}`
   const dockerVolumes = [
-    dockerVolume(`${prismaTmpDir}/prisma-0.0.0.tgz`, '/tmp/prisma-0.0.0.tgz'), // hardcoded because folder doesn't match name
     ...localPackages.map(({ tarballName }) => dockerVolume(`${prismaTmpDir}/${tarballName}`, `/tmp/${tarballName}`)),
     dockerVolume(path.join(monorepoRoot, 'packages', 'engines'), '/engines'),
     dockerVolume(path.join(monorepoRoot, 'packages', 'client'), '/client'),

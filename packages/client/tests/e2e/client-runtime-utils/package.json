@@ -5,12 +5,11 @@
   "scripts": {},
   "dependencies": {
     "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",
-    "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",
     "@prisma/client-runtime-utils": "/tmp/prisma-client-runtime-utils-0.0.0.tgz"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",
     "@types/node": "18.19.76",
-    "prisma": "/tmp/prisma-0.0.0.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
   }
 }

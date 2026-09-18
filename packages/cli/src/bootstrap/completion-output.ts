@@ -60,9 +60,9 @@ export function formatBootstrapOutput(opts: {
   if (opts.pendingDepsInstall) {
     lines.push(bold('Next steps:'))
     lines.push(
-      `  1. Install ${bold('@prisma-kb/client')}, ${bold('dotenv')}, and ${bold('prisma')} with your package manager`,
+      `  1. Install ${bold('@prisma-kb/client')}, ${bold('dotenv')}, and ${bold('prisma-kb')} with your package manager`,
     )
-    lines.push(`  2. Re-run ${green('npx prisma@latest bootstrap')} to finish setup`)
+    lines.push(`  2. Re-run ${green('npx prisma-kb@latest bootstrap')} to finish setup`)
     lines.push('')
     return lines.join('\n')
   }
@@ -75,17 +75,17 @@ export function formatBootstrapOutput(opts: {
     lines.push(
       `  1. Start querying: ${dim('https://www.prisma.io/docs/prisma-orm/quickstart/prisma-postgres#7-instantiate-prisma-client')}`,
     )
-    lines.push(`  2. Run ${green(getCommandWithExecutor('prisma studio'))} to view your data in the browser`)
+    lines.push(`  2. Run ${green(getCommandWithExecutor('prisma-kb studio'))} to view your data in the browser`)
   } else if (opts.hasModels) {
-    lines.push(`  1. Run ${green(getCommandWithExecutor('prisma generate'))} to generate the Prisma Client`)
+    lines.push(`  1. Run ${green(getCommandWithExecutor('prisma-kb generate'))} to generate the Prisma Client`)
     lines.push(
       `  2. Start querying: ${dim('https://www.prisma.io/docs/prisma-orm/quickstart/prisma-postgres#7-instantiate-prisma-client')}`,
     )
-    lines.push(`  3. Run ${green(getCommandWithExecutor('prisma studio'))} to view your data in the browser`)
+    lines.push(`  3. Run ${green(getCommandWithExecutor('prisma-kb studio'))} to view your data in the browser`)
   } else {
     lines.push(`  1. Define your data model in ${green('prisma/schema.prisma')}`)
-    lines.push(`  2. Run ${green(getCommandWithExecutor('prisma migrate dev'))} to create the database tables`)
-    lines.push(`  3. Run ${green(getCommandWithExecutor('prisma studio'))} to view your data in the browser`)
+    lines.push(`  2. Run ${green(getCommandWithExecutor('prisma-kb migrate dev'))} to create the database tables`)
+    lines.push(`  3. Run ${green(getCommandWithExecutor('prisma-kb studio'))} to view your data in the browser`)
   }
 
   lines.push('')

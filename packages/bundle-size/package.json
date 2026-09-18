@@ -22,7 +22,7 @@
     "@prisma-kb/client": "workspace:*",
     "@prisma/client-runtime-utils": "workspace:*",
     "pg": "8.14.1",
-    "prisma": "workspace:*"
+    "prisma-kb": "workspace:*"
   },
   "devDependencies": {
     "wrangler": "4.45.0"

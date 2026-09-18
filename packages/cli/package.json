@@ -1,7 +1,7 @@
 {
-  "version": "0.0.0",
-  "name": "prisma",
-  "description": "Prisma is an open-source database toolkit. It includes a JavaScript/TypeScript ORM for Node.js, migrations and a modern GUI to view and edit the data in your database. You can use Prisma in new projects or add it to an existing one.",
+  "version": "7.10.0-kb.1",
+  "name": "prisma-kb",
+  "description": "Prisma CLI distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
     "CLI",
     "ORM",
@@ -31,12 +31,12 @@
   "main": "build/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://www.prisma.io",
+  "homepage": "https://github.com/lifeng5210/prisma-v7",
   "author": "Tim Suchanek <suchanek@prisma.io>",
-  "bugs": "https://github.com/prisma/prisma/issues",
+  "bugs": "https://github.com/lifeng5210/prisma-v7/issues",
   "license": "Apache-2.0",
   "engines": {
     "node": "^20.19 || ^22.12 || >=24.0"
@@ -70,7 +70,10 @@
     ]
   },
   "bin": {
-    "prisma": "build/index.js"
+    "prisma-kb": "build/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "types": "./dist/cli/src/types.d.ts",
   "exports": {
@@ -171,7 +174,7 @@
     "zod": "3.24.2"
   },
   "scripts": {
-    "prisma": "tsx src/bin.ts",
+    "prisma-kb": "tsx src/bin.ts",
     "platform": "tsx src/bin.ts platform --early-access",
     "pm": "tsx src/bin.ts platform --early-access",
     "dev": "DEV=true tsx helpers/build.ts",

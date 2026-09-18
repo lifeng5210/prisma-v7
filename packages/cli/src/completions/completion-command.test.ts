@@ -47,7 +47,7 @@ describe('completion command', () => {
 
     expect(result).toBe('')
     expect(output).toHaveLength(1)
-    expect(output[0]).toContain('prisma complete -- $args[2..-1] "$lastArg"')
+    expect(output[0]).toContain('prisma-kb complete -- $args[2..-1] "$lastArg"')
     expect(output[0]).toContain('complete -c prisma')
   })
 

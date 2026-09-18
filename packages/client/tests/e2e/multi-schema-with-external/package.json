@@ -13,7 +13,7 @@
     "@prisma/config": "/tmp/prisma-config-0.0.0.tgz",
     "@types/jest": "29.5.12",
     "@types/node": "~20.19.0",
-    "prisma": "/tmp/prisma-0.0.0.tgz",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
   }
 }

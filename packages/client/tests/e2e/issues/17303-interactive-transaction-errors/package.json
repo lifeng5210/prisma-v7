@@ -14,7 +14,7 @@
     "@types/node": "~20.19.0",
     "@types/pg": "8.11.0",
     "expect-type": "0.19.0",
-    "prisma": "/tmp/prisma-0.0.0.tgz",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
   }
 }

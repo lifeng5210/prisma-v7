@@ -8,7 +8,7 @@ exports[`update available message update available dev tag - major 1`] = `
 │  https://pris.ly/d/major-version-upgrade                │
 │                                                         │
 │  Run the following to update                            │
-│    npm i --save-dev prisma@dev                          │
+│    npm i --save-dev prisma-kb@dev                       │
 │    npm i @prisma-kb/client@dev                          │
 └─────────────────────────────────────────────────────────┘"
 `;
@@ -17,7 +17,7 @@ exports[`update available message update available dev tag - minor 1`] = `
 "┌─────────────────────────────────────────────────────────┐
 │  Update available 2.6.1-dev.18 -> 2.16.0-dev.8          │
 │  Run the following to update                            │
-│    npm i --save-dev prisma@dev                          │
+│    npm i --save-dev prisma-kb@dev                       │
 │    npm i @prisma-kb/client@dev                          │
 └─────────────────────────────────────────────────────────┘"
 `;
@@ -30,7 +30,7 @@ exports[`update available message update available latest tag - major 1`] = `
 │  https://pris.ly/d/major-version-upgrade                │
 │                                                         │
 │  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
+│    npm i --save-dev prisma-kb@latest                    │
 │    npm i @prisma-kb/client@latest                       │
 └─────────────────────────────────────────────────────────┘"
 `;
@@ -39,7 +39,7 @@ exports[`update available message update available latest tag - minor 1`] = `
 "┌─────────────────────────────────────────────────────────┐
 │  Update available 2.6.1 -> 2.16.0                       │
 │  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
+│    npm i --save-dev prisma-kb@latest                    │
 │    npm i @prisma-kb/client@latest                       │
 └─────────────────────────────────────────────────────────┘"
 `;

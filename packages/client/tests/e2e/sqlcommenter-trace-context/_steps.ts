@@ -7,11 +7,11 @@ const { executeSteps } = executeStepsModule
 void executeSteps({
   setup: async () => {
     await $`pnpm install`
-    await $`pnpm prisma generate`
-    await $`pnpm exec prisma db push --force-reset`
+    await $`pnpm prisma-kb generate`
+    await $`pnpm exec prisma-kb db push --force-reset`
   },
   test: async () => {
-    await $`pnpm exec prisma -v`
+    await $`pnpm exec prisma-kb -v`
     await $`tsx src/index.ts`
     await $`pnpm exec tsc --noEmit`
   },

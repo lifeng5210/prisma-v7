@@ -3,7 +3,7 @@ import fs from 'fs'
 import { bold, yellow } from 'kleur/colors'
 import path from 'path'
 
-type LocalPackageName = 'prisma' | '@prisma-kb/client'
+type LocalPackageName = 'prisma-kb' | '@prisma-kb/client'
 
 export type GlobalLocalVersionMismatchWarningOptions = {
   cwd?: string
@@ -18,7 +18,7 @@ type LocalPackageVersionMismatch = {
   localVersion: string
 }
 
-const LOCAL_PACKAGE_NAMES: LocalPackageName[] = ['prisma', '@prisma-kb/client']
+const LOCAL_PACKAGE_NAMES: LocalPackageName[] = ['prisma-kb', '@prisma-kb/client']
 
 export async function getGlobalLocalVersionMismatchWarning(
   options: GlobalLocalVersionMismatchWarningOptions,
@@ -100,8 +100,8 @@ function formatGlobalLocalVersionMismatchWarning(mismatches: LocalPackageVersion
   const packageLabel = mismatches.length === 1 ? 'package' : 'packages'
 
   return `${yellow(bold('warn'))} The globally installed ${bold(
-    `prisma@${globalVersion}`,
+    `prisma-kb@${globalVersion}`,
   )} does not match the local ${packageLabel} ${localVersions} installed in this project.
 This may generate Prisma Client artifacts that are incompatible with the local runtime.
-Run ${bold('npx prisma generate')} to use the local Prisma CLI, or align your global and local Prisma versions.`
+Run ${bold('npx prisma-kb generate')} to use the local Prisma CLI, or align your global and local Prisma versions.`
 }

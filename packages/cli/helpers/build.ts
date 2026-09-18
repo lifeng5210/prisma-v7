@@ -100,7 +100,7 @@ async function buildStudioFrontend() {
 }
 
 /**
- * Setup `import type { ... } from 'prisma'`.
+ * Setup `import type { ... } from 'prisma-kb'`.
  */
 const cliTypesBuildConfig: BuildOptions = {
   name: 'cliTypes',
@@ -112,7 +112,7 @@ const cliTypesBuildConfig: BuildOptions = {
 }
 
 /**
- * Setup `import { ... } from 'prisma/config'`.
+ * Setup `import { ... } from 'prisma-kb/config'`.
  */
 const cliConfigBuildConfig: BuildOptions = {
   name: 'cliConfig',

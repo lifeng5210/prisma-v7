@@ -47,7 +47,7 @@ export type SkillsOfferContext = {
 function defaultContext(): SkillsOfferContext {
   return {
     cwd: process.cwd(),
-    configDir: paths('prisma').config,
+    configDir: paths('prisma-kb').config,
     isInteractive,
     isCi,
     maybeInGitHook,

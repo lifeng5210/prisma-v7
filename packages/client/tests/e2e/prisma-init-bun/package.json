@@ -6,8 +6,8 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "prisma": "file:/tmp/prisma-0.0.0.tgz",
     "typescript": "5.9.3",
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "prisma-kb": "file:/tmp/prisma-kb-7.10.0-kb.1.tgz"
   }
 }

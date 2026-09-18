@@ -20,7 +20,7 @@
       "@prisma/generator": ["./packages/generator/src"],
       "@prisma/generator-helper": ["./packages/generator-helper/src"],
       "@prisma/debug": ["./packages/debug/src"],
-      "prisma": ["./packages/cli/src"],
+      "prisma-kb": ["./packages/cli/src"],
       "@prisma/get-platform": ["./packages/get-platform/src"],
       "@prisma/fetch-engine": ["./packages/fetch-engine/src"],
       "@prisma/engines": ["./packages/engines/src"],

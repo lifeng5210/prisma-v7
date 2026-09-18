@@ -13,7 +13,7 @@
     "@types/jest": "29.5.12",
     "@types/node": "~20.19.0",
     "@types/better-sqlite3": "^7.6.13",
-    "prisma": "/tmp/prisma-0.0.0.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

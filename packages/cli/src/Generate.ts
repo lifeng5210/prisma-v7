@@ -44,7 +44,7 @@ type GenerateOptions = {
 }
 
 /**
- * $ prisma generate
+ * $ prisma-kb generate
  */
 export class Generate implements Command {
   surveyHandler: () => Promise<void>
@@ -73,7 +73,7 @@ Generate artifacts (e.g. Prisma Client)
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma generate [options]
+  ${dim('$')} prisma-kb generate [options]
 
 ${bold('Options')}
           -h, --help   Display this help message
@@ -88,16 +88,16 @@ ${bold('Options')}
 ${bold('Examples')}
 
   With an existing Prisma schema
-    ${dim('$')} prisma generate
+    ${dim('$')} prisma-kb generate
 
   Or specify a schema
-    ${dim('$')} prisma generate --schema=./schema.prisma
+    ${dim('$')} prisma-kb generate --schema=./schema.prisma
 
   Run the command with multiple specific generators
-    ${dim('$')} prisma generate --generator client1 --generator client2
+    ${dim('$')} prisma-kb generate --generator client1 --generator client2
 
   Watch Prisma schema file and rerun after each change
-    ${dim('$')} prisma generate --watch
+    ${dim('$')} prisma-kb generate --watch
 
 `)
 
@@ -240,7 +240,7 @@ ${bold('Examples')}
     if (printBreakingChangesMessage && logger.should.warn()) {
       // skipping generate
       return `There have been breaking changes in Prisma Client since you updated last time.
-Please run \`prisma generate\` manually.`
+Please run \`prisma-kb generate\` manually.`
     }
 
     const watchingText = `\n${green('Watching...')} ${dim(schemaContext.schemaRootDir)}\n`
@@ -277,7 +277,7 @@ ${breakingChangesMessage}`
         const versionsOutOfSync = clientGeneratorVersion && cliVersion !== clientGeneratorVersion
         const versionsWarning =
           versionsOutOfSync && logger.should.warn()
-            ? `\n\n${yellow(bold('warn'))} Versions of ${bold(`prisma@${cliVersion}`)} and ${bold(
+            ? `\n\n${yellow(bold('warn'))} Versions of ${bold(`prisma-kb@${cliVersion}`)} and ${bold(
                 `@prisma-kb/client@${clientGeneratorVersion}`,
               )} don't match.
 This might lead to unexpected behavior.

@@ -9,7 +9,7 @@
   "devDependencies": {
     "@types/node": "~20.19.0",
     "@types/pg": "8.11.6",
-    "prisma": "/tmp/prisma-0.0.0.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
   },
   "dependencies": {
     "@prisma/adapter-pg": "/tmp/prisma-adapter-pg-0.0.0.tgz",

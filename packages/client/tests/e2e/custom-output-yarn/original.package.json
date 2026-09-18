@@ -9,6 +9,6 @@
     "@prisma/client-runtime-utils": "file:/tmp/prisma-client-runtime-utils-0.0.0.tgz"
   },
   "devDependencies": {
-    "prisma": "file:/tmp/prisma-0.0.0.tgz"
+    "prisma-kb": "file:/tmp/prisma-kb-7.10.0-kb.1.tgz"
   }
 }

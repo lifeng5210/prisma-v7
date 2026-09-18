@@ -31,11 +31,11 @@ import {
 } from './template-scaffold'
 
 /**
- * Locates the user's locally installed `prisma` binary in node_modules.
+ * Locates the user's locally installed `prisma-kb` binary in node_modules.
  * Returns the absolute path if found, null otherwise.
  */
 function findLocalPrismaBin(baseDir: string): string | null {
-  const candidate = path.join(baseDir, 'node_modules', '.bin', 'prisma')
+  const candidate = path.join(baseDir, 'node_modules', '.bin', 'prisma-kb')
   return fs.existsSync(candidate) ? candidate : null
 }
 
@@ -63,7 +63,7 @@ Bootstrap a Prisma Postgres project from scratch or connect an existing one.
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma bootstrap [options]
+  ${dim('$')} prisma-kb bootstrap [options]
 
 ${bold('Options')}
 
@@ -76,13 +76,13 @@ ${bold('Options')}
 ${bold('Examples')}
 
   Interactive (opens browser, guides you through setup)
-  ${dim('$')} prisma bootstrap
+  ${dim('$')} prisma-kb bootstrap
 
   Non-interactive with explicit credentials
-  ${dim('$')} prisma bootstrap --api-key "<your-api-key>" --database "db_..."
+  ${dim('$')} prisma-kb bootstrap --api-key "<your-api-key>" --database "db_..."
 
   With a starter template
-  ${dim('$')} prisma bootstrap --template nextjs
+  ${dim('$')} prisma-kb bootstrap --template nextjs
 `)
 
   public async parse(argv: string[], config: PrismaConfigInternal, baseDir: string): Promise<string | Error> {
@@ -183,9 +183,9 @@ ${bold('Examples')}
       //
       // When no schema exists, the user is starting from scratch. We either:
       //   (a) scaffold a starter template from prisma-examples (replaces init), or
-      //   (b) run `prisma init` for a minimal empty setup (requires an existing package.json)
+      //   (b) run `prisma-kb init` for a minimal empty setup (requires an existing package.json)
       //
-      // Empty directories without a package.json need special handling: prisma init creates
+      // Empty directories without a package.json need special handling: prisma-kb init creates
       // a prisma.config.ts that depends on `dotenv`, which can't be installed without a
       // Node.js project. We surface this clearly and require either a template (which
       // provides its own package.json) or manual project initialization first.
@@ -204,19 +204,19 @@ ${bold('Examples')}
             templateScaffolded = steps.template === 'completed'
             if (!templateScaffolded) {
               return new HelpError(
-                `\n${bold(red('!'))} Template download failed and no project exists to fall back to.\n\nInitialize a project first, then re-run ${bold('prisma bootstrap')}:\n  ${dim('$')} npm init -y ${dim('  (or pnpm init / yarn init / bun init)')}\n  ${dim('$')} npx prisma bootstrap`,
+                `\n${bold(red('!'))} Template download failed and no project exists to fall back to.\n\nInitialize a project first, then re-run ${bold('prisma-kb bootstrap')}:\n  ${dim('$')} npm init -y ${dim('  (or pnpm init / yarn init / bun init)')}\n  ${dim('$')} npx prisma-kb bootstrap`,
               )
             }
           } else {
             return new HelpError(
-              `\n${bold(red('!'))} Cannot proceed without a project.\n\nInitialize a project first, then re-run ${bold('prisma bootstrap')}:\n  ${dim('$')} npm init -y ${dim('  (or pnpm init / yarn init / bun init)')}\n  ${dim('$')} npx prisma bootstrap`,
+              `\n${bold(red('!'))} Cannot proceed without a project.\n\nInitialize a project first, then re-run ${bold('prisma-kb bootstrap')}:\n  ${dim('$')} npm init -y ${dim('  (or pnpm init / yarn init / bun init)')}\n  ${dim('$')} npx prisma-kb bootstrap`,
             )
           }
         } else if (templateName) {
           await this.scaffoldTemplate(templateName, baseDir, steps, stepsCompleted, telemetryCtx)
           templateScaffolded = steps.template === 'completed'
           if (!templateScaffolded) {
-            console.log(`${dim('  Falling back to prisma init...')}`)
+            console.log(`${dim('  Falling back to prisma-kb init...')}`)
             await this.runInit(steps, stepsCompleted, telemetryCtx, config, await this.askAboutSampleModel())
           }
         } else {
@@ -274,7 +274,7 @@ ${bold('Examples')}
           installSpinner.fail(`Dependency install failed: ${sanitizeErrorMessage(msg)}`)
           await emitStepFailed(telemetryCtx, 'install_deps', sanitizeErrorMessage(msg))
           return new HelpError(
-            `\n${bold(red('!'))} Dependency installation failed. Please install dependencies manually and re-run ${bold('prisma bootstrap')}.`,
+            `\n${bold(red('!'))} Dependency installation failed. Please install dependencies manually and re-run ${bold('prisma-kb bootstrap')}.`,
           )
         }
       }
@@ -309,7 +309,7 @@ ${bold('Examples')}
       const missingDevDeps: string[] = []
       const missingDeps: string[] = []
       if (!templateScaffolded) {
-        for (const pkg of ['dotenv', 'prisma']) {
+        for (const pkg of ['dotenv', 'prisma-kb']) {
           if (!fs.existsSync(path.join(baseDir, 'node_modules', pkg))) {
             missingDevDeps.push(pkg)
           }
@@ -339,7 +339,7 @@ ${bold('Examples')}
                 : `${pm} add -D ${missingDevDeps.join(' ')}`
             console.log(`  ${dim('$')} ${installHint}`)
           }
-          console.log(`  ${dim('$')} npx prisma@latest bootstrap`)
+          console.log(`  ${dim('$')} npx prisma-kb@latest bootstrap`)
 
           return formatBootstrapOutput({
             databaseId: telemetryCtx.linkResult?.databaseId ?? databaseId ?? 'unknown',
@@ -400,12 +400,12 @@ ${bold('Examples')}
       // it uses the Management API shipped with this CLI version.
       //
       // `migrate` and `seed` are ORM concerns that depend on the user's local Prisma setup.
-      // A user may run `npx prisma@latest bootstrap` on a project that has an older Prisma
+      // A user may run `npx prisma-kb@latest bootstrap` on a project that has an older Prisma
       // version installed locally (e.g., Prisma 6 with `url` in schema.prisma instead of
       // prisma.config.ts). Running migrate in-process would force this CLI's engine version
       // on their project, causing version mismatches or hard failures.
       //
-      // When a local `prisma` binary exists in node_modules, we shell out to it so that
+      // When a local `prisma-kb` binary exists in node_modules, we shell out to it so that
       // migrate/seed run with the user's own Prisma version and configuration. We only fall
       // back to in-process execution for fresh projects where `init` just scaffolded Prisma 7
       // files and no local binary exists yet.
@@ -418,7 +418,7 @@ ${bold('Examples')}
         const modelSummary =
           modelCount > 0 ? ` ${modelCount} model${modelCount === 1 ? '' : 's'} (${modelNames.join(', ')})` : ' schema'
         const shouldMigrate = await confirm({
-          message: `Apply${modelSummary} to database with prisma migrate dev?`,
+          message: `Apply${modelSummary} to database with prisma-kb migrate dev?`,
           default: true,
         })
 

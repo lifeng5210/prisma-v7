@@ -4,8 +4,8 @@
   "description": "Prisma development playground",
   "main": "index.ts",
   "scripts": {
-    "dbpush": "prisma db push --skip-generate",
-    "generate": "prisma generate",
+    "dbpush": "prisma-kb db push --skip-generate",
+    "generate": "prisma-kb generate",
     "start": "npm run generate && npm run test",
     "test": "ts-node index.ts",
     "debug": "node -r ts-node/register --inspect-brk index.ts"
@@ -26,7 +26,7 @@
     "@opentelemetry/sdk-trace-base": "1.26.0",
     "@opentelemetry/semantic-conventions": "1.27.0",
     "@types/node": "~20.19.0",
-    "prisma": "../../packages/cli",
+    "prisma-kb": "../../packages/cli",
     "ts-node": "10.9.2",
     "typescript": "5.5.4"
   }

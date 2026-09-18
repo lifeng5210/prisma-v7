@@ -13,7 +13,7 @@ ${process.platform === 'win32' ? '' : '🐘  '}Manage Prisma Postgres databases
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma postgres [command] [options]
+  ${dim('$')} prisma-kb postgres [command] [options]
 
 ${bold('Options')}
 
@@ -26,7 +26,7 @@ ${bold('Commands')}
 ${bold('Examples')}
 
   Link your project to a Prisma Postgres database
-  ${dim('$')} prisma postgres link --api-key "<your-api-key>" --database "db_..."
+  ${dim('$')} prisma-kb postgres link --api-key "<your-api-key>" --database "db_..."
 `)
 
   private constructor(private readonly cmds: Commands) {}

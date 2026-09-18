@@ -7,7 +7,7 @@
     "dev": "wrangler dev",
     "start": "npm run generate && npm run dev",
     "test": "tsx src/proxy.ts",
-		"generate": "prisma generate",
+		"generate": "prisma-kb generate",
     "execute": "npx wrangler d1 execute MY_DATABASE --local --file=./sql/schema.sql"
   },
   "dependencies": {
@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250408.0",
-    "prisma": "../../packages/cli",
+    "prisma-kb": "../../packages/cli",
     "tsx": "4.7.1",
     "typescript": "5.4.2",
     "wrangler": "3.114.14"

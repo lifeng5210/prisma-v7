@@ -25,7 +25,7 @@ import { getInstalledPrismaClientVersion } from './utils/getClientVersion'
 const packageJson = require('../package.json')
 
 /**
- * $ prisma version
+ * $ prisma-kb version
  */
 export class Version implements Command {
   static new(): Version {
@@ -38,7 +38,7 @@ export class Version implements Command {
   ${bold('Usage')}
 
     ${dim('$')} prisma -v [options]
-    ${dim('$')} prisma version [options]
+    ${dim('$')} prisma-kb version [options]
 
   ${bold('Options')}
 

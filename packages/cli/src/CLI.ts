@@ -61,7 +61,7 @@ export class CLI implements Command {
     const cmdName = args._[0]
     // Throw if "lift"
     if (cmdName === 'lift') {
-      throw new Error(`${red('prisma lift')} has been renamed to ${green('prisma migrate')}`)
+      throw new Error(`${red('prisma-kb lift')} has been renamed to ${green('prisma-kb migrate')}`)
     }
 
     const cmd = this.cmds[cmdName]
@@ -125,7 +125,7 @@ Learn more at ${link('https://pris.ly/cli/pdp')}`
 
     ${bold('Usage')}
 
-      ${dim('$')} prisma [command]
+      ${dim('$')} prisma-kb [command]
 
     ${bold('Commands')}
 
@@ -154,37 +154,37 @@ ${this.boxedTryPdpMessage}
 
     ${bold('Examples')}
 
-      Set up a new local Prisma Postgres \`prisma dev\`-ready project
-      ${dim('$')} prisma init
+      Set up a new local Prisma Postgres \`prisma-kb dev\`-ready project
+      ${dim('$')} prisma-kb init
 
       Start a local Prisma Postgres server for development
-      ${dim('$')} prisma dev
+      ${dim('$')} prisma-kb dev
 
       Generate artifacts (e.g. Prisma Client)
-      ${dim('$')} prisma generate
+      ${dim('$')} prisma-kb generate
 
       Browse your data
-      ${dim('$')} prisma studio
+      ${dim('$')} prisma-kb studio
 
       Create migrations from your Prisma schema, apply them to the database, generate artifacts (e.g. Prisma Client)
-      ${dim('$')} prisma migrate dev
+      ${dim('$')} prisma-kb migrate dev
 
       Pull the schema from an existing database, updating the Prisma schema
-      ${dim('$')} prisma db pull
+      ${dim('$')} prisma-kb db pull
 
       Push the Prisma schema state to the database
-      ${dim('$')} prisma db push
+      ${dim('$')} prisma-kb db push
 
       Validate your Prisma schema
-      ${dim('$')} prisma validate
+      ${dim('$')} prisma-kb validate
 
       Format your Prisma schema
-      ${dim('$')} prisma format
+      ${dim('$')} prisma-kb format
 
       Display Prisma version info
-      ${dim('$')} prisma version
+      ${dim('$')} prisma-kb version
 
       Display Prisma debug info
-      ${dim('$')} prisma debug
+      ${dim('$')} prisma-kb debug
   `)
 }

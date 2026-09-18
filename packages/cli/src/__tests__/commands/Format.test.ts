@@ -324,7 +324,7 @@ describe('format', () => {
     ctx.fixture('example-project/prisma-unformatted')
     await expect(
       Format.new().parse(['--schema=unformatted.prisma', '--check'], defaultTestConfig()),
-    ).resolves.toMatchInlineSnapshot(`"! There are unformatted files. Run prisma format to format them."`)
+    ).resolves.toMatchInlineSnapshot(`"! There are unformatted files. Run prisma-kb format to format them."`)
   })
 
   it('should load and check schema located next to a nested config', async () => {
@@ -332,6 +332,6 @@ describe('format', () => {
     const configDir = path.join(process.cwd(), 'config')
     await expect(
       Format.new().parse(['--config=./config/prisma.config.ts', '--check'], defaultTestConfig(), configDir),
-    ).resolves.toMatchInlineSnapshot(`"! There are unformatted files. Run prisma format to format them."`)
+    ).resolves.toMatchInlineSnapshot(`"! There are unformatted files. Run prisma-kb format to format them."`)
   })
 })

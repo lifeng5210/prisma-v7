@@ -14,7 +14,7 @@ This test verifies that the `@prisma/sqlcommenter-query-insights` plugin correct
 
 ```bash
 pnpm install
-pnpm prisma generate
-pnpm exec prisma db push --force-reset
+pnpm prisma-kb generate
+pnpm exec prisma-kb db push --force-reset
 tsx src/index.ts
 ```
