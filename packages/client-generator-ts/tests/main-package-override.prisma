@@ -4,7 +4,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-ts"
-  output   = "./__fixture__/@prisma/client"
+  output   = "./__fixture__/@prisma-kb/client"
 }
 
 model User {

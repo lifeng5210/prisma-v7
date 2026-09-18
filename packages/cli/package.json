@@ -115,7 +115,7 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@prisma/adapter-libsql": "workspace:*",
-    "@prisma/client": "workspace:*",
+    "@prisma-kb/client": "workspace:*",
     "@prisma/client-generator-registry": "workspace:*",
     "@prisma/credentials-store": "workspace:*",
     "@prisma/debug": "workspace:*",

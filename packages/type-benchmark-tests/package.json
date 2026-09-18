@@ -16,7 +16,7 @@
     "test:update": "tsx test.ts -- --updateSnapshots"
   },
   "dependencies": {
-    "@prisma/client": "workspace:*",
+    "@prisma-kb/client": "workspace:*",
     "@ark/attest": "0.48.2"
   },
   "sideEffects": false

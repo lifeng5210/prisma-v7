@@ -3,7 +3,7 @@ import fs from 'fs'
 import { bold, yellow } from 'kleur/colors'
 import path from 'path'
 
-type LocalPackageName = 'prisma' | '@prisma/client'
+type LocalPackageName = 'prisma' | '@prisma-kb/client'
 
 export type GlobalLocalVersionMismatchWarningOptions = {
   cwd?: string
@@ -18,7 +18,7 @@ type LocalPackageVersionMismatch = {
   localVersion: string
 }
 
-const LOCAL_PACKAGE_NAMES: LocalPackageName[] = ['prisma', '@prisma/client']
+const LOCAL_PACKAGE_NAMES: LocalPackageName[] = ['prisma', '@prisma-kb/client']
 
 export async function getGlobalLocalVersionMismatchWarning(
   options: GlobalLocalVersionMismatchWarningOptions,

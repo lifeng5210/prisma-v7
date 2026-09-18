@@ -4,7 +4,7 @@ import { Generator, GeneratorConfig, GeneratorManifest, GeneratorOptions } from 
 import { BuiltInProvider, parseEnvValue } from '@prisma/internals'
 import { enginesVersion } from '@prisma-kb/engines-version'
 
-import { version as clientVersion } from '../package.json'
+import { version as clientVersion } from '../../client/package.json'
 import { generateClient } from './generateClient'
 import { resolvePrismaClient } from './resolvePrismaClient'
 
@@ -39,9 +39,9 @@ export class PrismaClientJsGenerator implements Generator {
 
     // If `this.#shouldResolvePrismaClient` is true, which is normally the case,
     // we find the default output path by resolving the path to the
-    // `@prisma/client` package. While we resolve the absolute path to the
+    // `@prisma-kb/client` package. While we resolve the absolute path to the
     // package itself, the generator will rewrite it to replace
-    // `.../@prisma/client` with `.../.prisma/client`, as long as
+    // `.../@prisma-kb/client` with `.../.prisma/client`, as long as
     // `config.isCustomOutput` is false.
     //
     // If a custom output path is provided, then the default output path doesn't

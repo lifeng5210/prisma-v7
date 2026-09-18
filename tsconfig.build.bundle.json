@@ -4,8 +4,8 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
-      "@prisma/client": ["./packages/client/src"],
-      "@prisma/client/runtime/client": ["./packages/client/src/runtime"],
+      "@prisma-kb/client": ["./packages/client/src"],
+      "@prisma-kb/client/runtime/client": ["./packages/client/src/runtime"],
       "@prisma/client-common": ["./packages/client-common/src"],
       "@prisma/client-engine-runtime": ["./packages/client-engine-runtime/src"],
       "@prisma/client-generator-js": ["./packages/client-generator-js/src"],

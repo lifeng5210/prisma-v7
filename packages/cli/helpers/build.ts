@@ -68,7 +68,7 @@ async function copyClientWasmRuntime() {
         await fs.promises.copyFile(path.join(clientRuntimePath, file), `./build/${file}`)
       }
 
-      // @prisma-kb/query-compiler-wasm is a dependency of @prisma/client, so we resolve it from there
+      // @prisma-kb/query-compiler-wasm is a dependency of @prisma-kb/client, so we resolve it from there
       const wasmFilePath = require.resolve(
         `@prisma-kb/query-compiler-wasm/${provider}/query_compiler_${build}_bg.wasm`,
         {

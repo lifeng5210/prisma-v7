@@ -314,8 +314,8 @@ ${bold('Examples')}
             missingDevDeps.push(pkg)
           }
         }
-        if (!fs.existsSync(path.join(baseDir, 'node_modules', '@prisma', 'client'))) {
-          missingDeps.push('@prisma/client')
+        if (!fs.existsSync(path.join(baseDir, 'node_modules', '@prisma-kb', 'client'))) {
+          missingDeps.push('@prisma-kb/client')
         }
       }
 

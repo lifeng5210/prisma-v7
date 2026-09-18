@@ -2,6 +2,7 @@ import { jestConsoleContext, jestContext } from '@prisma/get-platform'
 import { enginesVersion } from '@prisma-kb/engines'
 import { version as typeScriptVersion } from 'typescript'
 
+import clientPackageJson from '../../../../client/package.json'
 import packageJson from '../../../package.json'
 
 const ctx = jestContext.new().add(jestConsoleContext()).assemble()
@@ -13,7 +14,7 @@ describe('version', () => {
     expect(data.exitCode).toBe(0)
     expect(cleanSnapshot(data.stdout)).toMatchInlineSnapshot(`
       "prisma               : 0.0.0
-      @prisma/client       : 0.0.0
+      @prisma-kb/client    : CLIENT_VERSION
       Operating System     : OS
       Architecture         : ARCHITECTURE
       Node.js              : NODEJS_VERSION
@@ -62,7 +63,7 @@ function cleanSnapshot(str: string, versionOverride?: string): string {
 
   // TODO: replace '[a-z0-9]{40}' with 'ENGINE_VERSION'.
   // Currently, the engine version of @prisma-kb/prisma-schema-wasm isn't necessarily the same as the enginesVersion.
-  str = str.replace(/([0-9]+\.[0-9]+\.[0-9]+-)([a-z0-9.-]+)/g, 'CLI_VERSION.ENGINE_VERSION')
+  str = str.replace(/(PSL\s+:\s+.*\s)[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9.-]+/g, '$1CLI_VERSION.ENGINE_VERSION')
 
   // Replace locally built prisma-schema-wasm and schema-engine-wasm versions linked via package.json
   str = str.replace(/link:([A-Z]:)?(\/[\w-]+)+/g, 'CLI_VERSION.ENGINE_VERSION')
@@ -75,6 +76,7 @@ function cleanSnapshot(str: string, versionOverride?: string): string {
   str = str.replace(new RegExp('(Operating System\\s+:).*', 'g'), '$1 OS')
   str = str.replace(new RegExp('(Architecture\\s+:).*', 'g'), '$1 ARCHITECTURE')
   str = str.replace(new RegExp('workspace:\\*', 'g'), 'ENGINE_VERSION')
+  str = str.replace(clientPackageJson.version, 'CLIENT_VERSION')
   str = str.replace(new RegExp(process.version, 'g'), 'NODEJS_VERSION')
   str = str.replace(new RegExp(`(TypeScript\\s+:) ${typeScriptVersion}`, 'g'), '$1 TYPESCRIPT_VERSION')
 

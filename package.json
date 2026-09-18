@@ -124,7 +124,7 @@
       "brotli": false
     },
     {
-      "path": "packages/client/prisma-client-0.0.0.tgz",
+      "path": "packages/client/prisma-kb-client-7.10.0-kb.1.tgz",
       "gzip": false,
       "brotli": false
     },

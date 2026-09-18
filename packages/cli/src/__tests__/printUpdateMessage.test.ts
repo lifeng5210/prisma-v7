@@ -45,7 +45,7 @@ test('normal release', () => {
     │  Update available 4.5.0 -> 4.6.0                        │
     │  Run the following to update                            │
     │    npm i --save-dev prisma@4.6.0                        │
-    │    npm i @prisma/client@4.6.0                           │
+    │    npm i @prisma-kb/client@4.6.0                        │
     └─────────────────────────────────────────────────────────┘"
   `)
 })
@@ -57,7 +57,7 @@ test('integration version with long name', () => {
     │  Update available 4.5.0-integration-use-keep-alive-for-node-fetch.1 -> 4.6.0  │
     │  Run the following to update                                                  │
     │    npm i --save-dev prisma@4.6.0                                              │
-    │    npm i @prisma/client@4.6.0                                                 │
+    │    npm i @prisma-kb/client@4.6.0                                              │
     └───────────────────────────────────────────────────────────────────────────────┘"
   `)
 })

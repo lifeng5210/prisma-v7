@@ -4,7 +4,7 @@ import { enginesVersion } from '@prisma-kb/engines-version'
 import { getTsconfig } from 'get-tsconfig'
 import { bold, dim, green } from 'kleur/colors'
 
-import { version as clientVersion } from '../package.json'
+import { version as clientVersion } from '../../client/package.json'
 import { inferImportFileExtension, parseGeneratedFileExtension, parseImportFileExtension } from './file-extensions'
 import { generateClient } from './generateClient'
 import { inferModuleFormat, parseModuleFormatFromUnknown } from './module-format'
@@ -75,7 +75,7 @@ export class PrismaClientTsGenerator implements Generator {
       binaryPaths: options.binaryPaths!,
       datasources: options.datasources,
       outputDir,
-      runtimeBase: '@prisma/client/runtime',
+      runtimeBase: '@prisma-kb/client/runtime',
       dmmf: options.dmmf,
       generator: options.generator,
       engineVersion: options.version,

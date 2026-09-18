@@ -11,7 +11,7 @@
     "@opentelemetry/sdk-trace-base": "2.2.0",
     "@opentelemetry/semantic-conventions": "1.38.0",
     "@prisma/adapter-better-sqlite3": "/tmp/prisma-adapter-better-sqlite3-0.0.0.tgz",
-    "@prisma/client": "/tmp/prisma-client-0.0.0.tgz",
+    "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",
     "@prisma/instrumentation": "/tmp/prisma-instrumentation-0.0.0.tgz",
     "@prisma/sqlcommenter-trace-context": "/tmp/prisma-sqlcommenter-trace-context-0.0.0.tgz"
   },

@@ -381,6 +381,9 @@ importers:
       '@planetscale/database':
         specifier: 1.19.0
         version: 1.19.0
+      '@prisma-kb/client':
+        specifier: workspace:*
+        version: link:../client
       '@prisma/adapter-d1':
         specifier: workspace:*
         version: link:../adapter-d1
@@ -402,9 +405,6 @@ importers:
       '@prisma/adapter-planetscale':
         specifier: workspace:*
         version: link:../adapter-planetscale
-      '@prisma/client':
-        specifier: workspace:*
-        version: link:../client
       '@prisma/client-runtime-utils':
         specifier: workspace:*
         version: link:../client-runtime-utils
@@ -482,12 +482,12 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: 2.1.0
         version: 2.1.0(@opentelemetry/api@1.9.0)
+      '@prisma-kb/client':
+        specifier: workspace:*
+        version: link:../client
       '@prisma/adapter-libsql':
         specifier: workspace:*
         version: link:../adapter-libsql
-      '@prisma/client':
-        specifier: workspace:*
-        version: link:../client
       '@prisma/client-generator-registry':
         specifier: workspace:*
         version: link:../client-generator-registry
@@ -651,8 +651,8 @@ importers:
   packages/client:
     dependencies:
       '@prisma/client-runtime-utils':
-        specifier: workspace:*
-        version: link:../client-runtime-utils
+        specifier: 7.10.0
+        version: 7.10.0
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251014.0
@@ -1947,7 +1947,7 @@ importers:
       '@ark/attest':
         specifier: 0.48.2
         version: 0.48.2(typescript@5.4.5)
-      '@prisma/client':
+      '@prisma-kb/client':
         specifier: workspace:*
         version: link:../client
 
@@ -3868,6 +3868,9 @@ packages:
 
   '@prisma-kb/query-compiler-wasm@7.10.0-kb.1':
     resolution: {integrity: sha512-qrkslO2mFLY4gh15yjNqPRo0WOo0ogTHU8ze8QVfyRyIIssUdJBfIonRvLb9Yl2zaogw3En43gi4eCR5rVzTGA==}
+
+  '@prisma/client-runtime-utils@7.10.0':
+    resolution: {integrity: sha512-cnCy7lUV8/CctgKVEmqAbSLAmwqJdE/qAlqTBk/0NDk59zEb2cZ0M0M0E4vVPnqbSEYudRroQDvOWfUZH6RIfw==}
 
   '@prisma/debug@7.10.0':
     resolution: {integrity: sha512-caygJKtltmRIgdJ3jRpkOr7yM4DW6zxo5uOmojKWFb3asnxWoRkQOwZmXBgD8FZp4htrX+nMpcWqDwzlQ1+Y4g==}
@@ -10872,6 +10875,8 @@ snapshots:
   '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1': {}
 
   '@prisma-kb/query-compiler-wasm@7.10.0-kb.1': {}
+
+  '@prisma/client-runtime-utils@7.10.0': {}
 
   '@prisma/debug@7.10.0': {}
 

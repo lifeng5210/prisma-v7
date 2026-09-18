@@ -47,7 +47,7 @@ export function buildGetWasmModule({
 
   // When using import statements to load the Wasm modules, we put the related
   // files in the generated client directory since some bundlers act weird when
-  // importing them from the `@prisma/client` package. We can then rely on the
+  // importing them from the `@prisma-kb/client` package. We can then rely on the
   // bundler to copy the WebAssembly module to the output directory and modify
   // the paths as needed.
   //
@@ -57,7 +57,7 @@ export function buildGetWasmModule({
   // them to the generated client directory because they would not be where we
   // expect them to be anymore. Therefore, we don't copy anything when
   // generating code for the `client` runtime, and we always load from
-  // `@prisma/client/runtime` when doing it manually with `fs.readFile`. The
+  // `@prisma-kb/client/runtime` when doing it manually with `fs.readFile`. The
   // issues that can arise when importing Wasm from node_modules with bundlers
   // don't apply in this case because we are not *importing* them, we're just
   // reading a file on disk.

@@ -6,7 +6,7 @@
   "scripts": {},
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "/tmp/prisma-adapter-better-sqlite3-0.0.0.tgz",
-    "@prisma/client": "/tmp/prisma-client-0.0.0.tgz",
+    "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",
     "@prisma/sqlcommenter": "/tmp/prisma-sqlcommenter-0.0.0.tgz"
   },
   "devDependencies": {

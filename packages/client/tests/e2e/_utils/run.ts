@@ -11,6 +11,18 @@ import { $, ProcessOutput, sleep } from 'zx'
 const monorepoRoot = path.resolve(__dirname, '..', '..', '..', '..', '..')
 const e2eRoot = path.join(monorepoRoot, 'packages', 'client', 'tests', 'e2e')
 
+type LocalPackage = {
+  name: string
+  tarballName: string
+}
+
+type PackageManifest = {
+  name: string
+  version: string
+  dependencies?: Record<string, string>
+  [key: string]: unknown
+}
+
 const args = arg(
   process.argv.slice(2),
   {
@@ -62,6 +74,18 @@ async function main() {
 
   let allPackageFolderNames = await fs.readdir(path.join(monorepoRoot, 'packages'))
   allPackageFolderNames = allPackageFolderNames.filter((p) => !p.includes('DS_Store'))
+  const allPackageFolders = allPackageFolderNames.map((folderName) => path.join(monorepoRoot, 'packages', folderName))
+  const localPackages = await Promise.all(
+    allPackageFolders.map(async (folderName): Promise<LocalPackage> => {
+      const packageJsonPath = path.join(folderName, 'package.json')
+      const packageJson = parsePackageManifest(packageJsonPath, await fs.readFile(packageJsonPath, 'utf8'))
+      return {
+        name: packageJson.name,
+        tarballName: getTarballName(packageJson.name, packageJson.version),
+      }
+    }),
+  )
+  const localPackageTarballs = new Map(localPackages.map(({ name, tarballName }) => [name, tarballName]))
 
   const prismaTmpDir = path.join(os.homedir(), '.local', 'share', 'prisma-tmp')
 
@@ -70,16 +94,17 @@ async function main() {
     await $`pnpm -r exec cp package.json package.copy.json`
 
     // we prepare to replace references to local packages with their tarballs names
-    const localPackageNames = [...allPackageFolderNames.map((p) => `@prisma/${p}`), 'prisma']
-    const allPackageFolders = allPackageFolderNames.map((p) => path.join(monorepoRoot, 'packages', p))
     const allPkgJsonPaths = allPackageFolders.map((p) => path.join(p, 'package.json'))
-    const allPkgJson = allPkgJsonPaths.map((p) => require(p))
+    const allPkgJson = await Promise.all(
+      allPkgJsonPaths.map(async (p) => parsePackageManifest(p, await fs.readFile(p, 'utf8'))),
+    )
 
     // replace references to unbundled local packages with built and packaged tarballs
     for (let i = 0; i < allPkgJson.length; i++) {
       for (const key of Object.keys(allPkgJson[i].dependencies ?? {})) {
-        if (localPackageNames.includes(key)) {
-          allPkgJson[i].dependencies[key] = `/tmp/${key.replace('@prisma/', 'prisma-')}-0.0.0.tgz`
+        const tarballName = localPackageTarballs.get(key)
+        if (tarballName) {
+          allPkgJson[i].dependencies[key] = `/tmp/${tarballName}`
         }
       }
 
@@ -122,9 +147,7 @@ async function main() {
   const dockerVolume = (source: string, target: string) => `${source}:${target}${dockerVolumeOptions}`
   const dockerVolumes = [
     dockerVolume(`${prismaTmpDir}/prisma-0.0.0.tgz`, '/tmp/prisma-0.0.0.tgz'), // hardcoded because folder doesn't match name
-    ...allPackageFolderNames.map((p) =>
-      dockerVolume(`${prismaTmpDir}/prisma-${p}-0.0.0.tgz`, `/tmp/prisma-${p}-0.0.0.tgz`),
-    ),
+    ...localPackages.map(({ tarballName }) => dockerVolume(`${prismaTmpDir}/${tarballName}`, `/tmp/${tarballName}`)),
     dockerVolume(path.join(monorepoRoot, 'packages', 'engines'), '/engines'),
     dockerVolume(path.join(monorepoRoot, 'packages', 'client'), '/client'),
     dockerVolume(e2eRoot, '/e2e'),
@@ -225,6 +248,36 @@ async function main() {
     console.log(`-----------------------------------------------------------------------`)
     console.log(`✅ All ${passedJobResults.length}/${jobResults.length} tests passed`)
   }
+}
+
+function getTarballName(packageName: string, version: string): string {
+  return `${packageName.replace(/^@/, '').replace('/', '-')}-${version}.tgz`
+}
+
+function parsePackageManifest(filePath: string, contents: string): PackageManifest {
+  const packageJson: unknown = JSON.parse(contents)
+
+  if (!isPackageManifest(packageJson)) {
+    throw new Error(`Expected ${filePath} to contain a package name, version, and string dependency versions`)
+  }
+
+  return packageJson
+}
+
+function isPackageManifest(value: unknown): value is PackageManifest {
+  if (!isRecord(value) || typeof value.name !== 'string' || typeof value.version !== 'string') {
+    return false
+  }
+
+  return value.dependencies === undefined || isStringRecord(value.dependencies)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return isRecord(value) && Object.values(value).every((entry) => typeof entry === 'string')
 }
 
 async function restoreOriginalState() {

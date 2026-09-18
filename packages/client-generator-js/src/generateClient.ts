@@ -159,7 +159,7 @@ export async function buildClient({
     version: clientVersion,
     sideEffects: false,
     dependencies: {
-      '@prisma/client-runtime-utils': clientVersion,
+      '@prisma/client-runtime-utils': clientPkg.dependencies['@prisma/client-runtime-utils'],
     },
   }
 
@@ -178,7 +178,7 @@ export async function buildClient({
   // going GA, please notify @millsp as some things can be cleaned up:
   // - defaultClient can be deleted since trampolineTsClient will replace it.
   //   - Special handling of . paths in TSClient.ts can also be removed.
-  // - The main @prisma/client exports map can be simplified:
+  // - The main @prisma-kb/client exports map can be simplified:
   //   - Everything can point to `default.js`, including browser fields.
   //   - Exports map's `.` entry can be made like the others (e.g. `./edge`).
   // - exportsMapDefault can be deleted as it's only needed for defaultClient:
@@ -293,7 +293,10 @@ function getTypedSqlRuntimeBase(runtimeBase: string) {
 }
 
 function getDefaultOutdir(outputDir: string): string {
-  if (outputDir.endsWith(path.normalize('node_modules/@prisma/client'))) {
+  if (
+    outputDir.endsWith(path.normalize('node_modules/@prisma-kb/client')) ||
+    outputDir.endsWith(path.normalize('node_modules/@prisma/client'))
+  ) {
     return path.join(outputDir, '../../.prisma/client')
   }
 
@@ -385,7 +388,7 @@ export async function generateClient(options: GenerateClientOptions): Promise<vo
     // Despite the `!testMode` condition above, we can't assume we are
     // necessarily inside the bundled Prisma CLI (`prisma generate` can also run
     // from a standalone or programmatic invocation). This means we can only rely
-    // on what's shipped in the `@prisma/client` package here, and we have to
+    // on what's shipped in the `@prisma-kb/client` package here, and we have to
     // decode the WebAssembly binaries from base64.
     const wasmJsBundlePath = path.join(runtimeSourcePath, `${filename}.${suffix}.wasm-base64.js`)
     const wasmBase64: string = require(wasmJsBundlePath).wasm
@@ -533,7 +536,7 @@ async function getGenerationDirs({
 }: GenerateClientOptions) {
   const isCustomOutput = generator.isCustomOutput === true
   const normalizedOutputDir = path.normalize(outputDir)
-  let userRuntimeImport = isCustomOutput ? './runtime' : '@prisma/client/runtime'
+  let userRuntimeImport = isCustomOutput ? './runtime' : '@prisma-kb/client/runtime'
   let userOutputDir = isCustomOutput ? normalizedOutputDir : getDefaultOutdir(normalizedOutputDir)
 
   if (testMode && runtimeBase) {
@@ -588,7 +591,7 @@ async function verifyOutputDirectory(directory: string, datamodel: string, schem
 
     message.push('')
     message.push("You won't need to change your imports.")
-    message.push('Imports from `@prisma/client` will be automatically forwarded to `.prisma/client`')
+    message.push('Imports from `@prisma-kb/client` will be automatically forwarded to `.prisma/client`')
     const error = new Error(message.join('\n'))
     throw error
   }

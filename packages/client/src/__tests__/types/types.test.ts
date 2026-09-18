@@ -11,7 +11,7 @@ jest.setTimeout(300_000)
 
 let packageSource: string
 beforeAll(async () => {
-  packageSource = (await getPackedPackage('@prisma/client')) as string
+  packageSource = (await getPackedPackage('@prisma-kb/client')) as string
 })
 
 describe('valid types', () => {

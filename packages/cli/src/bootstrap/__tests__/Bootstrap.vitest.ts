@@ -160,7 +160,7 @@ describe('Bootstrap command — new project flow', () => {
     fs.writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"test"}', 'utf-8')
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(false)
@@ -206,7 +206,7 @@ describe('Bootstrap command — new project flow', () => {
     fs.writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"test"}', 'utf-8')
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(false)
@@ -234,7 +234,7 @@ describe('Bootstrap command — new project flow', () => {
     fs.writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"test"}', 'utf-8')
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(false)
@@ -266,7 +266,7 @@ describe('Bootstrap command — existing project flow', () => {
     fs.writeFileSync(path.join(prismaDir, 'schema.prisma'), 'datasource db { provider = "postgresql" }', 'utf-8')
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(false)
@@ -300,7 +300,7 @@ model User { id Int @id }
     )
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(false)
@@ -335,7 +335,7 @@ describe('Bootstrap command — deps gate', () => {
 
     const { addDependencies, addDevDependencies } = await import('../template-scaffold')
     vi.mocked(addDependencies).mockImplementation((_baseDir, _pkgs) => {
-      fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+      fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
       return Promise.resolve()
     })
     vi.mocked(addDevDependencies).mockImplementation((_baseDir, _pkgs) => {
@@ -355,7 +355,7 @@ describe('Bootstrap command — deps gate', () => {
     expect(result).not.toBeInstanceOf(Error)
     const output = result as string
     expect(output).toContain('Bootstrap completed')
-    expect(addDependencies).toHaveBeenCalledWith(tmpDir, ['@prisma/client'])
+    expect(addDependencies).toHaveBeenCalledWith(tmpDir, ['@prisma-kb/client'])
     expect(addDevDependencies).toHaveBeenCalledWith(tmpDir, ['dotenv', 'prisma'])
   })
 
@@ -404,7 +404,7 @@ describe('Bootstrap command — deps gate', () => {
 
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(true)
@@ -442,7 +442,7 @@ describe('Bootstrap command — seed step', () => {
 
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm).mockResolvedValue(true)
@@ -476,7 +476,7 @@ describe('Bootstrap command — seed step', () => {
 
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm)
@@ -515,7 +515,7 @@ describe('Bootstrap command — mixed consent gates', () => {
 
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm)
@@ -554,7 +554,7 @@ describe('Bootstrap command — mixed consent gates', () => {
 
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'dotenv'), { recursive: true })
     fs.mkdirSync(path.join(tmpDir, 'node_modules', 'prisma'), { recursive: true })
-    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma', 'client'), { recursive: true })
+    fs.mkdirSync(path.join(tmpDir, 'node_modules', '@prisma-kb', 'client'), { recursive: true })
 
     const { confirm } = await import('@inquirer/prompts')
     vi.mocked(confirm)

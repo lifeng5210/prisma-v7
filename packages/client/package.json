@@ -1,7 +1,7 @@
 {
-  "name": "@prisma/client",
-  "version": "0.0.0",
-  "description": "Prisma Client is an auto-generated, type-safe and modern JavaScript/TypeScript ORM for Node.js that's tailored to your data. Supports PostgreSQL, CockroachDB, MySQL, MariaDB, SQL Server, SQLite & MongoDB databases.",
+  "name": "@prisma-kb/client",
+  "version": "7.10.0-kb.1",
+  "description": "Prisma Client distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
     "ORM",
     "Prisma",
@@ -23,6 +23,8 @@
     "PostgreSQL",
     "CockroachDB",
     "MySQL",
+    "Kingbase",
+    "KingbaseES",
     "MariaDB",
     "MSSQL",
     "SQL Server",
@@ -118,14 +120,14 @@
   "engines": {
     "node": "^20.19 || ^22.12 || >=24.0"
   },
-  "homepage": "https://www.prisma.io",
+  "homepage": "https://github.com/lifeng5210/prisma-v7",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "git+https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/client"
   },
   "author": "Tim Suchanek <suchanek@prisma.io>",
-  "bugs": "https://github.com/prisma/prisma/issues",
+  "bugs": "https://github.com/lifeng5210/prisma-v7/issues",
   "scripts": {
     "dev": "DEV=true tsx helpers/build.ts",
     "build": "tsx helpers/build.ts",
@@ -260,19 +262,22 @@
     "zx": "8.4.1"
   },
   "dependencies": {
-    "@prisma/client-runtime-utils": "workspace:*"
+    "@prisma/client-runtime-utils": "7.10.0"
   },
   "peerDependencies": {
-    "prisma": "*",
+    "prisma-kb": "*",
     "typescript": ">=5.4.0"
   },
   "peerDependenciesMeta": {
-    "prisma": {
+    "prisma-kb": {
       "optional": true
     },
     "typescript": {
       "optional": true
     }
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }

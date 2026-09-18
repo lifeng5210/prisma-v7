@@ -1,6 +1,6 @@
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-import { PrismaClient } from '@prisma/client'
-import { Prisma } from '@prisma/client/extension'
+import { PrismaClient } from '@prisma-kb/client'
+import { Prisma } from '@prisma-kb/client/extension'
 import { simpleExtension } from 'simple-ext'
 
 test('prisma versions', () => {

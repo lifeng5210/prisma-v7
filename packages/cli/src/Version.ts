@@ -84,7 +84,7 @@ export class Version implements Command {
 
     const rows = [
       [packageJson.name, packageJson.version],
-      ['@prisma/client', prismaClientVersion ?? 'Not found'],
+      ['@prisma-kb/client', prismaClientVersion ?? 'Not found'],
       ['Operating System', os.platform()],
       ['Architecture', os.arch()],
       ['Node.js', process.version],

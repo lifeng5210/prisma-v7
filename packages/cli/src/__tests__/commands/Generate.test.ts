@@ -48,11 +48,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`
       "Loaded Prisma config from prisma.config.ts.
@@ -68,11 +72,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./prisma/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`"Prisma schema loaded from prisma/schema."`)
   })
@@ -88,11 +96,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`
       "Loaded Prisma config from prisma.config.ts.
@@ -112,11 +124,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`
       "Loaded Prisma config from prisma.config.ts.
@@ -136,11 +152,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`
       "Loaded Prisma config from prisma.config.ts.
@@ -164,11 +184,15 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to <output> in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to <output> in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
     expect(data.stderr).toMatchInlineSnapshot(`
       "Loaded Prisma config from prisma.config.ts.
@@ -257,8 +281,12 @@ it('should hide hints with --no-hints', async () => {
 
   expect(data.stdout).toMatchInlineSnapshot(`
     "
-    ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
-    "
+    ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
+
+
+    warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+    This might lead to unexpected behavior.
+    Please make sure they have the same version."
   `)
   expect(data.stderr).toMatchInlineSnapshot(`
     "Loaded Prisma config from prisma.config.ts.
@@ -424,11 +452,15 @@ describe('--schema from project directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 
@@ -447,11 +479,15 @@ describe('--schema from project directory', () => {
 
     expect(output).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 
@@ -499,11 +535,15 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./subdirectory/@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./subdirectory/@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 
@@ -524,11 +564,15 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./subdirectory/@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./subdirectory/@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 
@@ -553,11 +597,15 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 
@@ -570,13 +618,17 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client_3 in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client_3 in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-      "
+
+
+      warn Versions of prisma@0.0.0 and @prisma-kb/client@7.10.0-kb.1 don't match.
+      This might lead to unexpected behavior.
+      Please make sure they have the same version."
     `)
   })
 

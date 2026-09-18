@@ -7,10 +7,10 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "@prisma/client": "workspace:/tmp/prisma-client-0.0.0.tgz"
+    "@prisma-kb/client": "workspace:/tmp/prisma-kb-client-7.10.0-kb.1.tgz"
   },
   "devDependencies": {
-    "@prisma/client": "/tmp/prisma-client-0.0.0.tgz",
+    "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",
     "@prisma/client-runtime-utils": "/tmp/prisma-client-runtime-utils-0.0.0.tgz",
     "prisma": "/tmp/prisma-0.0.0.tgz",
     "typescript": "5.4.5"
