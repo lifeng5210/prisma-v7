@@ -253,8 +253,8 @@ importers:
   packages/adapter-kb:
     dependencies:
       '@prisma-kb/driver-adapter-utils':
-        specifier: workspace:*
-        version: link:../driver-adapter-utils-kb
+        specifier: 7.10.0-kb.1
+        version: 7.10.0-kb.1
       kingbasedb:
         specifier: 8.22.0
         version: 8.22.0
@@ -3856,6 +3856,9 @@ packages:
     resolution: {integrity: sha512-6BMtNr7aQhyNcGzmumkL0tgr1YQGfm9d7ZdmRpWqWuqpc9vZBind4xMe5NMiRECOhjuSiWHfBWLBnXkpeE90bw==}
     peerDependencies:
       prettier: '*'
+
+  '@prisma-kb/driver-adapter-utils@7.10.0-kb.1':
+    resolution: {integrity: sha512-PEUFkWhKLQSasl+vFUXHbkcIsHaFQbpFVyB5nqz/QK49aX0UDYoJu8Ub2YDyVsye5lhs/uTiVRLKc9sh3UDSSA==}
 
   '@prisma-kb/engines-version@7.10.0-kb.1':
     resolution: {integrity: sha512-cD1+7YSpXdEEjqb35imDP+0B4Ad8KytTjVG5cRiAFFT9HyWA4DNtNbe7I1HB/AAOyzx2zswA6BKCt8bgtfm95Q==}
@@ -10859,6 +10862,10 @@ snapshots:
     dependencies:
       make-synchronized: 0.4.2
       prettier: 3.5.3
+
+  '@prisma-kb/driver-adapter-utils@7.10.0-kb.1':
+    dependencies:
+      '@prisma/driver-adapter-utils': 7.10.0
 
   '@prisma-kb/engines-version@7.10.0-kb.1': {}
 

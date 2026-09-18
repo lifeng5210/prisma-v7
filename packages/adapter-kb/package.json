@@ -40,7 +40,7 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@prisma-kb/driver-adapter-utils": "workspace:*",
+    "@prisma-kb/driver-adapter-utils": "7.10.0-kb.1",
     "kingbasedb": "8.22.0"
   }
 }
