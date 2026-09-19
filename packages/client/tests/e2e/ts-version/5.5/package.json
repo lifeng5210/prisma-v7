@@ -11,6 +11,6 @@
     "@types/jest": "29.5.12",
     "@types/node": "~20.19.0",
     "typescript": "5.5.4",
-    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.2.tgz"
   }
 }

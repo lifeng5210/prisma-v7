@@ -10,6 +10,6 @@
   "devDependencies": {
     "@types/node": "~20.19.0",
     "vitest": "4.0.18",
-    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.2.tgz"
   }
 }

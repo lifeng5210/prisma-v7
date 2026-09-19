@@ -14,7 +14,7 @@
   "devDependencies": {
     "@types/node": "~20.19.0",
     "@types/react": "18.3.3",
-    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.2.tgz"
   },
   "dependencies": {
     "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz",

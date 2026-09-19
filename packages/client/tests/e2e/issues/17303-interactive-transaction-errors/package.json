@@ -15,6 +15,6 @@
     "@types/pg": "8.11.0",
     "expect-type": "0.19.0",
     "typescript": "5.4.5",
-    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.1.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.2.tgz"
   }
 }

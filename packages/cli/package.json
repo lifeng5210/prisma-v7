@@ -1,5 +1,5 @@
 {
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.2",
   "name": "prisma-kb",
   "description": "Prisma CLI distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
@@ -184,7 +184,7 @@
     "test:platform": "dotenv -e ../../.db.env -- tsx helpers/run-tests.ts src/platform",
     "tsc": "tsc -d -p tsconfig.build.json",
     "preinstall": "node scripts/preinstall-entry.js",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "node scripts/ensure-pnpm-publish.js && pnpm run build"
   },
   "dependencies": {
     "@prisma/config": "workspace:*",

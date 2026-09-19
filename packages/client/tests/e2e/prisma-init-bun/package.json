@@ -8,6 +8,6 @@
   "devDependencies": {
     "typescript": "5.9.3",
     "bun-types": "latest",
-    "prisma-kb": "file:/tmp/prisma-kb-7.10.0-kb.1.tgz"
+    "prisma-kb": "file:/tmp/prisma-kb-7.10.0-kb.2.tgz"
   }
 }
