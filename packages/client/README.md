@@ -9,18 +9,27 @@ intended to be used with the matching `prisma-kb` CLI and
 ## Installation
 
 ```bash
-npm install @prisma-kb/client@7.10.0-kb.1 @prisma-kb/adapter-kb@7.10.0-kb.1
-npm install --save-dev prisma-kb@7.10.0-kb.1
+npm install @prisma-kb/client @prisma-kb/adapter-kb
+npm install --save-dev prisma-kb
 ```
 
-After generating a client, import it from this package:
+After generating a client, import `PrismaClient` from the output configured in
+the `generator` block of your Prisma schema:
 
 ```ts
-import { PrismaClient } from '@prisma-kb/client'
+import { PrismaClient } from './generated/prisma/client'
 ```
 
-Keep all `@prisma-kb/*` packages on the same release version. This release uses
-Kingbase engine revision `5b8c5395cd3894eb88907c3e1e04ad43a669927f`.
+Use `PrismaKb` with the `kingbase-mysql` provider and `PrismaKbOracle` with the
+`kingbase-oracle` provider:
+
+```ts
+import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+```
+
+The Prisma Kingbase packages are versioned independently. Install their current
+`latest` releases together, or pin a set of versions that you have tested
+together in your lockfile.
 
 ## License
 

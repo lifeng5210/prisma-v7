@@ -43,6 +43,132 @@ Prisma Client can be used in _any_ Node.js or TypeScript backend application (in
 
 ## Getting started
 
+### KingbaseES quickstart
+
+This distribution adds two KingbaseES providers:
+
+- `kingbase-mysql`, used with the `PrismaKb` driver adapter
+- `kingbase-oracle`, used with the `PrismaKbOracle` driver adapter
+
+Create a TypeScript project and install the Prisma Kingbase packages:
+
+```sh
+npm init -y
+npm install --save-dev typescript tsx @types/node prisma-kb
+npm install @prisma-kb/client @prisma-kb/adapter-kb dotenv
+npx tsc --init
+npm pkg set type=module
+```
+
+Initialize the project for one of the two providers:
+
+```sh
+# Kingbase MySQL mode
+npx prisma-kb init --datasource-provider kingbase-mysql --output ../generated/prisma
+
+# Kingbase Oracle mode
+npx prisma-kb init --datasource-provider kingbase-oracle --output ../generated/prisma
+```
+
+Set `DATABASE_URL` in `.env` using the matching connection URL scheme:
+
+```dotenv
+# Kingbase MySQL mode
+DATABASE_URL="kingbase-mysql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA"
+
+# Kingbase Oracle mode
+DATABASE_URL="kingbase-oracle://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA"
+```
+
+The generated `prisma.config.ts` loads that URL and points the CLI to the
+schema and migrations directory:
+
+```ts
+import 'dotenv/config'
+import { defineConfig } from 'prisma-kb/config'
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    url: process.env.DATABASE_URL,
+  },
+})
+```
+
+Define your models in `prisma/schema.prisma`. Keep the provider selected during
+`init` (`kingbase-mysql` below, or change it to `kingbase-oracle`):
+
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  published Boolean @default(false)
+  authorId  Int
+  author    User    @relation(fields: [authorId], references: [id])
+}
+```
+
+Create the database objects and generate Prisma Client:
+
+```sh
+npx prisma-kb migrate dev --name init
+npx prisma-kb generate
+```
+
+For `kingbase-mysql`, create the Client with `PrismaKb`:
+
+```ts
+import 'dotenv/config'
+import { PrismaKb } from '@prisma-kb/adapter-kb'
+import { PrismaClient } from './generated/prisma/client'
+
+const adapter = new PrismaKb(process.env.DATABASE_URL!)
+const prisma = new PrismaClient({ adapter })
+
+const users = await prisma.user.findMany()
+console.log(users)
+
+await prisma.$disconnect()
+```
+
+For `kingbase-oracle`, use `PrismaKbOracle` instead:
+
+```ts
+import 'dotenv/config'
+import { PrismaKbOracle } from '@prisma-kb/adapter-kb'
+import { PrismaClient } from './generated/prisma/client'
+
+const adapter = new PrismaKbOracle(process.env.DATABASE_URL!)
+const prisma = new PrismaClient({ adapter })
+
+const users = await prisma.user.findMany()
+console.log(users)
+
+await prisma.$disconnect()
+```
+
+Run the application with `npx tsx index.ts`. Use the `prisma-kb` command for
+other Prisma workflows such as `db pull`, `migrate`, `studio`, and `validate`.
+
 ### Quickstart (5min)
 
 The fastest way to get started with Prisma is by following the quickstart guides. You can choose either of two databases:
