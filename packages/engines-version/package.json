@@ -1,13 +1,13 @@
 {
   "name": "@prisma-kb/engines-version",
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.2",
   "description": "Engine revision metadata for the Prisma Kingbase distribution",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "Apache-2.0",
   "author": "lifeng5210",
   "prisma": {
-    "enginesVersion": "5b8c5395cd3894eb88907c3e1e04ad43a669927f"
+    "enginesVersion": "72773c9df8306c5d9c437039f6ee348814abee34"
   },
   "repository": {
     "type": "git",

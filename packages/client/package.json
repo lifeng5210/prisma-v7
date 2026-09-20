@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/client",
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.2",
   "description": "Prisma Client distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
     "ORM",

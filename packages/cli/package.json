@@ -1,5 +1,5 @@
 {
-  "version": "7.10.0-kb.2",
+  "version": "7.10.0-kb.3",
   "name": "prisma-kb",
   "description": "Prisma CLI distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [

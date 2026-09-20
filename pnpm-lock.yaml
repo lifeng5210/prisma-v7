@@ -1247,8 +1247,8 @@ importers:
   packages/engines:
     dependencies:
       '@prisma-kb/engines-version':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: 7.10.0-kb.2
+        version: 7.10.0-kb.2
       '@prisma/debug':
         specifier: 7.10.0
         version: 7.10.0
@@ -3860,8 +3860,8 @@ packages:
   '@prisma-kb/driver-adapter-utils@7.10.0-kb.1':
     resolution: {integrity: sha512-PEUFkWhKLQSasl+vFUXHbkcIsHaFQbpFVyB5nqz/QK49aX0UDYoJu8Ub2YDyVsye5lhs/uTiVRLKc9sh3UDSSA==}
 
-  '@prisma-kb/engines-version@7.10.0-kb.1':
-    resolution: {integrity: sha512-cD1+7YSpXdEEjqb35imDP+0B4Ad8KytTjVG5cRiAFFT9HyWA4DNtNbe7I1HB/AAOyzx2zswA6BKCt8bgtfm95Q==}
+  '@prisma-kb/engines-version@7.10.0-kb.2':
+    resolution: {integrity: sha512-DbxObQClQtDirG5YsdM8xsQwfj/6sHNyJ1SscFsU+7Qj0iQ07BX9VIHtwZEJNUQZxkG2Quhr11qfQAls9iBd5Q==}
 
   '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1':
     resolution: {integrity: sha512-nm7l6Idc82NSr99p3NS9UQhXXST49aUfhVkl+28HG/C4hnH5ZBiUfKJa8aX07p9edZRDD73ZFyeHlWJUWzCD/g==}
@@ -10870,7 +10870,7 @@ snapshots:
     dependencies:
       '@prisma/driver-adapter-utils': 7.10.0
 
-  '@prisma-kb/engines-version@7.10.0-kb.1': {}
+  '@prisma-kb/engines-version@7.10.0-kb.2': {}
 
   '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1': {}
 
