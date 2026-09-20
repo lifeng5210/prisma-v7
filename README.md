@@ -167,7 +167,8 @@ await prisma.$disconnect()
 ```
 
 Run the application with `npx tsx index.ts`. Use the `prisma-kb` command for
-other Prisma workflows such as `db pull`, `migrate`, `studio`, and `validate`.
+other supported Prisma workflows such as `db pull`, `migrate`, `generate`, and
+`validate`. Prisma Studio does not currently support the Kingbase providers.
 
 ### Quickstart (5min)
 
