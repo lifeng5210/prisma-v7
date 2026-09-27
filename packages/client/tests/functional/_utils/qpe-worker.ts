@@ -6,7 +6,7 @@ import { serve, type ServerType } from '@hono/node-server'
 import { context, trace } from '@opentelemetry/api'
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks'
 import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
-import type { Server } from '@prisma/query-plan-executor'
+import type { Server } from '@prisma-kb/query-plan-executor'
 
 context.setGlobalContextManager(new AsyncLocalStorageContextManager())
 trace.setGlobalTracerProvider(new BasicTracerProvider())
@@ -79,7 +79,7 @@ async function handleMessage(port: MessagePort, message: QpeWorkerMessage): Prom
 
 async function handleStart(message: QpeWorkerStartMessage): Promise<QpeWorkerReadyResponse> {
   // It should only be imported after initializing OpenTelemetry
-  const { Server, parseSize, parseDuration } = await import('@prisma/query-plan-executor')
+  const { Server, parseSize, parseDuration } = await import('@prisma-kb/query-plan-executor')
 
   const qpe = await Server.create({
     databaseUrl: message.databaseUrl,

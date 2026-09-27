@@ -1,12 +1,12 @@
 {
-  "name": "@prisma/query-plan-executor",
-  "version": "0.0.0",
-  "description": "This package is intended for Prisma's internal use",
+  "name": "@prisma-kb/query-plan-executor",
+  "version": "7.10.0-kb.1",
+  "description": "Query plan executor with Kingbase MySQL and Kingbase Oracle support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/query-plan-executor"
   },
   "license": "Apache-2.0",

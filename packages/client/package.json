@@ -208,7 +208,7 @@
     "@prisma/param-graph": "workspace:*",
     "@prisma/param-graph-builder": "workspace:*",
     "@prisma-kb/query-compiler-wasm": "7.10.0-kb.1",
-    "@prisma/query-plan-executor": "workspace:*",
+    "@prisma-kb/query-plan-executor": "workspace:*",
     "@prisma/sqlcommenter": "workspace:*",
     "@prisma/sqlcommenter-trace-context": "workspace:*",
     "@prisma/ts-builders": "workspace:*",

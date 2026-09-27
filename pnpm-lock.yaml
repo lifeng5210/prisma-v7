@@ -801,7 +801,7 @@ importers:
       '@prisma/param-graph-builder':
         specifier: workspace:*
         version: link:../param-graph-builder
-      '@prisma/query-plan-executor':
+      '@prisma-kb/query-plan-executor':
         specifier: workspace:*
         version: link:../query-plan-executor
       '@prisma/sqlcommenter':
