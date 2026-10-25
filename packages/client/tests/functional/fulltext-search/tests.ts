@@ -1,3 +1,4 @@
+import { Providers } from '../_utils/providers'
 import testMatrix from './_matrix'
 // @ts-ignore
 import type { PrismaClient } from './generated/prisma/client'
@@ -5,7 +6,7 @@ import type { PrismaClient } from './generated/prisma/client'
 declare let prisma: PrismaClient
 
 testMatrix.setupTestSuite(
-  ({ andQuery, orQuery, notQuery, noResultsQuery, badQuery }, _suiteMeta, _clientMeta) => {
+  ({ provider, andQuery, orQuery, notQuery, noResultsQuery, badQuery }, _suiteMeta, _clientMeta) => {
     beforeAll(async () => {
       await prisma.user.createMany({
         data: [
@@ -77,6 +78,25 @@ testMatrix.setupTestSuite(
 
       expect(result).toEqual([])
     })
+
+    testIf(provider === Providers.KINGBASE_MYSQL || provider === Providers.MYSQL)(
+      'binds each Boolean Mode input with matching semantics on reused plans',
+      async () => {
+        for (const [search, expected] of [
+          ['John', ['John Smith', 'John Pearl']],
+          ['+John +Smith', ['John Smith']],
+          ['John April', ['John Smith', 'John Pearl', 'April ONeal']],
+          ['John -Smith April', ['John Pearl', 'April ONeal']],
+          ['"John Smith"', ['John Smith']],
+          ['John*', ['John Smith', 'John Pearl']],
+          ['-John', []],
+          ['+(John April) -Smith', ['John Pearl', 'April ONeal']],
+        ] as const) {
+          const users = await prisma.user.findMany({ where: { name: { search } } })
+          expect(users.map((user) => user.name).sort()).toEqual([...expected].sort())
+        }
+      },
+    )
 
     // TODO: Windows: why is this test skipped?
     // TODO: Edge: skipped because of the error snapshot

@@ -125,3 +125,29 @@ describe('Kingbase field conversion', () => {
     ).toBe('03:04:05.678')
   })
 })
+
+describe('MySQL Boolean Mode bound parameters', () => {
+  test.each([
+    ['John April', "('John') | ('April')"],
+    ['+John +Smith', "('John') & ('Smith')"],
+    ['John -Smith April', "(('John') | ('April')) & !(('Smith'))"],
+    ['"John Smith"', "(('John' <-> 'Smith'))"],
+    ['John*', "('John':*)"],
+    ['+(John April) -Smith', "((('John') | ('April'))) & !(('Smith'))"],
+    ['你好 世界', "('你好') | ('世界')"],
+    ['', "'__prisma_never_match__' & !'__prisma_never_match__'"],
+    ['-John', "'__prisma_never_match__' & !'__prisma_never_match__'"],
+  ])('converts %s consistently for reused query plans', (input, output) => {
+    expect(mapArg(input, { scalarType: 'string', dbType: 'PRISMA_MYSQL_BOOLEAN_QUERY', arity: 'scalar' })).toBe(output)
+    expect(mapArg(input, { scalarType: 'string', arity: 'scalar' })).toBe(input)
+  })
+
+  test.each(['~John', '>John', '"John Smith"@2', '(John', 'John)', '+', 'John & Smith', 'John <--> Smith', '""'])(
+    'rejects unsupported or malformed query %s',
+    (input) => {
+      expect(() =>
+        mapArg(input, { scalarType: 'string', dbType: 'PRISMA_MYSQL_BOOLEAN_QUERY', arity: 'scalar' }),
+      ).toThrow('Kingbase MySQL full-text search')
+    },
+  )
+})
