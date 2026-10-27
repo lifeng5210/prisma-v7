@@ -1,5 +1,7 @@
 import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 
+import { FIRST_NORMAL_OBJECT_ID } from './constants'
+
 /** PostgreSQL wire-protocol OIDs exposed by Kingbase Oracle mode. */
 const PostgresTypeId = {
   BOOL: 16,
@@ -159,7 +161,7 @@ export function fieldToOracleColumnType(fieldTypeId: number): ColumnType {
     default:
       // User-defined and enum types are returned as text. The query schema
       // determines whether the value is ultimately represented as an enum.
-      if (fieldTypeId >= 16384) {
+      if (fieldTypeId >= FIRST_NORMAL_OBJECT_ID) {
         return ColumnTypeEnum.Text
       }
       throw new UnsupportedOracleNativeDataType(fieldTypeId)

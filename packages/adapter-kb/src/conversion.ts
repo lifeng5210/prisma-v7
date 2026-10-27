@@ -1,5 +1,7 @@
 import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 
+import { FIRST_NORMAL_OBJECT_ID } from './constants'
+
 /**
  * OIDs shared with PostgreSQL. The values come from postgres-types' generated
  * `pg_type_gen.rs` and are also used by the existing adapter-pg package.
@@ -217,7 +219,7 @@ export function fieldToColumnType(fieldTypeId: number, typeModifier?: number): C
     default:
       // User-defined and enum types are returned as text. The query schema
       // decides whether the value should be surfaced as an enum.
-      if (fieldTypeId >= 16384) {
+      if (fieldTypeId >= FIRST_NORMAL_OBJECT_ID) {
         return ColumnTypeEnum.Text
       }
       throw new UnsupportedNativeDataType(fieldTypeId)
