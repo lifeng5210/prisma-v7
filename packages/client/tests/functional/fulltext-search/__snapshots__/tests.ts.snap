@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`fulltext-search (provider=kingbase-mysql, js_kb) bad query 1`] = `"Kingbase MySQL full-text search does not support MySQL relevance or proximity modifiers"`;
+exports[`fulltext-search (provider=kingbase-mysql, js_kb) bad query 1`] = `"syntax error in tsquery: "John Smith""`;
 
 exports[`fulltext-search (provider=kingbase-oracle, js_kb_oracle) bad query 1`] = `"syntax error in tsquery: "John Smith""`;
 

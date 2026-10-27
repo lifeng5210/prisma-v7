@@ -79,7 +79,7 @@ testMatrix.setupTestSuite(
       expect(result).toEqual([])
     })
 
-    testIf(provider === Providers.KINGBASE_MYSQL || provider === Providers.MYSQL)(
+    testIf(provider === Providers.MYSQL)(
       'binds each Boolean Mode input with matching semantics on reused plans',
       async () => {
         for (const [search, expected] of [
@@ -94,6 +94,42 @@ testMatrix.setupTestSuite(
         ] as const) {
           const users = await prisma.user.findMany({ where: { name: { search } } })
           expect(users.map((user) => user.name).sort()).toEqual([...expected].sort())
+        }
+      },
+    )
+
+    testIf(provider === Providers.KINGBASE_MYSQL || provider === Providers.KINGBASE_ORACLE)(
+      'binds native tsquery inputs unchanged on reused plans',
+      async () => {
+        for (const [search, expected] of [
+          ['John', ['John Smith', 'John Pearl']],
+          ['John & Smith', ['John Smith']],
+          ['John | April', ['John Smith', 'John Pearl', 'April ONeal']],
+          ['(John | April) & !Smith', ['John Pearl', 'April ONeal']],
+          ['John <-> Smith', ['John Smith']],
+          ['John:*', ['John Smith', 'John Pearl']],
+          ['!John', ['April ONeal']],
+          ['April & Smith', []],
+        ] as const) {
+          const users = await prisma.user.findMany({ where: { name: { search } } })
+          expect(users.map((user) => user.name).sort()).toEqual([...expected].sort())
+        }
+      },
+    )
+
+    testIf(provider === Providers.KINGBASE_MYSQL || provider === Providers.KINGBASE_ORACLE)(
+      'binds native tsquery relevance parameters on reused plans',
+      async () => {
+        for (const [search, first] of [
+          ['John & Smith', 'John Smith'],
+          ['April', 'April ONeal'],
+          ['John & Pearl', 'John Pearl'],
+        ] as const) {
+          const users = await prisma.user.findMany({
+            orderBy: { _relevance: { fields: ['name'], search, sort: 'desc' } },
+          })
+          expect(users).toHaveLength(3)
+          expect(users[0].name).toBe(first)
         }
       },
     )

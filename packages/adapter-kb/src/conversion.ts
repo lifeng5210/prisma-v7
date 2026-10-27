@@ -226,94 +226,6 @@ export function fieldToColumnType(fieldTypeId: number, typeModifier?: number): C
   }
 }
 
-/** Bind-time counterpart of Quaint's MySqlBooleanModeParser. */
-function mysqlBooleanQuery(input: string): string {
-  const chars = Array.from(input)
-  let position = 0
-  const fail = (detail: string): never => {
-    throw new Error(`Kingbase MySQL full-text search ${detail}`)
-  }
-  const wordChar = (char: string | undefined) => char !== undefined && /^[\p{L}\p{N}_]$/u.test(char)
-  const whitespace = () => {
-    while (chars[position] !== undefined && /\s/u.test(chars[position])) position++
-  }
-  const lexeme = (word: string, prefix = false) => {
-    if (!word || !Array.from(word).every(wordChar)) fail('contains an unsupported Boolean Mode token')
-    return `'${word.replaceAll('\\', '\\\\').replaceAll("'", "''")}'${prefix ? ':*' : ''}`
-  }
-  type Term = { modifier: string; expression: string }
-  const compose = (terms: Term[]): string | undefined => {
-    const join = (modifier: string, separator: string) =>
-      terms
-        .filter((term) => term.modifier === modifier)
-        .map((term) => `(${term.expression})`)
-        .join(separator)
-    const required = join('+', ' & ')
-    const optional = join('', ' | ')
-    const prohibited = join('-', ' | ')
-    let expression = required ? (optional ? `(${required}) & ((${required}) | (${optional}))` : required) : optional
-    if (!expression) return undefined
-    if (prohibited) expression = `(${expression}) & !(${prohibited})`
-    return expression
-  }
-  const parse = (nested: boolean): Term[] => {
-    const terms: Term[] = []
-    for (;;) {
-      whitespace()
-      if (position === chars.length) {
-        if (nested) fail('contains an unclosed parenthesis')
-        return terms
-      }
-      if (chars[position] === ')') {
-        if (nested) position++
-        return terms
-      }
-      let modifier = ''
-      if (chars[position] === '+' || chars[position] === '-') modifier = chars[position++]
-      else if (['~', '>', '<', '@'].includes(chars[position]))
-        fail('does not support MySQL relevance or proximity modifiers')
-      whitespace()
-      let expression: string
-      const first = chars[position++]
-      if (first === undefined) fail('modifier is missing a search term')
-      if (first === '(') {
-        expression = compose(parse(true)) ?? fail('group must contain a positive search term')
-      } else if (first === '"') {
-        const words: string[] = []
-        let word = ''
-        for (;;) {
-          const char = chars[position++]
-          if (char === undefined) fail('contains an unterminated phrase')
-          if (char === '"') {
-            if (word) words.push(lexeme(word))
-            break
-          }
-          if (/\s/u.test(char)) {
-            if (word) words.push(lexeme(word))
-            word = ''
-          } else word += char
-        }
-        if (!words.length) fail('phrase must contain a word')
-        if (chars[position] === '@') fail('does not support MySQL proximity modifiers')
-        expression = `(${words.join(' <-> ')})`
-      } else {
-        let word = first
-        while (wordChar(chars[position])) word += chars[position++]
-        const prefix = chars[position] === '*'
-        if (prefix) position++
-        if (chars[position] !== undefined && !/\s/u.test(chars[position]) && !['(', ')'].includes(chars[position])) {
-          fail('contains an unsupported Boolean Mode token')
-        }
-        expression = lexeme(word, prefix)
-      }
-      terms.push({ modifier, expression })
-    }
-  }
-  const expression = compose(parse(false))
-  if (position < chars.length) fail('contains an unexpected closing parenthesis')
-  return expression ?? "'__prisma_never_match__' & !'__prisma_never_match__'"
-}
-
 export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint8Array | A {
   if (argType.arity === 'list') {
     throw new Error('Arrays are not supported in Kingbase MySQL.')
@@ -325,10 +237,6 @@ export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint
   if (Array.isArray(arg)) {
     if (argType.scalarType === 'json') return JSON.stringify(arg)
     throw new Error('Arrays are not supported in Kingbase MySQL.')
-  }
-
-  if (typeof arg === 'string' && argType.dbType === 'PRISMA_MYSQL_BOOLEAN_QUERY') {
-    return mysqlBooleanQuery(arg)
   }
 
   if (typeof arg === 'string' && argType.scalarType === 'datetime') {
