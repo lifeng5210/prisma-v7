@@ -23,5 +23,17 @@ model OtherValue {
   value String
   @@index([value], map: "shared")
 }
+model AutoParent {
+  id Int @id @default(autoincrement()) @map("parent_key")
+  children AutoChild[]
+}
+model AutoChild {
+  id Int @id @default(autoincrement())
+  parentId Int
+  parent AutoParent @relation(fields: [parentId], references: [id])
+}
+model AutoBigInt {
+  id BigInt @id @default(autoincrement())
+}
 `,
 )

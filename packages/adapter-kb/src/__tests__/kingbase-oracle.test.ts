@@ -1,7 +1,7 @@
 import { ColumnTypeEnum, type SqlQuery } from '@prisma-kb/driver-adapter-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { PrismaKbOracleAdapterFactory, splitOracleStatements } from '../kingbase-oracle'
+import { PrismaKbOracleAdapterFactory } from '../kingbase-oracle'
 
 type MockConnection = {
   query: ReturnType<typeof vi.fn>
@@ -58,6 +58,54 @@ function createPool(): { pool: MockPool; connection: MockConnection } {
   return { pool, connection }
 }
 
+test.skipIf(!process.env.TEST_KINGBASE_ORACLE_URI)(
+  'real ORACLE JSON results preserve scalar strings and SQL NULL',
+  async () => {
+    const adapter = await new PrismaKbOracleAdapterFactory(process.env.TEST_KINGBASE_ORACLE_URI!).connect()
+    const values = [
+      '123',
+      'true',
+      'false',
+      'null',
+      '{}',
+      '[]',
+      '"quoted"',
+      '',
+      'hello',
+      123,
+      true,
+      false,
+      null,
+      [1, '123', null],
+      { n: '123' },
+    ]
+    try {
+      for (const jsonType of ['JSON', 'JSONB']) {
+        for (const value of values) {
+          const result = await adapter.queryRaw({
+            sql: `SELECT CAST($1 AS ${jsonType}) AS value`,
+            args: [JSON.stringify(value)],
+            argTypes: [{ scalarType: 'string', arity: 'scalar' }],
+          })
+          expect(result.columnTypes).toEqual([ColumnTypeEnum.Json])
+          expect(JSON.parse(result.rows[0][0] as string)).toEqual(value)
+        }
+      }
+      const ordinaryDriverResult = await adapter.underlyingDriver().query({
+        text: 'SELECT CAST($1 AS JSON) AS value',
+        values: ['"123"'],
+        rowMode: 'array',
+      })
+      expect(ordinaryDriverResult.rows).toEqual([['123']])
+      const nulls = await adapter.queryRaw({ sql: 'SELECT CAST(NULL AS JSON) AS value', args: [], argTypes: [] })
+      expect(nulls.rows).toEqual([[null]])
+    } finally {
+      await adapter.dispose()
+    }
+  },
+  20000,
+)
+
 describe('PrismaKbOracleAdapterFactory', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -77,9 +125,15 @@ describe('PrismaKbOracleAdapterFactory', () => {
       text: 'SELECT "id" FROM "UserTest" WHERE "id" = $1',
       values: [1],
       rowMode: 'array',
+      types: expect.objectContaining({ getTypeParser: expect.any(Function) }),
     })
     expect(connection.release).toHaveBeenCalledOnce()
     expect(adapter.underlyingDriver()).toBe(pool)
+    const config = connection.query.mock.calls[1][0]
+    for (const oid of [114, 3802]) {
+      expect(config.types.getTypeParser(oid, 'text')('"123"')).toBe('"123"')
+    }
+    expect(config.types.getTypeParser(23, 'text')('7')).toBe(7)
     expect(adapter.provider).toBe('kingbase-oracle')
     expect(adapter.getConnectionInfo()).toEqual({
       maxBindValues: 32767,
@@ -115,11 +169,17 @@ describe('PrismaKbOracleAdapterFactory', () => {
     const transaction = await adapter.startTransaction('READ COMMITTED')
 
     expect(connection.query).toHaveBeenNthCalledWith(1, "SET TIME ZONE 'UTC'")
-    expect(connection.query).toHaveBeenCalledWith({ text: 'BEGIN', values: [], rowMode: 'array' })
+    expect(connection.query).toHaveBeenCalledWith({
+      text: 'BEGIN',
+      values: [],
+      rowMode: 'array',
+      types: expect.objectContaining({ getTypeParser: expect.any(Function) }),
+    })
     expect(connection.query).toHaveBeenCalledWith({
       text: 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED',
       values: [],
       rowMode: 'array',
+      types: expect.objectContaining({ getTypeParser: expect.any(Function) }),
     })
 
     await transaction.rollback()
@@ -138,6 +198,7 @@ describe('PrismaKbOracleAdapterFactory', () => {
       text: 'SELECT "id" FROM "UserTest" WHERE "id" = $1',
       values: [1],
       rowMode: 'array',
+      types: expect.objectContaining({ getTypeParser: expect.any(Function) }),
     })
     expect(connection.release).toHaveBeenCalledOnce()
   })
@@ -179,94 +240,39 @@ describe('PrismaKbOracleAdapterFactory', () => {
     await adapter.dispose()
   })
 
-  test('executes Oracle procedural blocks without splitting their internal statements', async () => {
+  test('rejects script execution without borrowing a connection or executing SQL', async () => {
     const { pool, connection } = createPool()
-    const adapter = await new PrismaKbOracleAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbOracleAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
-    await adapter.executeScript(`
-      CREATE TABLE "Log" ("id" INTEGER);
-      BEGIN
-        INSERT INTO "Log" ("id") VALUES (1);
-        INSERT INTO "Log" ("id") VALUES (2);
-      END;
-      /
-      SELECT * FROM "Log";
-    `)
-
-    expect(connection.query).toHaveBeenNthCalledWith(2, 'CREATE TABLE "Log" ("id" INTEGER)')
-    expect(connection.query).toHaveBeenNthCalledWith(
-      4,
-      'BEGIN\n        INSERT INTO "Log" ("id") VALUES (1);\n        INSERT INTO "Log" ("id") VALUES (2);\n      END;',
+    expect(() => adapter.executeScript('BEGIN; INSERT INTO records VALUES (1); ROLLBACK;')).toThrow(
+      'Not implemented yet',
     )
-    expect(connection.query).toHaveBeenNthCalledWith(6, 'SELECT * FROM "Log"')
-    expect(connection.release).toHaveBeenCalledTimes(3)
-  })
+    expect(pool.connect).not.toHaveBeenCalled()
+    expect(pool.query).not.toHaveBeenCalled()
+    expect(connection.query).not.toHaveBeenCalled()
 
-  test('preserves semicolons inside dollar-quoted script bodies', () => {
-    expect(splitOracleStatements('CREATE FUNCTION f() AS $$ BEGIN; END; $$; SELECT 1;')).toEqual([
-      'CREATE FUNCTION f() AS $$ BEGIN; END; $$',
-      'SELECT 1',
-    ])
-  })
-
-  test('recognizes commented editionable procedures and Oracle alternative quotes', () => {
-    expect(
-      splitOracleStatements(`
-        -- Keep this deployment comment with the procedure.
-        /* A block comment can also precede CREATE. */
-        CREATE OR REPLACE EDITIONABLE PROCEDURE write_log AS
-        BEGIN
-          INSERT INTO "Log" ("message") VALUES (q'[it's safe; keep this together]');
-          INSERT INTO "Log" ("message") VALUES (q'{another; message}');
-        END;
-        /
-        SELECT q'<a semicolon; and an apostrophe: it's>' AS "message";
-        SELECT 1;
-      `),
-    ).toEqual([
-      `-- Keep this deployment comment with the procedure.
-        /* A block comment can also precede CREATE. */
-        CREATE OR REPLACE EDITIONABLE PROCEDURE write_log AS
-        BEGIN
-          INSERT INTO "Log" ("message") VALUES (q'[it's safe; keep this together]');
-          INSERT INTO "Log" ("message") VALUES (q'{another; message}');
-        END;`,
-      `SELECT q'<a semicolon; and an apostrophe: it's>' AS "message"`,
-      'SELECT 1',
-    ])
-  })
-
-  test('preserves semicolons and apostrophes inside national Oracle alternative quotes', () => {
-    expect(
-      splitOracleStatements(
-        `SELECT nq'[it's; safe]' AS "lower"; SELECT NQ'{also; safe}' AS "upper"; SELECT nq'!'abc!' AS "same"; SELECT 1;`,
-      ),
-    ).toEqual([
-      `SELECT nq'[it's; safe]' AS "lower"`,
-      `SELECT NQ'{also; safe}' AS "upper"`,
-      `SELECT nq'!'abc!' AS "same"`,
-      'SELECT 1',
-    ])
-  })
-
-  test('recognizes anonymous Oracle blocks after leading comments', () => {
-    expect(
-      splitOracleStatements(`
-        -- Run both statements as one anonymous block.
-        BEGIN
-          NULL;
-          NULL;
-        END;
-        /
-        SELECT 1;
-      `),
-    ).toEqual([
-      `-- Run both statements as one anonymous block.
-        BEGIN
-          NULL;
-          NULL;
-        END;`,
-      'SELECT 1',
-    ])
+    await adapter.dispose()
   })
 })
+
+// Read-only integration coverage does not require script execution.
+test.skipIf(!process.env.TEST_KINGBASE_ORACLE_URI)(
+  'real Oracle long JSON text remains untruncated',
+  async () => {
+    const adapter = await new PrismaKbOracleAdapterFactory(process.env.TEST_KINGBASE_ORACLE_URI!).connect()
+    try {
+      const result = await adapter.queryRaw({
+        sql: 'SELECT CAST(CAST($1 AS JSONB) AS TEXT) ILIKE $2 AS matched',
+        args: [JSON.stringify('a'.repeat(4100) + 'TAIL'), '%TAIL%'],
+        argTypes: [
+          { scalarType: 'json', arity: 'scalar' },
+          { scalarType: 'string', arity: 'scalar' },
+        ],
+      })
+      expect(result.rows).toEqual([[true]])
+    } finally {
+      await adapter.dispose()
+    }
+  },
+  20000,
+)

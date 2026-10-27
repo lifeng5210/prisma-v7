@@ -65,6 +65,38 @@ testMatrix.setupTestSuite(
       })
     })
 
+    test('distinguishes JSON null and SQL NULL when creating, updating and filtering', async () => {
+      const ids = ['null-json', 'null-db', 'null-object']
+      try {
+        await prisma.nullableJsonField.createMany({
+          data: [
+            { id: ids[0], json: Prisma.JsonNull },
+            { id: ids[1], json: Prisma.DbNull },
+            { id: ids[2], json: { value: 1 } },
+          ],
+        })
+        const matching = async (value: PrismaNamespace.JsonNullValueFilter) =>
+          (
+            await prisma.nullableJsonField.findMany({
+              where: { id: { in: ids }, json: { equals: value } },
+              orderBy: { id: 'asc' },
+              select: { id: true },
+            })
+          ).map(({ id }) => id)
+
+        expect(await matching(Prisma.JsonNull)).toEqual([ids[0]])
+        expect(await matching(Prisma.DbNull)).toEqual([ids[1]])
+        expect(await matching(Prisma.AnyNull)).toEqual([ids[1], ids[0]])
+
+        await prisma.nullableJsonField.update({ where: { id: ids[0] }, data: { json: Prisma.DbNull } })
+        await prisma.nullableJsonField.update({ where: { id: ids[1] }, data: { json: Prisma.JsonNull } })
+        expect(await matching(Prisma.JsonNull)).toEqual([ids[1]])
+        expect(await matching(Prisma.DbNull)).toEqual([ids[0]])
+      } finally {
+        await prisma.nullableJsonField.deleteMany({ where: { id: { in: ids } } })
+      }
+    })
+
     describe('properties of DbNull/JsonNull/AnyNull', () => {
       test('instanceof checks pass', () => {
         expect(Prisma.DbNull).toBeInstanceOf(Prisma.NullTypes.DbNull)

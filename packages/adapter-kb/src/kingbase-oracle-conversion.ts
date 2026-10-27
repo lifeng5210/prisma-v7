@@ -210,7 +210,7 @@ type ResultField = {
   dataTypeID: number
 }
 
-const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB])
+export const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB])
 const dateTypeIds = new Set<number>([PostgresTypeId.DATE])
 const timeTypeIds = new Set<number>([PostgresTypeId.TIME, PostgresTypeId.TIMETZ])
 const dateTimeTypeIds = new Set<number>([
@@ -317,18 +317,9 @@ function formatTime(date: Date): string {
 }
 
 function normalizeJsonResult(value: unknown): string {
-  if (typeof value !== 'string') {
-    return JSON.stringify(value)
-  }
-
-  try {
-    JSON.parse(value)
-    return value
-  } catch {
-    // A JSON scalar string is returned without its JSON quotes by the driver.
-    // The query protocol expects a serialized JSON value, so add them back.
-    return JSON.stringify(value)
-  }
+  // Query-local JSON parsers return complete JSON text, including the quotes
+  // around a scalar string. Never infer its type from the string contents.
+  return typeof value === 'string' ? value : JSON.stringify(value)
 }
 
 function normalizeDateTimeResult(value: unknown, preserveLocalWallTime = false): string {

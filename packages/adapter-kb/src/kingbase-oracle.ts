@@ -20,6 +20,7 @@ import { name as packageName } from '../package.json'
 import { convertDriverError } from './errors'
 import {
   fieldToOracleColumnType,
+  jsonTypeIds,
   mapOracleArg,
   mapOracleRow,
   UnsupportedOracleNativeDataType,
@@ -35,6 +36,7 @@ type QueryConfig = {
   text: string
   values: unknown[]
   rowMode: 'array'
+  types?: { getTypeParser(oid: number, format?: string): (value: string) => unknown }
 }
 
 type Field = {
@@ -67,6 +69,9 @@ type KingbaseOraclePool = KingbaseOracleQueryableClient & {
 
 type KingbaseRuntimeModule = {
   Pool: new (config: PoolConfig) => KingbaseOraclePool
+  types: {
+    getTypeParser(oid: number, format?: string): (value: string) => unknown
+  }
   default?: KingbaseRuntimeModule
 }
 
@@ -126,6 +131,17 @@ class KingbaseOracleQueryable<Client extends KingbaseOracleQueryableClient> impl
         text: query.sql,
         values,
         rowMode: 'array',
+        types: {
+          getTypeParser: (oid, format = 'text') => {
+            // Preserve JSON wire text for the Client's decoder. In particular,
+            // decoded strings such as "123" cannot be distinguished from JSON
+            // numbers by inspecting their contents.
+            if (format === 'text' && jsonTypeIds.has(oid)) {
+              return (value) => value
+            }
+            return runtime.types.getTypeParser(oid, format)
+          },
+        },
       })
     } catch (error) {
       this.onError(error)
@@ -226,14 +242,8 @@ export class PrismaKbOracleAdapter extends KingbaseOracleQueryable<KingbaseOracl
     }
   }
 
-  async executeScript(script: string): Promise<void> {
-    for (const statement of splitOracleStatements(script)) {
-      try {
-        await this.client.query(statement)
-      } catch (error) {
-        this.onError(error)
-      }
-    }
+  executeScript(_script: string): Promise<void> {
+    throw new Error('Not implemented yet')
   }
 
   getConnectionInfo(): ConnectionInfo {
@@ -458,249 +468,4 @@ function normalizeConnectionString(connectionString: string): string {
   }
 
   return connectionString
-}
-
-/** Splits Oracle-compatible scripts while preserving procedural block bodies. */
-export function splitOracleStatements(script: string): string[] {
-  const statements: string[] = []
-  let statement = ''
-  let quote: "'" | '"' | '`' | undefined
-  let lineComment = false
-  let blockComment = false
-  let proceduralBlock = false
-
-  for (let index = 0; index < script.length; index++) {
-    const character = script[index]
-    const nextCharacter = script[index + 1]
-
-    if (lineComment) {
-      statement += character
-      if (character === '\n') {
-        lineComment = false
-      }
-      continue
-    }
-
-    if (blockComment) {
-      statement += character
-      if (character === '*' && nextCharacter === '/') {
-        statement += nextCharacter
-        index++
-        blockComment = false
-      }
-      continue
-    }
-
-    if (quote !== undefined) {
-      statement += character
-      if (character === '\\' && quote === "'" && nextCharacter !== undefined) {
-        statement += nextCharacter
-        index++
-      } else if (character === quote) {
-        if (nextCharacter === quote) {
-          statement += nextCharacter
-          index++
-        } else {
-          quote = undefined
-        }
-      }
-      continue
-    }
-
-    if (character === '$') {
-      const dollarQuote = readDollarQuote(script, index)
-      if (dollarQuote !== undefined) {
-        const closeIndex = script.indexOf(dollarQuote, index + dollarQuote.length)
-        if (closeIndex !== -1) {
-          statement += script.slice(index, closeIndex + dollarQuote.length)
-          index = closeIndex + dollarQuote.length - 1
-          continue
-        }
-      }
-    }
-
-    if (
-      character === 'q' ||
-      character === 'Q' ||
-      ((character === 'n' || character === 'N') && (nextCharacter === 'q' || nextCharacter === 'Q'))
-    ) {
-      const alternativeQuoteEnd = readOracleAlternativeQuoteEnd(script, index)
-      if (alternativeQuoteEnd !== undefined) {
-        const closeIndex = script.indexOf(alternativeQuoteEnd.delimiter, alternativeQuoteEnd.contentStart)
-        if (closeIndex !== -1) {
-          statement += script.slice(index, closeIndex + alternativeQuoteEnd.delimiter.length)
-          index = closeIndex + alternativeQuoteEnd.delimiter.length - 1
-          continue
-        }
-      }
-    }
-
-    if (character === '-' && nextCharacter === '-') {
-      statement += '--'
-      index++
-      lineComment = true
-      continue
-    }
-
-    if (character === '/' && nextCharacter === '*') {
-      statement += '/*'
-      index++
-      blockComment = true
-      continue
-    }
-
-    if (character === "'" || character === '"' || character === '`') {
-      statement += character
-      quote = character
-      continue
-    }
-
-    if (proceduralBlock && character === '/' && isOracleScriptTerminator(script, index)) {
-      addStatement(statements, statement)
-      statement = ''
-      proceduralBlock = false
-      index = skipToNextLine(script, index)
-      continue
-    }
-
-    if (character === ';' && !proceduralBlock) {
-      addStatement(statements, statement)
-      statement = ''
-      continue
-    }
-
-    statement += character
-    if (!proceduralBlock && isOracleProceduralBlock(statement) && hasOracleScriptTerminator(script, index + 1)) {
-      proceduralBlock = true
-    }
-  }
-
-  addStatement(statements, statement)
-  return statements
-}
-
-function addStatement(statements: string[], statement: string): void {
-  const trimmed = statement.trim()
-  if (trimmed) {
-    statements.push(trimmed)
-  }
-}
-
-function readDollarQuote(sql: string, start: number): string | undefined {
-  if (start > 0 && /[A-Za-z0-9_]/.test(sql[start - 1])) {
-    return undefined
-  }
-
-  let end = start + 1
-  if (end >= sql.length) {
-    return undefined
-  }
-
-  if (sql[end] !== '$') {
-    if (!/[A-Za-z_]/.test(sql[end])) {
-      return undefined
-    }
-    end++
-    while (end < sql.length && sql[end] !== '$') {
-      if (!/[A-Za-z0-9_]/.test(sql[end])) {
-        return undefined
-      }
-      end++
-    }
-  }
-
-  return end < sql.length ? sql.slice(start, end + 1) : undefined
-}
-
-function readOracleAlternativeQuoteEnd(
-  sql: string,
-  start: number,
-): { delimiter: string; contentStart: number } | undefined {
-  const nationalPrefix =
-    (sql[start] === 'n' || sql[start] === 'N') && (sql[start + 1] === 'q' || sql[start + 1] === 'Q')
-  const quoteStart = nationalPrefix ? start + 1 : start
-
-  if (
-    (sql[quoteStart] !== 'q' && sql[quoteStart] !== 'Q') ||
-    sql[quoteStart + 1] !== "'" ||
-    (start > 0 && /[A-Za-z0-9_$#]/.test(sql[start - 1]))
-  ) {
-    return undefined
-  }
-
-  const openingDelimiter = sql[quoteStart + 2]
-  if (openingDelimiter === undefined || /\s/.test(openingDelimiter) || openingDelimiter === "'") {
-    return undefined
-  }
-
-  const closingDelimiter =
-    {
-      '[': ']',
-      '{': '}',
-      '(': ')',
-      '<': '>',
-    }[openingDelimiter] ?? openingDelimiter
-
-  return {
-    delimiter: `${closingDelimiter}'`,
-    contentStart: quoteStart + 3,
-  }
-}
-
-function isOracleProceduralBlock(statement: string): boolean {
-  const statementWithoutLeadingComments = stripLeadingSqlComments(statement)
-
-  return (
-    /^(?:declare|begin)\b/i.test(statementWithoutLeadingComments) ||
-    /^create\s+(?:or\s+replace\s+)?(?:(?:non)?editionable\s+)?(?:function|procedure|package(?:\s+body)?|trigger|type(?:\s+body)?)\b/i.test(
-      statementWithoutLeadingComments,
-    )
-  )
-}
-
-function stripLeadingSqlComments(statement: string): string {
-  let index = 0
-
-  while (index < statement.length) {
-    while (index < statement.length && /\s/.test(statement[index])) {
-      index++
-    }
-
-    if (statement.startsWith('--', index)) {
-      const lineEnd = statement.indexOf('\n', index + 2)
-      if (lineEnd === -1) {
-        return ''
-      }
-      index = lineEnd + 1
-      continue
-    }
-
-    if (statement.startsWith('/*', index)) {
-      const commentEnd = statement.indexOf('*/', index + 2)
-      if (commentEnd === -1) {
-        return ''
-      }
-      index = commentEnd + 2
-      continue
-    }
-
-    break
-  }
-
-  return statement.slice(index)
-}
-
-function hasOracleScriptTerminator(script: string, start: number): boolean {
-  return /(?:^|\n)\s*\/\s*(?:--[^\n]*)?(?:\n|$)/.test(script.slice(start))
-}
-
-function isOracleScriptTerminator(script: string, start: number): boolean {
-  const lineStart = script.lastIndexOf('\n', start - 1) + 1
-  const lineEnd = script.indexOf('\n', start)
-  return /^\s*\/\s*(?:--.*)?$/.test(script.slice(lineStart, lineEnd === -1 ? script.length : lineEnd))
-}
-
-function skipToNextLine(script: string, start: number): number {
-  const lineEnd = script.indexOf('\n', start)
-  return lineEnd === -1 ? script.length : lineEnd
 }

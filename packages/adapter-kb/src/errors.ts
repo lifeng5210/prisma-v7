@@ -17,7 +17,7 @@ type KingbaseError = {
 
 const SOCKET_ERRORS = new Set(['ENOTFOUND', 'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT'])
 
-export function convertDriverError(error: unknown): DriverAdapterErrorObject {
+export function convertDriverError(error: unknown, logicalIndexName?: string): DriverAdapterErrorObject {
   if (isSocketError(error)) {
     return mapSocketError(error)
   }
@@ -33,14 +33,14 @@ export function convertDriverError(error: unknown): DriverAdapterErrorObject {
     return {
       originalCode: error.code,
       originalMessage: error.message,
-      ...mapKingbaseError(error),
+      ...mapKingbaseError(error, logicalIndexName),
     }
   }
 
   throw error
 }
 
-function mapKingbaseError(error: KingbaseError): MappedError {
+function mapKingbaseError(error: KingbaseError, logicalIndexName?: string): MappedError {
   // SQLSTATE 22P03 is used for several kinds of malformed binary input. The
   // Kingbase bit type reports an overlong bit string with this SQLSTATE rather
   // than 22001, so only map this specific diagnostic to Prisma's length error.
@@ -60,7 +60,7 @@ function mapKingbaseError(error: KingbaseError): MappedError {
       let constraint: { fields: string[] } | { index: string } | undefined
 
       if (error.constraint) {
-        constraint = { index: error.constraint }
+        constraint = { index: logicalIndexName ?? error.constraint }
       } else if (fields !== undefined) {
         constraint = { fields }
       }

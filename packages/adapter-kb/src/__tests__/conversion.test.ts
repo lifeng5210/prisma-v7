@@ -42,26 +42,21 @@ describe('Kingbase field conversion', () => {
   })
 
   test.each([
-    [1000, ColumnTypeEnum.BooleanArray],
-    [1001, ColumnTypeEnum.BytesArray],
-    [1005, ColumnTypeEnum.Int32Array],
-    [1007, ColumnTypeEnum.Int32Array],
-    [1016, ColumnTypeEnum.Int64Array],
-    [1021, ColumnTypeEnum.FloatArray],
-    [1022, ColumnTypeEnum.DoubleArray],
-    [1231, ColumnTypeEnum.NumericArray],
-    [1182, ColumnTypeEnum.DateArray],
-    [1183, ColumnTypeEnum.TimeArray],
-    [1115, ColumnTypeEnum.DateTimeArray],
-    [199, ColumnTypeEnum.JsonArray],
-    [3807, ColumnTypeEnum.JsonArray],
-    [2951, ColumnTypeEnum.UuidArray],
-    [7083, ColumnTypeEnum.Int64Array],
-    [7953, ColumnTypeEnum.DateTimeArray],
-    [1002, ColumnTypeEnum.TextArray],
-    [8101, ColumnTypeEnum.TextArray],
-  ])('maps array type id %s to %s', (typeId, expected) => {
-    expect(fieldToColumnType(typeId)).toBe(expected)
+    1000, 1001, 1005, 1007, 1016, 1021, 1022, 1231, 1182, 1183, 1115, 199, 3807, 2951, 7083, 7953, 1002, 8101,
+  ])('rejects SQL array type id %s', (typeId) => {
+    expect(() => fieldToColumnType(typeId)).toThrow('Unsupported column type')
+    for (const value of [[], [1, 2], null]) {
+      expect(() => mapRow([value], [{ dataTypeID: typeId }])).toThrow('Unsupported column type')
+    }
+  })
+
+  test('rejects SQL array arguments but keeps JSON array values', () => {
+    for (const value of [[], [1, 2], null]) {
+      expect(() => mapArg(value, { scalarType: 'int', arity: 'list' })).toThrow('Arrays are not supported')
+    }
+    expect(() => mapArg([1, 2], { scalarType: 'int', arity: 'scalar' })).toThrow('Arrays are not supported')
+    expect(mapArg([1, '123', null], { scalarType: 'json', arity: 'scalar' })).toBe('[1,"123",null]')
+    expect(mapArg('[1,2]', { scalarType: 'json', arity: 'scalar' })).toBe('[1,2]')
   })
 
   test('uses the typmod to distinguish Kingbase BIT(1) from binary BIT', () => {
@@ -79,14 +74,36 @@ describe('Kingbase field conversion', () => {
     expect(mapRow(['0x010203'], [{ dataTypeID: 8013 }])).toEqual([Buffer.from([1, 2, 3])])
     expect(mapRow(['\\xaa'], [{ dataTypeID: 3383 }])).toEqual([Buffer.from([0xaa])])
     expect(mapRow(['\\x0a'], [{ dataTypeID: 17 }])).toEqual([Buffer.from([0x0a])])
-    expect(mapRow([['\\x0a', '\\x0b']], [{ dataTypeID: 1001 }])).toEqual([[Buffer.from([0x0a]), Buffer.from([0x0b])]])
     expect(mapRow([Buffer.from([1, 2])], [{ dataTypeID: 3383 }])).toEqual([Buffer.from([1, 2])])
   })
 
-  test('keeps valid JSON text and quotes unquoted JSON string scalars', () => {
+  test('preserves complete JSON wire text without guessing string contents', () => {
     expect(mapRow(['{"payload":"SGVsbG8="}'], [{ dataTypeID: 7024 }])).toEqual(['{"payload":"SGVsbG8="}'])
-    expect(mapRow(['SGVsbG8='], [{ dataTypeID: 7024 }])).toEqual(['"SGVsbG8="'])
+    expect(mapRow(['"SGVsbG8="'], [{ dataTypeID: 7024 }])).toEqual(['"SGVsbG8="'])
     expect(mapRow([['SGVsbG8=', 'hello']], [{ dataTypeID: 7024 }])).toEqual(['["SGVsbG8=","hello"]'])
+  })
+
+  test.each([114, 3802, 7024])('preserves JSON value types for wire OID %s', (dataTypeID) => {
+    for (const value of [
+      '123',
+      'true',
+      'false',
+      'null',
+      '{}',
+      '[]',
+      '"quoted"',
+      '',
+      123,
+      true,
+      false,
+      null,
+      [1, '123'],
+      { n: 'null' },
+    ]) {
+      const text = JSON.stringify(value)
+      expect(mapRow([text], [{ dataTypeID }])).toEqual([text])
+    }
+    expect(mapRow([null], [{ dataTypeID }])).toEqual([null])
   })
 
   test('decodes BIT(1) values as booleans rather than byte arrays', () => {

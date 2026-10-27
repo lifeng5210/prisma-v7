@@ -17,7 +17,7 @@ import { Debug, DriverAdapterError } from '@prisma-kb/driver-adapter-utils'
 import * as kingbaseModule from 'kingbasedb'
 
 import { name as packageName } from '../package.json'
-import { fieldToColumnType, mapArg, mapRow, UnsupportedNativeDataType } from './conversion'
+import { fieldToColumnType, jsonTypeIds, mapArg, mapRow, UnsupportedNativeDataType } from './conversion'
 import { convertDriverError } from './errors'
 
 const debug = Debug('prisma:driver-adapter:kb')
@@ -30,6 +30,7 @@ type QueryConfig = {
   text: string
   values: unknown[]
   rowMode: 'array'
+  types?: { getTypeParser(oid: number, format?: string): (value: string) => unknown }
 }
 
 type Field = {
@@ -67,11 +68,37 @@ type KingbasePool = KingbaseQueryableClient & {
 
 type KingbaseRuntimeModule = {
   Pool: new (config: PoolConfig) => KingbasePool
+  types: {
+    getTypeParser(oid: number, format?: string): (value: string) => unknown
+  }
   default?: KingbaseRuntimeModule
 }
 
 const runtimeModule = kingbaseModule as unknown as KingbaseRuntimeModule
 const runtime = runtimeModule.default ?? runtimeModule
+
+const indexNamesSql = `SELECT n.nspname, c.relname, d.description
+  FROM sys_catalog.sys_class c
+  JOIN sys_catalog.sys_namespace n ON n.oid=c.relnamespace
+  JOIN sys_catalog.sys_description d ON d.objoid=c.oid AND d.objsubid=0
+    AND d.classoid=(SELECT classid FROM sys_catalog.sys_get_object_address(
+      'view', ARRAY['sys_catalog','sys_class'], ARRAY[]::text[]))
+  WHERE c.relkind IN ('i','I') AND d.description LIKE 'prisma:logical-index:%'`
+
+async function readIndexNames(client: KingbaseQueryableClient): Promise<Map<string, string>> {
+  const result = await client.query({ text: indexNamesSql, values: [], rowMode: 'array' })
+  const names = new Map<string, string>()
+  for (const row of result.rows) {
+    const [schema, physical, description] = row as unknown[]
+    if (typeof schema === 'string' && typeof physical === 'string' && typeof description === 'string') {
+      const logical = description.startsWith('prisma:logical-index:')
+        ? description.slice('prisma:logical-index:'.length)
+        : ''
+      if (logical) names.set(JSON.stringify([schema, physical]), logical)
+    }
+  }
+  return names
+}
 
 class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQueryable {
   readonly provider = 'kingbase-mysql' as const
@@ -81,6 +108,7 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
     protected readonly client: Client,
     protected readonly adapterOptions?: PrismaKbOptions,
     private readonly pool?: KingbasePool,
+    private readonly transactionIndexNames?: ReadonlyMap<string, string>,
   ) {}
 
   async queryRaw(query: SqlQuery): Promise<SqlResultSet> {
@@ -152,8 +180,17 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
     client: KingbaseQueryableClient,
   ): Promise<{ result: QueryResult; lastInsertId?: string }> {
     const result = await this.performIO(query, client)
+    // The compiler marks the bound auto-increment field; never infer it from
+    // SQL text or argument order. Kingbase's LAST_INSERT_ID() retains an older
+    // generated value when a nonzero identifier is supplied explicitly.
+    const idIndex = query.argTypes.findIndex((type) => type.dbType === 'PRISMA_MYSQL_AUTOINCREMENT_ID')
+    const explicitId = idIndex < 0 ? undefined : query.args[idIndex]
+    const suppliedId = normalizeLastInsertId(explicitId as string | number | bigint | undefined)
+    const suppliedZero = suppliedId !== undefined && BigInt(suppliedId) === 0n
     const lastInsertId =
-      normalizeLastInsertId(result.insertId ?? result.lastInsertId) ?? (await this.fetchLastInsertId(query.sql, client))
+      (suppliedZero ? undefined : suppliedId) ??
+      normalizeLastInsertId(result.insertId ?? result.lastInsertId) ??
+      (await this.fetchLastInsertId(query.sql, client, suppliedZero))
 
     return { result, lastInsertId }
   }
@@ -166,12 +203,23 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
   private async fetchLastInsertId(
     sql: string,
     client: KingbaseQueryableClient = this.client,
+    suppliedZero = false,
   ): Promise<string | undefined> {
     if (!isInsertQuery(sql)) {
       return undefined
     }
 
     try {
+      if (suppliedZero) {
+        const modes = await client.query({ text: 'SHOW sql_mode', values: [], rowMode: 'array' })
+        if (
+          String(modes.rows[0]?.[0])
+            .split(',')
+            .some((mode) => mode.trim().toUpperCase() === 'NO_AUTO_VALUE_ON_ZERO')
+        ) {
+          return '0'
+        }
+      }
       const result = await client.query({
         text: 'SELECT LAST_INSERT_ID()',
         values: [],
@@ -192,9 +240,32 @@ class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQu
         text: rewriteQuestionMarkPlaceholders(query.sql),
         values,
         rowMode: 'array',
+        types: {
+          getTypeParser: (oid, format = 'text') => {
+            // Preserve JSON wire text for the Client's decoder. In particular,
+            // decoded strings such as "123" cannot be distinguished from JSON
+            // numbers by inspecting their contents.
+            if (format === 'text' && jsonTypeIds.has(oid)) {
+              return (value) => value
+            }
+            return runtime.types.getTypeParser(oid, format)
+          },
+        },
       })
     } catch (error) {
-      this.onError(error)
+      // Autocommit has already rolled the failed statement back. Transactions
+      // instead use the snapshot read before BEGIN, including with max: 1 pools.
+      const diagnostic = error as { code?: string; schema?: string; constraint?: string } | null
+      let logical: string | undefined
+      if (diagnostic?.code === '23505' && diagnostic.constraint?.startsWith('_prisma_idx_') && diagnostic.schema) {
+        try {
+          const names = this.transactionIndexNames ?? (await readIndexNames(client))
+          logical = names.get(JSON.stringify([diagnostic.schema, diagnostic.constraint]))
+        } catch {
+          // Preserve the original violation if metadata is unavailable.
+        }
+      }
+      throw new DriverAdapterError(convertDriverError(error, logical))
     }
   }
 
@@ -218,8 +289,9 @@ class KingbaseTransaction extends KingbaseQueryable<KingbaseClient> implements T
     readonly options: TransactionOptions,
     readonly kbOptions?: PrismaKbOptions,
     readonly cleanup?: () => void,
+    indexNames?: ReadonlyMap<string, string>,
   ) {
-    super(client, kbOptions)
+    super(client, kbOptions, undefined, indexNames)
   }
 
   commit(): Promise<void> {
@@ -283,7 +355,10 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
     const cleanup = () => connection.off?.('error', onError)
 
     try {
-      const transaction = new KingbaseTransaction(connection, options, this.kbOptions, cleanup)
+      // Catalog access only improves diagnostics; it must not prevent a normal
+      // transaction when the connection can otherwise execute application SQL.
+      const indexNames = await readIndexNames(connection).catch(() => new Map<string, string>())
+      const transaction = new KingbaseTransaction(connection, options, this.kbOptions, cleanup, indexNames)
       await transaction.executeRaw({ sql: 'BEGIN', args: [], argTypes: [] })
       if (isolationLevel) {
         await transaction.executeRaw({
@@ -300,14 +375,8 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
     }
   }
 
-  async executeScript(script: string): Promise<void> {
-    for (const statement of splitStatements(script)) {
-      try {
-        await this.client.query(statement)
-      } catch (error) {
-        this.onError(error)
-      }
-    }
+  executeScript(_script: string): Promise<void> {
+    throw new Error('Not implemented yet')
   }
 
   getConnectionInfo(): ConnectionInfo {
@@ -675,105 +744,4 @@ function isIdentifierStart(character: string): boolean {
 
 function isIdentifierCont(character: string): boolean {
   return /[a-zA-Z0-9_]/.test(character)
-}
-
-/** Split migration scripts without treating semicolons in literals or comments as delimiters. */
-export function splitStatements(script: string): string[] {
-  const statements: string[] = []
-  let statement = ''
-  let quote: "'" | '"' | '`' | undefined
-  let lineComment = false
-  let blockComment = false
-
-  for (let index = 0; index < script.length; index++) {
-    const character = script[index]
-    const nextCharacter = script[index + 1]
-
-    if (lineComment) {
-      statement += character
-      if (character === '\n') {
-        lineComment = false
-      }
-      continue
-    }
-
-    if (blockComment) {
-      statement += character
-      if (character === '*' && nextCharacter === '/') {
-        statement += nextCharacter
-        index++
-        blockComment = false
-      }
-      continue
-    }
-
-    if (quote !== undefined) {
-      statement += character
-
-      if (character === '\\' && quote === "'" && nextCharacter !== undefined) {
-        statement += nextCharacter
-        index++
-      } else if (character === quote) {
-        if (nextCharacter === quote) {
-          statement += nextCharacter
-          index++
-        } else {
-          quote = undefined
-        }
-      }
-      continue
-    }
-
-    if (character === '$') {
-      const end = skipDollarQuote(script, index)
-      if (end !== undefined) {
-        statement += script.slice(index, end)
-        index = end - 1
-        continue
-      }
-    }
-
-    if (character === '#') {
-      statement += character
-      lineComment = true
-      continue
-    }
-
-    if (character === '-' && nextCharacter === '-') {
-      statement += '--'
-      index++
-      lineComment = true
-      continue
-    }
-
-    if (character === '/' && nextCharacter === '*') {
-      statement += '/*'
-      index++
-      blockComment = true
-      continue
-    }
-
-    if (character === "'" || character === '"' || character === '`') {
-      statement += character
-      quote = character
-      continue
-    }
-
-    if (character === ';') {
-      const trimmed = statement.trim()
-      if (trimmed) {
-        statements.push(trimmed)
-      }
-      statement = ''
-    } else {
-      statement += character
-    }
-  }
-
-  const trimmed = statement.trim()
-  if (trimmed) {
-    statements.push(trimmed)
-  }
-
-  return statements
 }

@@ -128,7 +128,17 @@ export class UnsupportedNativeDataType extends Error {
   }
 }
 
+// Keep known SQL-array OIDs only to reject them, including empty/NULL arrays.
+const sqlArrayTypeIds = new Set<number>(
+  [...Object.entries(PostgresTypeId), ...Object.entries(KingbaseMysqlTypeId)]
+    .filter(([name]) => name.endsWith('_ARRAY'))
+    .map(([, oid]) => oid),
+)
+
 export function fieldToColumnType(fieldTypeId: number, typeModifier?: number): ColumnType {
+  if (sqlArrayTypeIds.has(fieldTypeId)) {
+    throw new UnsupportedNativeDataType(fieldTypeId)
+  }
   switch (fieldTypeId) {
     case PostgresTypeId.INT2:
     case PostgresTypeId.INT4:
@@ -204,61 +214,6 @@ export function fieldToColumnType(fieldTypeId: number, typeModifier?: number): C
     case KingbaseMysqlTypeId.VARCHARBYTE:
       return ColumnTypeEnum.Text
 
-    case PostgresTypeId.BOOL_ARRAY:
-      return ColumnTypeEnum.BooleanArray
-    case PostgresTypeId.BYTEA_ARRAY:
-      return ColumnTypeEnum.BytesArray
-    case PostgresTypeId.INT2_ARRAY:
-    case PostgresTypeId.INT4_ARRAY:
-      return ColumnTypeEnum.Int32Array
-    case PostgresTypeId.INT8_ARRAY:
-    case PostgresTypeId.OID_ARRAY:
-    case KingbaseMysqlTypeId.UINT4_ARRAY:
-    case KingbaseMysqlTypeId.UINT8_ARRAY:
-      return ColumnTypeEnum.Int64Array
-    case PostgresTypeId.FLOAT4_ARRAY:
-      return ColumnTypeEnum.FloatArray
-    case PostgresTypeId.FLOAT8_ARRAY:
-      return ColumnTypeEnum.DoubleArray
-    case PostgresTypeId.NUMERIC_ARRAY:
-    case PostgresTypeId.MONEY_ARRAY:
-      return ColumnTypeEnum.NumericArray
-    case PostgresTypeId.DATE_ARRAY:
-      return ColumnTypeEnum.DateArray
-    case PostgresTypeId.TIME_ARRAY:
-    case PostgresTypeId.TIMETZ_ARRAY:
-    case KingbaseMysqlTypeId.SYS_TIME_ARRAY:
-      return ColumnTypeEnum.TimeArray
-    case PostgresTypeId.TIMESTAMP_ARRAY:
-    case PostgresTypeId.TIMESTAMPTZ_ARRAY:
-    case KingbaseMysqlTypeId.DATETIME_ARRAY:
-    case KingbaseMysqlTypeId.SYS_TIMESTAMP_ARRAY:
-      return ColumnTypeEnum.DateTimeArray
-    case PostgresTypeId.JSON_ARRAY:
-    case PostgresTypeId.JSONB_ARRAY:
-      return ColumnTypeEnum.JsonArray
-    case PostgresTypeId.UUID_ARRAY:
-      return ColumnTypeEnum.UuidArray
-    case PostgresTypeId.BPCHAR_ARRAY:
-    case PostgresTypeId.NAME_ARRAY:
-    case PostgresTypeId.TEXT_ARRAY:
-    case PostgresTypeId.VARCHAR_ARRAY:
-    case PostgresTypeId.BIT_ARRAY:
-    case PostgresTypeId.VARBIT_ARRAY:
-    case PostgresTypeId.INET_ARRAY:
-    case PostgresTypeId.CIDR_ARRAY:
-    case PostgresTypeId.XML_ARRAY:
-    case PostgresTypeId.CHAR_ARRAY:
-    case KingbaseMysqlTypeId.BINARY_ARRAY:
-    case KingbaseMysqlTypeId.VARBINARY_ARRAY:
-    case KingbaseMysqlTypeId.SYS_BIT_ARRAY:
-    case KingbaseMysqlTypeId.ROWID_ARRAY:
-    case KingbaseMysqlTypeId.BPCHARBYTE_ARRAY:
-    case KingbaseMysqlTypeId.VARCHARBYTE_ARRAY:
-    case KingbaseMysqlTypeId.TINYINT_ARRAY:
-      // Matches Quaint's UnknownArray -> TextArray fallback for Kingbase
-      // compatibility array types without a dedicated value decoder.
-      return ColumnTypeEnum.TextArray
     default:
       // User-defined and enum types are returned as text. The query schema
       // decides whether the value should be surfaced as an enum.
@@ -357,13 +312,17 @@ function mysqlBooleanQuery(input: string): string {
   return expression ?? "'__prisma_never_match__' & !'__prisma_never_match__'"
 }
 
-export function mapArg<A>(arg: A | Date, argType: ArgType): null | unknown[] | string | Uint8Array | A {
+export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint8Array | A {
+  if (argType.arity === 'list') {
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
+  }
   if (arg === null) {
     return null
   }
 
-  if (Array.isArray(arg) && argType.arity === 'list') {
-    return arg.map((value) => mapArg(value, argType))
+  if (Array.isArray(arg)) {
+    if (argType.scalarType === 'json') return JSON.stringify(arg)
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
   }
 
   if (typeof arg === 'string' && argType.dbType === 'PRISMA_MYSQL_BOOLEAN_QUERY') {
@@ -432,7 +391,7 @@ type ResultField = {
   dataTypeModifier?: number
 }
 
-const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB, KingbaseMysqlTypeId.SYS_JSON])
+export const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB, KingbaseMysqlTypeId.SYS_JSON])
 const dateTypeIds = new Set<number>([PostgresTypeId.DATE, KingbaseMysqlTypeId.SYS_DATE])
 const timeTypeIds = new Set<number>([PostgresTypeId.TIME, PostgresTypeId.TIMETZ, KingbaseMysqlTypeId.SYS_TIME])
 const dateTimeTypeIds = new Set<number>([
@@ -450,19 +409,6 @@ const binaryTypeIds = new Set<number>([
   KingbaseMysqlTypeId.MEDIUMBLOB,
   KingbaseMysqlTypeId.LONGBLOB,
   KingbaseMysqlTypeId.BLOB,
-])
-const arrayElementTypeIds = new Map<number, number>([
-  [PostgresTypeId.BYTEA_ARRAY, PostgresTypeId.BYTEA],
-  [PostgresTypeId.DATE_ARRAY, PostgresTypeId.DATE],
-  [PostgresTypeId.TIME_ARRAY, PostgresTypeId.TIME],
-  [PostgresTypeId.TIMETZ_ARRAY, PostgresTypeId.TIMETZ],
-  [KingbaseMysqlTypeId.SYS_TIME_ARRAY, KingbaseMysqlTypeId.SYS_TIME],
-  [PostgresTypeId.TIMESTAMP_ARRAY, PostgresTypeId.TIMESTAMP],
-  [PostgresTypeId.TIMESTAMPTZ_ARRAY, PostgresTypeId.TIMESTAMPTZ],
-  [KingbaseMysqlTypeId.DATETIME_ARRAY, KingbaseMysqlTypeId.DATETIME],
-  [KingbaseMysqlTypeId.SYS_TIMESTAMP_ARRAY, KingbaseMysqlTypeId.SYS_TIMESTAMP],
-  [PostgresTypeId.JSON_ARRAY, PostgresTypeId.JSON],
-  [PostgresTypeId.JSONB_ARRAY, PostgresTypeId.JSONB],
 ])
 
 function formatDateTime(date: Date): string {
@@ -511,18 +457,20 @@ export function mapRow(row: unknown[] | Record<string, unknown>, fields?: Result
 }
 
 function mapResultValue(value: unknown, typeId?: number, typeModifier?: number): unknown {
+  if (typeId !== undefined && sqlArrayTypeIds.has(typeId)) {
+    throw new UnsupportedNativeDataType(typeId)
+  }
   if (value === null || value === undefined) {
     return value
   }
 
-  const elementTypeId = typeId === undefined ? undefined : arrayElementTypeIds.get(typeId)
   if (Array.isArray(value)) {
     if (typeId !== undefined && jsonTypeIds.has(typeId)) {
       // Kingbase's MySQL JSON parser can expose a JSON array as a native JS
       // array. The client-engine expects the JSON column value as JSON text.
       return JSON.stringify(value)
     }
-    return value.map((element) => mapResultValue(element, elementTypeId ?? typeId, typeModifier))
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
   }
 
   if (typeof value === 'bigint') {
@@ -559,20 +507,9 @@ function mapResultValue(value: unknown, typeId?: number, typeModifier?: number):
 }
 
 function normalizeJsonResult(value: unknown): string {
-  if (typeof value !== 'string') {
-    return JSON.stringify(value)
-  }
-
-  // PostgreSQL-compatible drivers normally return the complete JSON text.
-  // Kingbase's MySQL mode can return a JSON string scalar without its JSON
-  // quotes (for example, a base64 value), so quote malformed JSON text before
-  // the client-engine JSON decoder parses it.
-  try {
-    JSON.parse(value)
-    return value
-  } catch {
-    return JSON.stringify(value)
-  }
+  // Query-local JSON parsers return complete JSON text, including the quotes
+  // around a scalar string. Never infer its type from the string contents.
+  return typeof value === 'string' ? value : JSON.stringify(value)
 }
 
 function normalizeDateTimeResult(value: unknown): string {

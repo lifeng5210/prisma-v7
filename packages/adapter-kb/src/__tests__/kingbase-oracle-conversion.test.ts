@@ -52,10 +52,33 @@ describe('Kingbase Oracle field conversion', () => {
     expect(mapOracleRow(['\\x0a'], [{ dataTypeID: 17 }])).toEqual([Buffer.from([0x0a])])
     expect(mapOracleRow(['2025-01-02 03:04:05'], [{ dataTypeID: 8020 }])).toEqual(['2025-01-02T03:04:05+00:00'])
     expect(mapOracleRow(['{"hello":"world"}'], [{ dataTypeID: 114 }])).toEqual(['{"hello":"world"}'])
-    expect(mapOracleRow(['aGVsbG8='], [{ dataTypeID: 114 }])).toEqual(['"aGVsbG8="'])
+    expect(mapOracleRow(['"aGVsbG8="'], [{ dataTypeID: 114 }])).toEqual(['"aGVsbG8="'])
     expect(mapOracleRow([new Date(2025, 0, 2, 3, 4, 5)], [{ dataTypeID: 8020 }])).toEqual(['2025-01-02T03:04:05+00:00'])
     expect(mapOracleRow([new Date(2025, 0, 2, 3, 4, 5)], [{ dataTypeID: 1114 }])).toEqual(['2025-01-02T03:04:05+00:00'])
     expect(mapOracleRow(['-128', '127'], [{ dataTypeID: 8100 }, { dataTypeID: 8100 }])).toEqual([-128, 127])
+  })
+
+  test.each([114, 3802])('preserves JSON value types for Oracle wire OID %s', (dataTypeID) => {
+    for (const value of [
+      '123',
+      'true',
+      'false',
+      'null',
+      '{}',
+      '[]',
+      '"quoted"',
+      '',
+      123,
+      true,
+      false,
+      null,
+      [1, '123'],
+      { n: 'null' },
+    ]) {
+      const text = JSON.stringify(value)
+      expect(mapOracleRow([text], [{ dataTypeID }])).toEqual([text])
+    }
+    expect(mapOracleRow([null], [{ dataTypeID }])).toEqual([null])
   })
 
   test('preserves offset-less wall-clock timestamps in a non-UTC zone across DST', () => {
