@@ -9,11 +9,10 @@ datasource db {
   provider = "${provider}"
 }
 model RangeValue {
-  id Int @id @default(autoincrement()) @db.UnsignedTinyInt
-  tiny Int @db.UnsignedTinyInt
-  small Int @db.UnsignedSmallInt
-  medium Int @db.UnsignedMediumInt
-  enabled Boolean @db.UnsignedTinyInt
+  id Int @id @default(autoincrement())
+  unsignedInt Int @db.UnsignedInt
+  unsignedBigInt BigInt @db.UnsignedBigInt
+  enabled Boolean
   value String @map("value\`name")
   @@index([value], map: "shared")
   @@map("range\`values")

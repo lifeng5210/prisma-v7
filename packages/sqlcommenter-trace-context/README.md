@@ -35,7 +35,7 @@ The `traceContext()` plugin:
 
 1. Checks if tracing is enabled via `@prisma/instrumentation`
 2. Retrieves the current trace context's `traceparent` header
-3. Only includes the `traceparent` in the SQL comment if the sampled flag is set (the trace flags end with `01`)
+3. Only includes the `traceparent` in the SQL comment if the sampled bit is set (`traceFlags & 0x01` is nonzero; both `01` and `03` qualify)
 
 This means:
 
