@@ -6,6 +6,7 @@ import path from 'path'
 import hash from 'string-hash'
 import VError, { MultiError } from 'verror'
 
+import { PrismaKb, PrismaKbOracle } from '../../../../adapter-kb/src'
 import { PrismaLibSql } from '../../../../adapter-libsql/src/index-node'
 import { PrismaMariaDb } from '../../../../adapter-mariadb/src'
 import { PrismaMssql } from '../../../../adapter-mssql/src'
@@ -37,13 +38,17 @@ type Scenario = {
    */
   name: string
   /**
+   * Preview features enabled only for this scenario's generated client.
+   */
+  previewFeatures?: PreviewFeature[]
+  /**
    * SQL to put database into pre-test condition.
    */
   up: string
   /**
    * Arbitrary Prisma client logic to test.
    */
-  do: (client: any) => Promise<any>
+  do: (client: any, ctx: Context) => Promise<any>
   /**
    * Value that the "do" operation should result in.
    */
@@ -93,7 +98,7 @@ type Database<Client> = {
   /**
    * At the end of _each_ test run logic
    */
-  afterEach?: (db: Client) => MaybePromise
+  afterEach?: (db: Client, ctx: Context) => MaybePromise
   /**
    * At the end of _all_ tests run logic to close the database connection.
    */
@@ -134,7 +139,7 @@ type Settings = {
 /**
  * A list of available preview features on Prisma Client.
  */
-type PreviewFeature = ''
+type PreviewFeature = '' | 'fullTextSearch'
 
 /**
  * Settings to add properties on Prisma Client.
@@ -227,8 +232,10 @@ export function runtimeIntegrationTest<Client>(input: Input<Client>) {
     async (_, scenario) => {
       const { ctx, state } = await setupScenario(kind, input, scenario)
       states[scenario.name] = state
+      logKingbaseScenarioStage(state, 'database setup and introspection completed')
 
       const PrismaClient = await getTestClient(ctx.fs.cwd())
+      logKingbaseScenarioStage(state, 'generated Prisma Client loaded')
 
       let adapter: SqlDriverAdapterFactory
       const connectionString =
@@ -237,6 +244,12 @@ export function runtimeIntegrationTest<Client>(input: Input<Client>) {
           : input.database.datasource.url
 
       switch (input.database.name) {
+        case 'kingbase-mysql':
+          adapter = new PrismaKb(connectionString, { schema: ctx.id })
+          break
+        case 'kingbase-oracle':
+          adapter = new PrismaKbOracle(connectionString, { schema: ctx.id })
+          break
         case 'postgresql':
           adapter = new PrismaPg({ connectionString }, { schema: ctx.id })
           break
@@ -256,11 +269,15 @@ export function runtimeIntegrationTest<Client>(input: Input<Client>) {
 
       state.prisma = new PrismaClient({ adapter })
       await state.prisma.$connect()
+      logKingbaseScenarioStage(state, 'Prisma Client connected through adapter')
 
-      const result = await scenario.do(state.prisma)
+      const result = await scenario.do(state.prisma, ctx)
+      logKingbaseScenarioStage(state, 'scenario operation completed')
       expect(result).toEqual(scenario.expect)
+      logKingbaseScenarioStage(state, 'scenario expectation passed')
 
       await teardownScenario(state)
+      logKingbaseScenarioStage(state, 'scenario teardown completed')
     },
     input.settings?.timeout ?? 30_000,
   )
@@ -297,10 +314,15 @@ async function setupScenario(kind: string, input: Input, scenario: Scenario) {
   state.ctx = ctx
   state.scenario = scenario
 
+  logKingbaseScenarioStage(state, 'creating temporary scenario directory')
   await ctx.fs.dirAsync('.')
+  logKingbaseScenarioStage(state, 'temporary scenario directory created')
 
+  logKingbaseScenarioStage(state, 'establishing raw database connection')
   state.db = await input.database.connect(ctx)
+  logKingbaseScenarioStage(state, 'raw database connection established')
   await input.database.beforeEach(state.db, scenario.up, ctx)
+  logKingbaseScenarioStage(state, 'database setup SQL completed')
 
   const datasourceBlock = makeDatasourceBlock(input.database.datasource.provider ?? input.database.name)
 
@@ -308,7 +330,7 @@ async function setupScenario(kind: string, input: Input, scenario: Scenario) {
     generator client {
       provider = "prisma-client-js"
       output   = "${ctx.fs.path()}"
-      ${renderPreviewFeatures(input.prismaClientSettings?.previewFeatures)}
+      ${renderPreviewFeatures(scenario.previewFeatures ?? input.prismaClientSettings?.previewFeatures)}
     }
 
     ${datasourceBlock}
@@ -333,6 +355,7 @@ async function setupScenario(kind: string, input: Input, scenario: Scenario) {
     baseDirectoryPath: process.cwd(),
     viewsDirectoryPath: '',
   })
+  logKingbaseScenarioStage(state, 'Schema Engine introspection completed')
 
   const prismaSchemaPath = ctx.fs.path('schema.prisma')
 
@@ -345,12 +368,18 @@ async function setupScenario(kind: string, input: Input, scenario: Scenario) {
   }
 }
 
+function logKingbaseScenarioStage(state: ScenarioState, stage: string): void {
+  if (process.env.DEBUG_KINGBASE_MYSQL_INTEGRATION === '1' && state.input.database.name === 'kingbase-mysql') {
+    process.stderr.write(`[kingbase-mysql] ${state.ctx.scenarioName}: ${stage}\n`)
+  }
+}
+
 async function teardownScenario(state: ScenarioState) {
   const errors: any[] = []
 
   // props might be missing if test errors out before they are set.
   if (state.db) {
-    await Promise.resolve(state.input.database.afterEach?.(state.db))
+    await Promise.resolve(state.input.database.afterEach?.(state.db, state.ctx))
       .catch((e) => errors.push(e))
       .then(() => state.prisma?.$disconnect())
       .catch((e) => errors.push(e))
@@ -394,7 +423,7 @@ function getScenariosDir(databaseName: string, testKind: string) {
  */
 function makeDatasourceBlock(providerName: string) {
   return `
-    datasource ${providerName} {
+    datasource db {
       provider = "${providerName}"
     }
   `

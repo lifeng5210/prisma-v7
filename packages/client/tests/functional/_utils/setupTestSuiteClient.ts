@@ -270,6 +270,22 @@ export function setupTestSuiteClientDriverAdapter({
     }
   }
 
+  if (driverAdapter === AdapterProviders.JS_KB || driverAdapter === AdapterProviders.JS_KB_ORACLE) {
+    const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
+    const schema = new URL(datasourceInfo.databaseUrl).searchParams.get('schema')
+
+    if (!schema) {
+      throw new Error('Kingbase functional test URLs must set the schema query parameter')
+    }
+
+    return {
+      adapter:
+        driverAdapter === AdapterProviders.JS_KB
+          ? new PrismaKb(datasourceInfo.databaseUrl, { schema })
+          : new PrismaKbOracle(datasourceInfo.databaseUrl, { schema }),
+    }
+  }
+
   if (driverAdapter === 'js_mariadb') {
     const { PrismaMariaDb } = require('@prisma/adapter-mariadb') as typeof import('@prisma/adapter-mariadb')
 

@@ -5,10 +5,10 @@
   "scripts": {},
   "dependencies": {
     "@prisma/adapter-libsql": "/tmp/prisma-adapter-libsql-0.0.0.tgz",
-    "@prisma/client": "/tmp/prisma-client-0.0.0.tgz"
+    "@prisma-kb/client": "/tmp/prisma-kb-client-7.10.0-kb.1.tgz"
   },
   "devDependencies": {
     "@types/node": "~20.19.0",
-    "prisma": "/tmp/prisma-0.0.0.tgz"
+    "prisma-kb": "/tmp/prisma-kb-7.10.0-kb.2.tgz"
   }
 }

@@ -98,9 +98,7 @@ testMatrix.setupTestSuite(
         })
         .filter((span) => span.parentSpanContext?.spanId === rootSpan.spanContext().spanId)
 
-      const tree: Tree = {
-        name: rootSpan.name,
-      }
+      const tree: Tree = { name: rootSpan.name }
 
       if (childrenSpans.length > 0) {
         tree.children = childrenSpans.map((span) => buildTree(span, spans))
@@ -118,8 +116,14 @@ testMatrix.setupTestSuite(
     }
 
     const isMongoDb = provider === Providers.MONGODB
-    const isMySql = provider === Providers.MYSQL
+    const isMySql = provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL
     const isSqlServer = provider === Providers.SQLSERVER
+    const usesReturningWriteQueries = [
+      Providers.POSTGRESQL,
+      Providers.COCKROACHDB,
+      Providers.SQLITE,
+      Providers.KINGBASE_ORACLE,
+    ].includes(provider)
     const usesJsDrivers = driverAdapter !== undefined || clientEngineExecutor === 'remote'
 
     const usesSyntheticTxQueries =
@@ -238,6 +242,12 @@ testMatrix.setupTestSuite(
         if (provider === Providers.SQLSERVER) {
           return dbSystem === 'mssql'
         }
+        if (provider === Providers.KINGBASE_MYSQL) {
+          return dbSystem === 'mysql'
+        }
+        if (provider === Providers.KINGBASE_ORACLE) {
+          return dbSystem === 'oracle'
+        }
         return dbSystem === provider
       })
     }
@@ -260,7 +270,7 @@ testMatrix.setupTestSuite(
         ]
       }
 
-      if (['postgresql', 'cockroachdb', 'sqlite'].includes(provider)) {
+      if (usesReturningWriteQueries) {
         return [dbQuery(expect.stringContaining('INSERT'))]
       }
 
@@ -368,7 +378,7 @@ testMatrix.setupTestSuite(
             dbQuery(expect.stringContaining('db.User.updateMany')),
             dbQuery(expect.stringContaining('db.User.aggregate')),
           ]
-        } else if (['postgresql', 'cockroachdb', 'sqlite'].includes(provider)) {
+        } else if (usesReturningWriteQueries) {
           expectedDbQueries = [dbQuery(expect.stringContaining('UPDATE'))]
         } else {
           expectedDbQueries = [

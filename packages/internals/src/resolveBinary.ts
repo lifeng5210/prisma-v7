@@ -1,6 +1,6 @@
-import { getEnginesPath } from '@prisma/engines'
 import { BinaryType, engineEnvVarMap, getBinaryEnvVarPath } from '@prisma/fetch-engine'
 import { getBinaryTargetForCurrentPlatform } from '@prisma/get-platform'
+import { getEnginesPath } from '@prisma-kb/engines'
 import * as TE from 'fp-ts/TaskEither'
 import fs from 'fs'
 import { ensureDir } from 'fs-extra'

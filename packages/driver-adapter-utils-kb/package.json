@@ -1,0 +1,39 @@
+{
+  "name": "@prisma-kb/driver-adapter-utils",
+  "version": "7.10.0-kb.1",
+  "description": "Driver adapter utilities with Prisma Kingbase provider types.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lifeng5210/prisma-v7.git",
+    "directory": "packages/driver-adapter-utils-kb"
+  },
+  "license": "Apache-2.0",
+  "author": "lifeng5210",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsx helpers/build.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@prisma/driver-adapter-utils": "7.10.0"
+  }
+}

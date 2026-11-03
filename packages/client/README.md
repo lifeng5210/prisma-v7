@@ -1,26 +1,36 @@
-# Prisma Client &middot; [![npm version](https://img.shields.io/npm/v/@prisma/client.svg?style=flat)](https://www.npmjs.com/package/@prisma/client) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/prisma/prisma/blob/main/CONTRIBUTING.md) [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/prisma/prisma/blob/main/LICENSE) [![Discord](https://img.shields.io/discord/937751382725886062?label=Discord)](https://pris.ly/discord)
+# @prisma-kb/client
 
-Prisma Client JS is an **auto-generated query builder** that enables **type-safe** database access and **reduces boilerplate**. You can use it as an alternative to traditional ORMs such as Sequelize, TypeORM or SQL query builders like knex.js.
+Prisma Client distribution for KingbaseES, based on Prisma ORM 7.10.0.
 
-It is part of the [Prisma](https://www.prisma.io/) ecosystem. Prisma provides database tools for data access, declarative data modeling, schema migrations and visual data management. Learn more in the main [`prisma`](https://github.com/prisma/prisma/) repository or read the [documentation](https://www.prisma.io/docs/).
+This package adds the `kingbase-mysql` and `kingbase-oracle` providers and is
+intended to be used with the matching `prisma-kb` CLI and
+`@prisma-kb/adapter-kb` driver adapter versions.
 
-## Getting started
+## Installation
 
-Follow one of these guides to get started with Prisma Client JS:
+```bash
+npm install @prisma-kb/client @prisma-kb/adapter-kb
+npm install --save-dev prisma-kb
+```
 
-- [Quickstart](https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres) (5 min)
-- [Getting started with Prisma Migrate](https://www.prisma.io/docs/orm/prisma-migrate/getting-started) (15 min)
-- [Add Prisma to an existing project](https://www.prisma.io/docs/getting-started/prisma-orm/add-to-existing-project/prisma-postgres) (15 min)
+After generating a client, import `PrismaClient` from the output configured in
+the `generator` block of your Prisma schema:
 
-Alternatively you can explore the ready-to-run [examples](https://github.com/prisma/prisma-examples/) (REST, GraphQL, gRPC, plain JavaScript and TypeScript demos, ...) or watch the [demo videos](https://www.youtube.com/watch?v=0RhtQgIs-TE&list=PLn2e1F9Rfr6k9PnR_figWOcSHgc_erDr5&index=1) (1-2 min per video).
+```ts
+import { PrismaClient } from './generated/prisma/client'
+```
 
-## Contributing
+Use `PrismaKb` with the `kingbase-mysql` provider and `PrismaKbOracle` with the
+`kingbase-oracle` provider:
 
-Refer to our [contribution guidelines](https://github.com/prisma/prisma/blob/main/CONTRIBUTING.md) and [Code of Conduct for contributors](https://github.com/prisma/prisma/blob/main/CODE_OF_CONDUCT.md).
+```ts
+import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+```
 
-## Tests Status
+The Prisma Kingbase packages are versioned independently. Install their current
+`latest` releases together, or pin a set of versions that you have tested
+together in your lockfile.
 
-- Prisma Tests Status:  
-  [![CI](https://github.com/prisma/prisma/actions/workflows/test.yml/badge.svg)](https://github.com/prisma/prisma/actions/workflows/test.yml)
-- Ecosystem Tests Status:  
-  [![Actions Status](https://github.com/prisma/ecosystem-tests/workflows/test/badge.svg)](https://github.com/prisma/ecosystem-tests/actions)
+## License
+
+Apache-2.0. See the repository license for details.

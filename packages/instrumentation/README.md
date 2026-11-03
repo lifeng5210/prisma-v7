@@ -23,7 +23,7 @@ registerInstrumentations({
 
 ## Jaeger
 
-Exporting traces to [Jaeger Tracing](https://jaegertracing.io).
+Exporting traces to [Jaeger Tracing](https://jaegertracing.io). This example uses a PostgreSQL driver adapter and a client generated to `./generated/prisma`.
 
 ```ts
 import { context, trace } from '@opentelemetry/api'
@@ -34,8 +34,9 @@ import { resourceFromAttributes } from '@opentelemetry/resources'
 import { BasicTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
+import { PrismaPg } from '@prisma/adapter-pg'
 
-import { PrismaClient } from '.prisma/client'
+import { PrismaClient } from './generated/prisma/client'
 
 const contextManager = new AsyncLocalStorageContextManager().enable()
 
@@ -58,15 +59,20 @@ registerInstrumentations({
 })
 
 async function main() {
-  const prisma = new PrismaClient()
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  const prisma = new PrismaClient({ adapter })
 
   const email = `user.${Date.now()}@prisma.io`
 
-  await prisma.user.create({
-    data: {
-      email: email,
-    },
-  })
+  try {
+    await prisma.user.create({
+      data: {
+        email: email,
+      },
+    })
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 main()

@@ -7,8 +7,8 @@ void executeSteps({
   setup: async () => {
     await $`pnpm install`
     cd('packages/db')
-    await $`pnpm exec prisma db push --force-reset`
-    await $`pnpm exec prisma generate`
+    await $`pnpm exec prisma-kb db push --force-reset`
+    await $`pnpm exec prisma-kb generate`
     cd('../service')
   },
   test: async () => {

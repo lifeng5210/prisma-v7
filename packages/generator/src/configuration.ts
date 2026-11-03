@@ -38,6 +38,8 @@ export interface BinaryTargetsEnvValue {
 
 export type ConnectorType =
   | 'mysql'
+  | 'kingbase-mysql'
+  | 'kingbase-oracle'
   | 'mongodb'
   | 'sqlite'
   | 'postgresql'

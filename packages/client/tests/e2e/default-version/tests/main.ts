@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma-kb/client'
 
 test('example', () => {
   expect(Prisma.prismaVersion.client).toMatch(/^\d+\.\d+\.\d+/)

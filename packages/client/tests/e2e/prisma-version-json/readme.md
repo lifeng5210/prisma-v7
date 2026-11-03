@@ -11,5 +11,5 @@ This test verifies that `prisma version --json` outputs valid JSON that can be p
 ## Running the test
 
 ```bash
-pnpm --filter @prisma/client test:e2e prisma-version-json
+pnpm --filter @prisma-kb/client test:e2e prisma-version-json
 ```

@@ -5,7 +5,7 @@ import { bold, dim, red } from 'kleur/colors'
 
 import { fetchStatus } from './status-page'
 
-/** $ prisma platform status */
+/** $ prisma-kb platform status */
 export class Status implements Command {
   static new(): Status {
     return new Status()
@@ -16,7 +16,7 @@ export class Status implements Command {
 
   ${bold('Usage')}
 
-  ${dim('$')} prisma platform status [options]
+  ${dim('$')} prisma-kb platform status [options]
 
   ${bold('Options')}
 

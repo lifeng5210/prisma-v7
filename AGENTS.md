@@ -1,190 +1,93 @@
-# Prisma Repository – Agent Field Notes
+# Prisma v7 工作约定
 
-> **Meta note**: This is the primary agent knowledge base file. `CLAUDE.md` and `GEMINI.md` are symlinks to this file—always edit `AGENTS.md` directly. When learning something new about the codebase that would help with future tasks, update this file immediately.
+本文件只记录当前有效的仓库约定，整理日期为 2026-11-02。当前用户指令优先；确认行为时以本次源码、配置及实际验证为准。不要把历史审计中的 UNFIXED、COMPLETE 或测试计数直接当作当前状态。
 
-- **Repository scope**: Monorepo for Prisma ORM, CLI, client, tests, etc. Many packages use TypeScript, Rust and WebAssembly (via engines), TSX, and Jest; automation relies on `pnpm`. Expect large fixture directories and generated files.
-- **Workspace layout**: Managed via pnpm workspaces and Turborepo (`turbo.json`). Node ^20.19 || ^22.12 || >=24.0 and pnpm >=11 <12 are required (see root `package.json`). Top-level scripts (`pnpm build`, `pnpm dev`, `pnpm test`) delegate into `scripts/ci/publish.ts`; package-specific commands run with `pnpm --filter @prisma/<pkg> <script>`. Turborepo caches builds; run `pnpm build` from root to build all packages in dependency order.
-  - **pnpm 11 configuration lives in `pnpm-workspace.yaml`.** pnpm 11 no longer reads the `pnpm` field of `package.json` (so `overrides` moved to `pnpm-workspace.yaml`) nor pnpm-specific settings from `.npmrc` (`.npmrc` is auth/registry only; `shellEmulator`, `autoInstallPeers`, `savePrefix` moved to `pnpm-workspace.yaml` in camelCase). `peerDependencyRules` already lived there.
-  - **Build-script approval uses `allowBuilds`, not `onlyBuiltDependencies`.** pnpm 11 removed `onlyBuiltDependencies`/`neverBuiltDependencies` and replaced them with `allowBuilds` (a map of package matcher → `true`/`false`) in `pnpm-workspace.yaml`. pnpm 11 still _reads_ a stray `onlyBuiltDependencies` key (so `pnpm config get` echoes it) but no longer _acts_ on it, so leftover entries silently do nothing. With `strictDepBuilds` defaulting to `true`, any dependency with an unreviewed build script fails `pnpm install` in CI with `ERR_PNPM_IGNORED_BUILDS` (exit 1) — a warning-only situation under pnpm 10. Current allow-list: `@swc/core`, `better-sqlite3`, `esbuild`, `sharp`, `sqlite3`, `workerd`, `yarn`. Verify completeness with `pnpm approve-builds` (should report "no packages awaiting approval"); `pnpm approve-builds --all` appends approvals to `allowBuilds`.
-  - **pnpm 11 does not link a workspace package's bin when its target is missing at install time.** A workspace dependency whose `bin` points at a build output (e.g. `prisma` → `build/index.js`) is not built yet during `pnpm install`, so pnpm 11 skips creating its `node_modules/.bin` entry and — unlike pnpm 10, which created a dangling symlink — never backfills it on later `pnpm install`/`--force`/`rebuild` (only a clean `rm -rf node_modules && pnpm install` after the target exists relinks it). Scripts that rely on the bin (`pnpm prisma …`, `pnpm exec prisma …`) then fail with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL] Command "prisma" not found`. Invoke the CLI through the resolved built entry instead (see `packages/bundle-size/create-gzip-files.ts`, which runs `node <pkg>/node_modules/prisma/build/index.js`).
-  - **CI decouples the pnpm runtime from the test Node.js.** pnpm 11 requires Node.js >=22.13, but the test matrix still exercises Node.js 20. `pnpm/action-setup` is configured with `standalone: true` (installs `@pnpm/exe`, which bundles its own Node.js), so pnpm runs on its bundled Node.js while `pnpm run <script>` executes under the matrix Node.js resolved from PATH (verified: scripts use the PATH `node`, not pnpm's bundled one). Keep `standalone: true` on every `action-setup` step. The e2e Docker container (`packages/client/tests/e2e/_utils/standard.dockerfile`) deliberately stays on pnpm 10.x because its standalone projects rely on per-test `pnpm.overrides` in `package.json`.
-- **Key packages**: `packages/cli` (Prisma CLI entry point), `packages/migrate` (migrate/db namespace + fixtures), `packages/client` (client runtime), `packages/client-generator-ts` (new `prisma-client` generator), `packages/client-generator-js` (traditional `prisma-client-js` generator), `packages/client-generator-registry` (generator registry for managing generators), `packages/client-engine-runtime` (the core part of the new Rust binary free client based on Wasm query compiler, used by `ClientEngine` class in `packages/client`), `packages/client-common` (shared client utilities), `packages/client-runtime-utils` (utility types and singletons for Prisma Client), `packages/config` (`PrismaConfigInternal` + loader), `packages/internals` (shared CLI + engine glue), `packages/engines` (Rust binaries download wrapper), `packages/integration-tests` (matrix suites), `packages/query-plan-executor` (standalone query plan executor service for Prisma Accelerate), `packages/credentials-store` (credential storage utilities), sqlcommenter packages under `packages/sqlcommenter*`, and numerous driver adapters under `packages/adapter-*`.
-- **Driver adapters & runtimes**: `packages/bundled-js-drivers` plus the `adapter-*` packages ship JS driver adapters: `adapter-pg`, `adapter-neon`, `adapter-libsql`, `adapter-planetscale`, `adapter-d1`, `adapter-better-sqlite3`, `adapter-mssql`, `adapter-mariadb`, `adapter-ppg` (Prisma Postgres Serverless). These are built on helpers in `driver-adapter-utils`; migrate/client fixtures exercise them, so adapter changes typically require fixture/test updates. CI tests driver adapters with flavors: `js_pg`, `js_neon`, `js_libsql`, `js_planetscale`, `js_d1`, `js_better_sqlite3`, `js_mssql`, `js_mariadb`, `js_pg_cockroachdb`.
-- **Build & tooling**: Typescript-first repo with WASM/Rust assets (downloaded by `@prisma/engines`). Multiple `tsconfig.*` drive bundle vs runtime builds. Lint via `pnpm lint`, format via `pnpm format`. Maintenance scripts live in `scripts/` (e.g. `bump-engines.ts`, `bench.ts`, `ci/publish.ts` orchestrates build/test/publish flows). Build configuration uses esbuild via `helpers/compile/build.ts` with configs in `helpers/compile/configs.ts`. Most packages use `bundledConfig` which bundles to both CJS and ESM with type declarations.
-  - Build helpers that copy Wasm artifacts should resolve package assets through `require.resolve(...)` instead of hardcoding `packages/*/node_modules` paths. With pnpm hoisted installs, dependencies can live only at workspace root and package-local `node_modules/@prisma/*` entries may be absent.
-- **Benchmarking**: Comprehensive performance benchmarks using Benchmark.js with CodSpeed integration. See `docs/benchmarking.md` for full documentation. Key commands:
-  - `pnpm bench` - Run all benchmarks (outputs to `output.txt`)
-  - `pnpm bench <pattern>` - Run benchmarks matching pattern
-  - Benchmark locations:
-    - End-to-end query performance: `packages/client/src/__tests__/benchmarks/query-performance/query-performance.bench.ts`
-    - Query compilation: `packages/client/src/__tests__/benchmarks/query-performance/compilation.bench.ts`
-    - Query interpreter/data mapper: `packages/client-engine-runtime/bench/interpreter.bench.ts`
-    - Client generation: `packages/client/src/__tests__/benchmarks/huge-schema/`, `packages/client/src/__tests__/benchmarks/lots-of-relations/`
-  - Benchmarks run automatically on CI via `.github/workflows/benchmark.yml`; CodSpeed tracks performance over time and alerts on >100% regression.
-  - CodSpeed is the only regression gate. The `Store benchmark result` step in the same workflow pushes Benchmark.js wall-clock numbers to `gh-pages` for the chart at <https://prisma.github.io/prisma/dev/bench/> and nothing else: GitHub-hosted runner throughput varies by more than 2x between jobs (adjacent data points for `findUnique by id` range from ~4.4k to ~9.1k ops/sec), so its commit-vs-parent comparison cannot resolve a real regression. Do not re-enable `comment-on-alert` / `fail-on-alert` or tune `alert-threshold` there — no threshold sits above the noise floor and below a regression worth catching.
-- **Testing & databases**: `TESTING.md` covers Jest/Vitest usage. Most suites run as `pnpm --filter @prisma/<pkg> test <pattern>`. DB-backed tests expect `.db.env` and Docker services from `docker/docker-compose.yml` (`docker compose up -d`). Client functional tests sit in `packages/client/tests/functional`—run them via `pnpm --filter @prisma/client test:functional` (with typechecking) or `pnpm --filter @prisma/client test:functional:code` (code only); `packages/client/helpers/functional-test/run-tests.ts` documents CLI flags to target providers, drivers, etc. Client e2e suites require a fresh `pnpm build` at repo root, then `pnpm --filter @prisma/client test:e2e --verbose --runInBand`. The legacy `pnpm --filter @prisma/client test` command primarily runs the older Jest unit tests plus `tsd` type checks. Migrate CLI suites live in `packages/migrate/src/__tests__`, the CLI runs both Jest (legacy suites) and Vitest (new subcommand coverage) via `pnpm --filter prisma test`, and end-to-end coverage lives in `packages/integration-tests`.
+`CLAUDE.md`、`GEMINI.md` 是本文件的符号链接，请直接编辑 `AGENTS.md`。只在长期规则或工作入口变化时更新本文件；实验经过、逐轮验收数字和原始日志索引写入普通文档。
 
-- **Client functional tests structure**:
-  - Each test lives in its own folder under `packages/client/tests/functional/` (or `issues/` for regression tests).
-  - Required files: `_matrix.ts` (test configurations), `test.ts` or `tests.ts` (test code), `prisma/_schema.ts` (schema template).
-  - `_matrix.ts` defines provider/adapter combinations using `defineMatrix(() => [[{provider: Providers.POSTGRESQL}, ...]])`.
-  - `prisma/_schema.ts` exports `testMatrix.setupSchema(({ provider }) => ...)` returning a Prisma schema string.
-  - Test file uses `testMatrix.setupTestSuite(() => { test(...) }, { optOut: { from: [...], reason: '...' } })`.
-  - Run specific adapter: `pnpm --filter @prisma/client test:functional:code --adapter js_pg <pattern>` (adapters: `js_pg`, `js_neon`, `js_libsql`, `js_planetscale`, `js_d1`, `js_better_sqlite3`, `js_mssql`, `js_mariadb`, `js_pg_cockroachdb`). Options come before the pattern, with no `--` separator. The adapter implies the provider, so `--provider` is rarely needed; pass `--provider` together with `--remote-executor` to exercise the Accelerate code path. Flags are documented in `packages/client/helpers/functional-test/run-tests.ts`.
-  - For error assertions, use `result.name === 'PrismaClientKnownRequestError'` and `result.code` (not `instanceof`).
-  - Use `idForProvider(provider)` from `_utils/idForProvider` for portable ID field definitions.
+## 用户约定与金仓边界
 
-- **Docs & references**: `ARCHITECTURE.md` contains dependency graphs (requires GraphViz to regenerate), `docker/README.md` explains local DB setup, `docs/benchmarking.md` covers performance benchmarking, `examples/` provides sample apps, and `sandbox/` hosts debugging helpers like the DMMF explorer. Planning documents live under `docs/plans/<topic>/` as a numbered index (`000-<topic>-index.md`) plus per-task files.
+- 保留用户已有改动、未跟踪文档和相邻仓库的工作。未经授权，不提交、推送、发布，不调整驱动 pin、实例配置、服务、角色或权限。此前拒绝推送 rust-kingbase 的决定仍有效。
+- 金仓适配默认只改自己的生产路径及必要的共享登记点，不顺带改原生 PostgreSQL/MySQL 的生产行为。Oracle 与 MySQL 两模式分别处理；协议相同不等于类型和 SQL 语义相同。
+- adapter-kb 的组织以 `packages/adapter-pg` 的职责布局为唯一参照。连接地址、PoolConfig、TLS、schema 处理留在 `kingbase.ts`、`kingbase-oracle.ts`，不要重新抽取 `connection-string.ts` 或参照其他 adapter 额外拆分文件。
+- 不在框架额外模拟数据库表达式语义。MySQL 模式的 BLOB→BIT 使用普通 MODIFY 交数据库接受或拒绝；时间→数字使用原生 CAST，不恢复十进制前缀/饱和/sql_mode模拟、`to_char` 时间编码或按容量不足删列的补偿。
+- 三种小 unsigned 原生类型被 PSL 拒绝，不恢复域、CHECK 或保护触发器模拟。`UnsignedInt`/`sys.uint4`、`UnsignedBigInt`/`sys.uint8` 及默认 Boolean 保留。旧模拟对象的识别和人工迁移边界见 engines 仓库的现行约定。
+- 两模式全文输入统一为金仓原生 tsquery，例如 `John & !Smith`；参数原样绑定。MySQL visitor 保留 SQL 重写及 simple/GIN 配置，不恢复 Boolean Mode 解析器或 `PRISMA_MYSQL_BOOLEAN_QUERY` 标记。
+- 两模式 JS `executeScript` 均保留签名并同步抛出 `Error('Not implemented yet')`，不能访问连接或执行 SQL。不要恢复脚本拆分器；普通事务、savepoint、MySQL 占位符扫描及 Rust 原生迁移脚本不受此限制。
+- Kingbase MySQL 独立 SQL 数组绑定/结果不支持，已知数组 OID 仅用于拒绝。不要误删标量 JSON 数组编码或 `IN` 参数展开，也不要扩展为 PSL ScalarLists。底层驱动内部 catalog 数组与 escape hatch 不属于已删除接口。
+- 不因 SQL 写法、类型范围或数据库能力不同就认定是应删的“额外功能”。SetDefault、宽字符串/Decimal、全文/TEXT/BLOB键、普通连接选项、原始 UUID/XML/网络值等应按已有功能适配范围判断。`pgbouncer` 未被要求删除，也没有真实代理端到端验收。
 
-- **Client architecture (Prisma 7)**:
-  - `ClientEngine` in `packages/client/src/runtime/core/engines/client/` orchestrates query execution using Wasm query compiler.
-  - Two executor implementations: `LocalExecutor` (driver adapters, direct DB) and `RemoteExecutor` (Accelerate/Data Proxy).
-  - `QueryInterpreter` class in `packages/client-engine-runtime/src/interpreter/query-interpreter.ts` executes query plans against `SqlQueryable` (driver adapter interface).
-  - Query plans are cached and shared between requests (`QueryPlanCache` in `packages/client/src/runtime/core/engines/client/query-plan-cache.ts`), so the interpreter receives them as `DeepReadonly` and must never mutate them (#29262 fixed such a bug and added a functional regression test in `packages/client/tests/functional/issues/29254-query-plan-cache-mutation`). Code that needs a modified plan must copy the affected nodes; structural sharing of unaffected subtrees is fine (see `purifyQueryPlan`).
-  - Query flow: `PrismaClient` → `ClientEngine.request()` → query compiler → `executor.execute()` → `QueryInterpreter.run()` → driver adapter.
-  - `ExecutePlanParams` interface in `packages/client/src/runtime/core/engines/client/Executor.ts` defines what's passed through the execution chain.
-  - `TransactionManager` in `packages/client-engine-runtime/src/transaction-manager/transaction-manager.ts` owns interactive transaction IDs and implements nested transactions using savepoints. Savepoint SQL is provider-specific (e.g. PostgreSQL uses `ROLLBACK TO SAVEPOINT <name>`, MySQL/SQLite use `ROLLBACK TO <name>`, SQL Server uses `SAVE TRANSACTION <name>` / `ROLLBACK TRANSACTION <name>` and has no release statement).
-  - `Transaction` in `packages/driver-adapter-utils` models savepoint behavior as async methods (`createSavepoint`, `rollbackToSavepoint`, optional `releaseSavepoint`) instead of returning SQL via `savepoint(action, name)`. `TransactionManager` expects adapter methods for savepoints and does not synthesize provider fallback SQL.
-  - Fluent API `dataPath` is built in `packages/client/src/runtime/core/model/applyFluent.ts` by appending `['select', <relationName>]` on each hop; runtime unpacking in `packages/client/src/runtime/RequestHandler.ts` currently strips `'select'`/`'include'` segments before `deepGet`.
-  - In extension context resolution, `dataPath` should be interpreted as selector/field pairs (`select|include`, relation field). Do not strip by raw string value or relation fields literally named `select`/`include` get dropped.
+## 仓库入口与架构
 
-- **Adding PrismaClient constructor options**:
-  - Runtime types: `PrismaClientOptions`, `PrismaClientBaseOptions`, `PrismaClientOptionsWithAdapter`, `PrismaClientOptionsWithAccelerateUrl` in `packages/client/src/runtime/getPrismaClient.ts`. `PrismaClientOptions` is a discriminated union (`PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter`) where each branch is `PrismaClientBaseOptions & { ... discriminator }`. Avoid going back to the older `(A | B) & C` shape: TypeScript reports errors against the named branches with the new layout (`not assignable to type 'PrismaClientOptionsWithAccelerateUrl'`) instead of expanding anonymous types like `{ accelerateUrl: string; adapter?: never; } & PrismaClientBaseOptions`.
-  - Validation: `packages/client/src/runtime/utils/validatePrismaClientOptions.ts` (add to `knownProperties` array and `validators` object).
-  - Engine config: `EngineConfig` interface in `packages/client/src/runtime/core/engines/common/Engine.ts`.
-  - Generated types: Update both `packages/client-generator-js/src/TSClient/PrismaClient.ts` (`buildClientOptions` method) and `packages/client-generator-ts/src/TSClient/file-generators/PrismaNamespaceFile.ts` (`buildClientOptions` function). The TS generator mirrors the runtime layout, emitting four exported types (`PrismaClientBaseOptions`, `PrismaClientOptionsWithAdapter`, `PrismaClientOptionsWithAccelerateUrl`, `PrismaClientOptions`); the JS generator keeps a single flat `PrismaClientOptions` interface for legacy compatibility.
-  - Use `@prisma/ts-builders` for generating TypeScript type declarations.
-  - Current known options: `errorFormat`, `adapter`, `accelerateUrl`, `log`, `transactionOptions`, `omit`, `comments`, `__internal`.
-  - The generated constructor parameter type is `Prisma.PrismaClientConstructorArgs<Options>` (defined in `packages/client-generator-js/src/TSClient/common.ts` for the JS generator, and emitted by `packages/client-generator-ts/src/TSClient/file-generators/PrismaNamespaceFile.ts` for the TS generator). It resolves to a plain `PrismaClientOptions` when `Options` defaults to `PrismaClientOptions` (the case when the user passes nothing or `{}`), and falls back to `Subset<Options, PrismaClientOptions>` otherwise. This keeps the "missing adapter" TypeScript error readable (`not assignable to parameter of type 'PrismaClientOptions'` instead of `Subset<...>`) while still rejecting unknown properties at the type level for the literal-argument case.
-  - **Union order matters.** `PrismaClientOptions` lists `PrismaClientOptionsWithAccelerateUrl` first and `PrismaClientOptionsWithAdapter` second. When `// @ts-nocheck` is present on the file that declares the union (and the generated `prismaNamespace.ts` _does_ keep `@ts-nocheck` for type-check performance), TypeScript's missing-property error elaboration for a discriminated union reports against the **second** union member. Putting the adapter branch second makes `new PrismaClient({ log: [...] })` say `Property 'adapter' is missing in type ... but required in type 'PrismaClientOptionsWithAdapter'` (the recommended option for most users) instead of suggesting `accelerateUrl`. Keep the same order in both the runtime types (`getPrismaClient.ts`) and the generator (`PrismaNamespaceFile.ts`).
-  - JSDoc on individual constructor option properties shows up via **autocomplete** (TypeScript's `getCompletionEntryDetails`) but not via **hover** on an already-written property name when the parameter type is generic. This is a TypeScript limitation that also affects query args like `where` / `select` / `take` (see microsoft/TypeScript#32542). Do not try to "fix" it by removing the generic parameter from the constructor signature — doing so breaks log/omit type inference.
-  - The "missing driver adapter" runtime error is raised from both `validatePrismaClientOptions` (constructor-level, primary user-facing message) and `ClientEngine` (defense-in-depth). When updating the wording, also update the inline snapshot in `packages/client/src/__tests__/validatePrismaClientOptions.test.ts`.
+- 本仓是 pnpm/Turborepo monorepo。Node、pnpm 版本以根 `package.json` 的 `engines`、`packageManager` 为准；pnpm 配置在 `pnpm-workspace.yaml`，构建许可使用 `allowBuilds`。不要把 pnpm 11 的配置移回旧 package.json 字段。
+- 根 `pnpm build`、`pnpm dev` 调用 Turbo；根 `pnpm test` 调用 `scripts/ci/publish.ts --test`。按实际包名筛选：CLI 为 `prisma-kb`，Client 为 `@prisma-kb/client`，金仓 adapter 为 `@prisma-kb/adapter-kb`；其他包查看各自 `package.json`。
+- `packages/cli`：命令入口；`packages/migrate`：迁移与反查；`packages/config`：`PrismaConfig`；`packages/client`：Client runtime 和 functional 测试；两套生成器在 `packages/client-generator-js`、`packages/client-generator-ts`。
+- `packages/driver-adapter-utils/src/types.ts` 定义 SQL adapter 合同；`packages/client-engine-runtime` 执行查询计划；`packages/query-plan-executor` 提供远端执行库。
+- Client 路径为 `PrismaClient → ClientEngine → Query Compiler Wasm → executor → QueryInterpreter → JS driver adapter`。Rust PSL/QC 仍存在；Schema Engine 仍是原生工具。不要把 Client 不使用原生 Query Engine 误写成仓库没有任何 query-engine 测试或 Rust 数据库代码。
+- PSL 不接受 datasource `url`、`directUrl`、`shadowDatabaseUrl`。连接信息由 `prisma.config.ts` 的 datasource 或 Client adapter 提供；不要恢复旧 `engine: 'classic' | 'js'` 配置。Prisma 7 不自动加载 `.env`；测试脚本中的 dotenv 是独立行为。
+- Rust 仓库通常是同级 `../prisma-engines`，先确认实际路径。跨仓驱动版本以该仓 `Cargo.toml`/`Cargo.lock` 为准，不从历史笔记复制 pin。
 
-- **Creating new packages**:
-  - Create directory under `packages/`, add `package.json`, `tsconfig.json`, `tsconfig.build.json`, and `helpers/build.ts`.
-  - Package is auto-discovered via `pnpm-workspace.yaml` glob `packages/*`.
-  - For type-only packages, use `bundledConfig` from `helpers/compile/configs.ts`.
-  - Add as dependency to consuming packages using `"workspace:*"` version.
-  - **Important**: Add resolution path to `tsconfig.build.bundle.json` under `compilerOptions.paths` for go-to-definition to work in editors.
-  - **Important**: If the package has tests, add it to `.github/workflows/test-template.yml`. Utility packages typically go in:
-    - `others` job (Linux, no Docker): includes `debug`, `generator-helper`, `get-platform`, `fetch-engine`, `engines`, `instrumentation`, `instrumentation-contract`, `schema-files-loader`, `config`, `dmmf`, `generator`, `credentials-store`, `sqlcommenter-*` packages.
-    - `client-packages` job: includes `client-common`, `client-engine-runtime`, `ts-builders`, `client-generator-js`, `client-generator-ts`, `client-generator-registry`.
-    - `driver-adapter-unit-tests` job: includes `adapter-libsql`, `adapter-mariadb`, `adapter-d1`, `adapter-pg`, `adapter-planetscale`, `adapter-mssql`, `adapter-neon`.
-    - `no-docker` job (Windows/macOS): mirrors the `others` and `client-packages` jobs for cross-platform testing.
+## Adapter 和运行时合同
 
-- **Prisma 7 direction**: Migration from `schema.prisma` datasource URLs / `env()` to `prisma.config.ts`. Commands, tests, and fixtures should read connection settings from `PrismaConfigInternal.datasource` (or driver adapters) rather than CLI flags or environment loading. SQLite datasource URLs now resolve relative to the config file and not to the schema.
-- **Test helpers**: `ctx.setConfigFile('<name>')` (from `__helpers__/prismaConfig.ts`) overrides the config used for the next CLI invocation and is automatically reset after each test, so no explicit cleanup is needed. Many migrate fixtures now provide one config per schema variant (e.g. `invalid-url.config.ts` next to `prisma/invalid-url.prisma`) and tests swap them via `ctx.setConfigFile(...)`. `ctx.setDatasource`/`ctx.resetDatasource` continue to override connection URLs when needed.
+- OID/codec 参照 rust-kingbase 的 `postgres-types/src/mysql_type_gen.rs`、`oracle_type_gen.rs` 以及 engines 的 `quaint/src/connector/kingbase_mysql/native`、`kingbase_oracle/native`。这是 PostgreSQL 兼容协议 OID，不是 MySQL 字段代码。
+- MySQL `BIT(1)` 与较宽 BIT 需同时按 OID/typmod决定声明类型和解码；默认 Boolean 应按布尔值往返，不能仅因 MySQL 引号语法而套用原生 MySQL 的所有标量结果语义。
+- 两模式保留完整 JSON wire text，使用查询级 parser，不猜测 JSON 字符串内容，也不修改全局 parser。标量 JSON 的 JS 数组仍作为 JSON 编码。
+- `kingbasedb` 池连接同时有驱动继承的 `connect()`/`end()` 和池提供的 `release()`，不能靠方法存在与否识别 pool。显式传递 pool；外部 pool 的选中 schema/Oracle UTC 设置必须落在真正执行查询的连接上。
+- Kingbase MySQL INSERT 与 `SELECT LAST_INSERT_ID()` 补查必须使用同一连接。事务内复用事务 client，不重连或提前释放。显式非零自增 ID 使用编译器的 `PRISMA_MYSQL_AUTOINCREMENT_ID` 参数元数据；不要按 SQL/参数位置猜测，也不要用连接中残留的 ID 覆盖显式 ID。显式零按会话 `NO_AUTO_VALUE_ON_ZERO` 处理。
+- 当前 `kingbasedb` 并未直接提供 `insertId`/`lastInsertId()`；adapter 自己的可选类型声明不证明驱动能力。自动插入 ID 当前由 adapter 补查取得，不应将此描述为 MySQL 驱动调用链。
+- 两模式 `usePhantomQuery=false`：框架发 COMMIT/ROLLBACK，adapter 完成连接释放。变更前核对 transaction manager 合同，不重复提交或回滚。
+- Oracle DATE 包含日期和时间；不要将其绑定为 date-only。带时区时间参数保留 offset，Oracle 连接配置 UTC；Oracle TINYINT 文本结果映射 Int32，ROWID 文本结果不能当作 Rust 二进制 codec 已实现。
+- 共享查询计划由缓存复用，`DeepReadonly` 输入不可原地修改；需要调整时复制受影响节点，参照 `purifyQueryPlan`。关联路径按 selector/field 成对解释，不能按字符串值删除名为 `select`/`include` 的真实字段。
+- 错误分层为 adapter `errors.ts` → `MappedError` → runtime user-facing error。raw 查询走 P2010；已识别数据库种类但未细分的错误保留原始 code/message，当前走 P2039。缺少 adapter 的初始化错误使用 P2038。新错误编号先检查源码，不能按旧文档猜测空位。
+- MySQL P2002 要保留逻辑索引名；不要把物理索引名泄漏当作既定合同，也不要为了修正错误读取而破坏事务中的原始失败。
+- 新 provider 需检查 Wasm provider 清单、CLI 资产复制、结果类型/lastInsertId、QPE factory、TypedSQL、Studio 和测试矩阵。
 
-- **CLI commands**: Most commands already accept `--config` for custom config paths. Upcoming work removes `--schema` / `--url` in favour of config-based resolution. When editing CLI help text, keep examples aligned with new config-first workflow.
-  - For isolated Studio verification, you can run `packages/cli/src/Studio.ts` directly via `pnpm exec tsx` and pass a config object that preserves `loadedFromFile`; this keeps SQLite URLs resolving relative to the config file while avoiding unrelated `packages/cli/src/bin.ts` imports.
-  - Studio is now pre-bundled into `packages/cli/build/studio.js` and `packages/cli/build/studio.css`, served only through explicit routes in `packages/cli/src/Studio.ts` via the runtime-specific `packages/cli/src/studio-server.ts` bindings, and should keep listener-level coverage in `packages/cli/src/__tests__/studio-server.vitest.ts` because a past Node regression dropped `GET` bodies by treating them like `HEAD`.
-  - If Enter or click does not open a cell editor in Studio, verify that the current table and column are writable before assuming a keyboard regression; views/system tables and read-only columns legitimately stay non-editable.
+## 实施与构建
 
-- **Driver adapters datasource**:
-  - Helper `ctx.setDatasource()` in tests overrides config.datasource for connection-specific scenarios.
+- 优先复用现有结构和 helper。新文件使用 kebab-case，避免新建无必要的 barrel；已有 index 约定按邻近代码保持一致。生产代码不要深导入其他 workspace 包的 `src/`，使用包入口。
+- TypeScript 优先原生 `#private`；类型导入显式区分。注释解释原因和合同，避免复述实现。保持现有换行、fixture 原文、CRLF 和 Unicode，不用格式化掩盖测试差异。
+- 新包同步 workspace、bundle paths 和合适的 `.github/workflows/test-template.yml` 任务；按任务需要验证相关包，不因文档举例就执行全仓构建。
+- 修改 Client 构造选项时同步 runtime 校验、EngineConfig 和两套生成器，保留现有 union 顺序及推断行为。JSDoc hover 的 TypeScript 限制不能通过删除 constructor 泛型来规避。
+- Wasm 构建在 engines 根执行 `make build-schema-wasm`、`make build-qc-wasm`，按改动选择必要模块。使用匹配版本的本地包/资产并核对包解析；不要为临时测试默认执行递归升级、改变依赖 pin 或覆盖用户 runtime。
+- `@prisma/internals` 会打包 schema Wasm，仅在运行时替换依赖无法更新旧 bundle。涉及迁移/反查的测试还要让 `PRISMA_SCHEMA_ENGINE_BINARY` 指向匹配的原生引擎。
+- 包构建会产出 CJS/ESM/d.ts；功能测试可能直接导入 `packages/client/runtime/client.js`，源码修改需确认实际加载的新产物。临时覆盖文件先备份，结束时按字节恢复。
 
-- **Testing patterns**:
-  - Tests rely on fixtures under `packages/**/src/__tests__/fixtures`; many now contain `prisma.config.ts`.
-  - Default Jest/Vitest runner is invoked via `pnpm --filter @prisma/<pkg> test <pattern>`; it wraps `dotenv` and expects `.db.env`.
-    - Some packages already use Vitest, `packages/cli` uses both for different tests as it's in the process of transition, older packages still use Jest.
-  - Functional generated clients in `packages/client/tests/functional/**/.generated` import `packages/client/runtime/client.js` directly; runtime changes in `src/runtime` may need corresponding runtime bundle updates to be exercised by functional tests.
-  - Client e2e `_steps.ts` files run inside `packages/client/tests/e2e/_utils/standard.dockerfile`; the startup script exports `NODE_PATH` for CommonJS and symlinks globally installed `zx` into `/test/node_modules` because ESM package resolution ignores `NODE_PATH`. Linux Docker runs may need SELinux-compatible bind mounts (`:z`) for mounted e2e files to be readable in the container.
-  - Each client e2e test is copied to `/test/<name>` in the container and `pnpm install`ed there as a standalone root (the e2e dir's `pnpm-workspace.yaml`/`.npmrc` are not copied along), so a per-test `pnpm.overrides` in the test's `package.json` takes effect. Use it to pin transitive deps that float via `^` ranges and can break tests out of the blue — e.g. the `prisma-client-imports-*` suites typecheck with `skipLibCheck: false` against pinned `@types/node@20` / TS 5.4, and a new `pg-protocol` release using generic `Buffer<T>` types broke the postgres suite that way. Note: `pnpm.overrides` in `package.json` works in pnpm 10 (what the container pins) but is ignored by pnpm 11.
-  - Inline snapshots can be sensitive to formatting; prefer concise expectations unless the exact message matters.
-  - **Never install packages or fetch from the network inside a test.** This has been the recurring cause of Windows CI timeouts in the `All pkgs (win+mac)` job, because Windows runners are several times slower than Linux at process creation and file I/O, so a test that is merely slow elsewhere blows its budget there. Removed instances: a generator fixture declaring `provider = "npx github:prisma/minimal-generator"`, and an `npm i` inside `DbSeed.test.ts`. Symlink what the repo already pins instead (see below).
-  - `ctx.fixture()` (`packages/get-platform/src/test-utils/jestContext.ts`) copies a fixture into a fresh temp dir and symlinks **only** `@prisma/client` and `@prisma/config` into its `node_modules`. Nothing else is resolvable from there, so: fixture scripts (e.g. custom generators) must not `require` other workspace packages — `packages/cli/src/__tests__/fixtures/custom-generator/minimal-generator.js` speaks the JSON-RPC generator protocol directly for this reason; and a fixture needing a third-party package must link it explicitly, as `DbSeed.test.ts` does for `ts-node` and `@types/node`. Linking works because Node resolves a symlink to its real path before looking up that package's own dependencies, which are then found in the pnpm store as usual. Note that fixtures run in-place (not via `ctx.fixture()`) resolve up to the repo root instead — `dependent-generator` relies on that.
-  - Invoking a binary as `pnpm <bin>` in a test costs an extra package manager process and a workspace resolution per call (measured at ~5s cold and ~0.4s warm on Linux, and considerably more on Windows). Where a test spawns something repeatedly, resolve the entry point and run it with `process.execPath` — see `runWranglerCLI` in `local-clouflare-d1-db-e2e.test.ts`.
-  - A `it.failing` test that exceeds its timeout is reported as **passing**, since Jest sees the timeout as the expected throw. Give such tests a generous timeout, or they can go green without ever exercising what they claim to.
+## 测试与验证
 
-- **Environment loading**: Prisma 7 removes automatic `.env` loading.
-
-- **Driver adapter error handling**:
-  - Database errors are mapped in each adapter's `errors.ts` (e.g., `packages/adapter-pg/src/errors.ts`).
-  - `MappedError` type in `packages/driver-adapter-utils/src/types.ts` defines all known error kinds.
-  - Known error kinds include: `GenericJs`, `UnsupportedNativeDataType`, `InvalidIsolationLevel`, `LengthMismatch`, `UniqueConstraintViolation`, `NullConstraintViolation`, `ForeignKeyConstraintViolation`, `DatabaseNotReachable`, `DatabaseDoesNotExist`, `DatabaseAlreadyExists`, `DatabaseAccessDenied`, `ConnectionClosed`, `TlsConnectionError`, `AuthenticationFailed`, `TransactionWriteConflict`, `TableDoesNotExist`, `ColumnNotFound`, `TooManyConnections`, `ValueOutOfRange`, `InvalidInputValue`, `MissingFullTextSearchIndex`, `SocketTimeout`, `InconsistentColumnData`, `TransactionAlreadyClosed`, and database-specific kinds (`postgres`, `mysql`, `sqlite`, `mssql`).
-  - `convertDriverError()` in each adapter maps database-specific error codes to `MappedError` kinds.
-  - `rethrowAsUserFacing()` in `packages/client-engine-runtime/src/user-facing-error.ts` maps `MappedError` kinds to Prisma error codes (P2xxx).
-  - To add a new error mapping: (1) add kind to `MappedError` in driver-adapter-utils, (2) map database error code in relevant adapter(s), (3) add Prisma code mapping in `getErrorCode()` and message in `renderErrorMessage()`.
-  - Raw queries (`$executeRaw`, `$queryRaw`) use `rethrowAsUserFacingRawError()` which always returns P2010; regular Prisma operations use `rethrowAsUserFacing()`.
-  - When no specific mapping exists for a database-specific kind (`postgres`, `mysql`, `sqlite`, `mssql`) — i.e. the adapter didn't recognize the underlying DB error code — `rethrowAsUserFacing()` falls back to a P2039 `UserFacingError` with the message `Database error. Code: <originalCode>. Message: <originalMessage>` carrying the raw `originalCode` / `originalMessage`. This keeps the DB error surface as `PrismaClientKnownRequestError` locally and as an HTTP 400 from the query plan executor (instead of HTTP 500, which Accelerate strips), so that schema-drift-style failures (stale migrations, stale generated client, etc.) remain debuggable. Raw queries keep the historical P2010 (`Raw query failed. Code: <originalCode>. Message: <originalMessage>`) via `rethrowAsUserFacingRawError()`; P2039 is used for non-raw queries so the message doesn't claim a regular Prisma operation was a raw query. Truly unknown `kind` values still fall through to `assertNever` so new driver-adapter variants surface clearly during development.
-  - Prisma error codes currently assigned outside the documented public Error Reference (P2000–P2037) are: **P2038** — used for the `PrismaClientInitializationError` raised by `ClientEngine` when no driver adapter is configured (see `CLIENT_ENGINE_ERROR` in `packages/client/src/runtime/core/engines/client/ClientEngine.ts`); **P2039** — used for unmapped database-specific driver-adapter errors as described above. Pick the next available code (P2040, …) for any new additions and document it here.
-
-- **SQL Commenter packages**:
-  - `@prisma/sqlcommenter`: Core types (`SqlCommenterPlugin`, `SqlCommenterContext`, `SqlCommenterQueryInfo`, `SqlCommenterTags`) for building sqlcommenter plugins.
-  - `@prisma/sqlcommenter-query-tags`: AsyncLocalStorage-based plugin for adding ad-hoc tags via `withQueryTags()` and `withMergedQueryTags()`.
-  - `@prisma/sqlcommenter-trace-context`: Plugin for adding W3C Trace Context `traceparent` header to queries.
-  - `@prisma/sqlcommenter-query-insights`: Plugin for adding parameterized query shapes to comments (format: `Model.action:base64Payload`).
-  - Plugins are registered via `PrismaClient({ comments: [plugin1(), plugin2()] })`.
-  - E2E tests for sqlcommenter plugins live in `packages/client/tests/e2e/sqlcommenter*` directories.
-  - `SqlCommenterQueryInfo` distinguishes `type: 'single'` (single query) vs `type: 'compacted'` (batched queries merged into one SQL statement). For non-raw client-engine queries, the SQL commenter context should receive parameterized query payloads so plugins such as query-insights never see user data values.
-
-- **AI agent safety checkpoint**: `packages/migrate/src/utils/ai-safety.ts` blocks `db drop`, `db push --force-reset`, `db push --accept-data-loss`, and `migrate reset` when an AI agent is detected, unless `PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION` is set. Do not replace the in-house detection with `@vercel/detect-agent` (rationale in the comment above `agentMatchers`). Its tests must clear inherited agent marker env vars in `beforeEach`, since the test process may itself run under an agent. The `prisma mcp` server (`packages/cli/src/mcp/MCP.ts`) deliberately exposes no `migrate-reset` tool — an agent that needs a reset must run the CLI, where the checkpoint applies. Do not add destructive tools to the MCP server.
-
-- **Codebase helpers to know**:
-  - `@prisma/internals` exports CLI utilities: `arg`, `loadSchemaContext` (less used now).
-  - `packages/migrate/src/__tests__/__helpers__/context.ts` sets up Jest helpers including config contributors.
-  - `packages/config` defines `PrismaConfigInternal`; inspect when validating config assumptions.
-  - `@prisma/ts-builders` provides a fluent API for generating TypeScript code (interfaces, types, properties with doc comments).
-  - `@prisma/driver-adapter-utils` defines core interfaces: `SqlQuery`, `SqlQueryable`, `SqlDriverAdapter`, `SqlDriverAdapterFactory`, `SqlMigrationAwareDriverAdapterFactory`, `MappedError` for error handling, `ConnectionInfo`, `Provider` type (`'mysql' | 'postgres' | 'sqlite' | 'sqlserver'`).
-  - `@prisma/client-engine-runtime` exports query interpreter, transaction manager, and related utilities.
-  - `@prisma/client-common` provides shared client utilities used by both generators and runtime.
-  - `@prisma/client-runtime-utils` provides utility types and singletons for Prisma Client.
-  - NPS survey infrastructure lives in `packages/cli/src/utils/nps/` (`survey.ts` orchestrates: TTY check via `isInteractive` from `@prisma/internals`, 30s prompt timeout, gating on `isCi`/`maybeInGitHook`/`isInNpmLifecycleHook`/`isInContainer`, once-per-timeframe persistence in `env-paths('prisma').config` as `nps.json`). Triggered only from `prisma generate` (suppressed by `--no-hints` and watch mode). Reuse this machinery for any new one-time interactive CLI prompt.
-  - `prisma mcp` (`packages/cli/src/mcp/MCP.ts`) is a stdio MCP server exposing `migrate-status`, `migrate-dev`, `migrate-reset`, and `Prisma-Studio` tools by shelling back into the CLI binary.
-
-- **Coding conventions**:
-  - Use **kebab-case** for new file names (e.g., `query-utils.ts`, `filter-operators.test.ts`).
-  - **Avoid creating barrel files** (`index.ts` that re-export from other modules). Import directly from the source file (e.g., `import { foo } from './utils/query-utils'` not `import { foo } from './utils'`), unless `./utils/index.ts` file already exists (in which case use it for consistency with surrounding code).
-  - **Never import from another workspace package's `src/` in code that ships.** Packages publish only `dist` (`files: ["README.md", "dist"]`), so a deep import such as `@prisma/internals/src/cli/completion-values` that survives bundling throws `MODULE_NOT_FOUND` the moment the installed package is required — this made `@prisma/migrate` 7.9.0 unloadable (#29772). Import from the package entry instead (`@prisma/internals`, `@prisma/migrate`): `tsconfig.build.bundle.json` maps those entries to `packages/*/src`, so the bundler sees the same module graph and tree-shakes it identically, at no cost in bundle size. Enforced by the `no-restricted-imports` rule in `eslint.config.cjs`, which exempts tests (never published) and the `@prisma/*-wasm` packages (wasm-pack output that genuinely ships `src/`).
-  - **Avoid adding useless code comments that do not add new information for the reader**.
-    Inline code comments can be broadly categorized as answering one of the three questions:
-    - _What does this code do?_ — never write these because they do not and cannot convey any new information that's not obvious from the code. Not only they don't add value, they are actively harmful (getting out of sync with code, distracting human readers, wasting LLM tokens etc). Descriptions of units of code like functions, classes and methods must be limited to doc comments (and describe the contract of this unit and not the internal implementation details), never inline comments.
-    - _Why was this code written (in this particular way or at all)?_ — this is what inline comments are for. Only use them to include relevant context, background, GitHub issues, reasons behind decisions etc.
-    - _How does this code work?_ — these comments should be exceedingly rare and may indicate poorly written or confusing code. Prefer writing code in a way that makes such comments redundant, unless required for performance or other reasons, or when the complexity comes from outside systems or packages (in which case it's more of a "why" comment than a "how" comment anyway). For well known algorithms, prefer their names and references to papers, books or Wikipedia articles over long explanations.
-  - Do write documentation comments, and mainly do so for exported items (although intra-module documentation may sometimes be useful as well).
-  - The correct and official abbreviation of WebAssembly is "Wasm", not "WASM". There are instances of "WASM" in the codebase, but they are wrong and you should not repeat them. Fix the capitalization whenever you incidentally touch the corresponding lines or surrounding code for other reasons.
-  - Prefer native JavaScript private properties and methods (`#field`) over the `private` keyword in TypeScript.
-
-- **Workflow reminders**:
-  - Respect existing structure: modifications often require updating both command implementation and tests/fixtures.
-  - Keep changes ASCII unless a file already uses Unicode (docs sometimes include emojis).
-  - For new fixtures, prefer minimal config mirroring existing ones to ensure cross-platform compatibility.
-  - When adding features that span multiple packages, build from root (`pnpm build`) to ensure correct dependency order.
-  - Type-only imports from workspace packages work at runtime but IDE may show errors until `pnpm install` refreshes the workspace graph.
-  - Test files named `*.test.ts` are excluded from build output via esbuild config; place tests alongside source files.
-  - **Update this file** (`AGENTS.md`) whenever you learn something new about the codebase that would be valuable for future tasks.
-
-- **Knowledge reminders**:
-  - Your training data contains a lot of outdated information that doesn't apply to Prisma 7. Always analyze this codebase like you would analyze a project you are not familiar with, and prefer the learnings from this file and this codebase over your prior knowledge. In particular, remember:
-    - **There's no such thing as "query engine" in Prisma**
-    - **There are no database URLs in Prisma schema files**
-    - **Prisma uses JavaScript drivers**
-    - **Query execution code is written in TypeScript in Prisma**
-    - PSL parser and query compiler/planner is still written in Rust and compiled to WebAssembly. There are no native binaries or library addons in Prisma Client.
-    - Schema engine for Prisma Migrate still exists and is still a native binary.
-
-## Debugging and making changes to Rust/WebAssembly code
-
-When you need to check the code or make some changes in Rust codebase, assume the repository is checked out in the `prisma-engines` directory above the root of this repo. Determine the absolute path to the current project on the filesystem (e.g. `/home/user/work/prisma`) and infer the directory of the `prisma-engines` repo (e.g. `/home/user/work/prisma-engines`, let's call it `$PRISMA_ENGINES_ROOT`).
-
-After you make some changes there, use these commands in the prisma-engines repo to build the Wasm modules:
+常用入口（从本仓根运行，先确认相应测试环境）：
 
 ```sh
-make build-schema-wasm
-make build-qc-wasm
+pnpm --filter @prisma-kb/adapter-kb test
+pnpm --filter @prisma-kb/adapter-kb build
+pnpm --filter prisma-kb test <pattern>
+pnpm --filter @prisma-kb/client test:functional:code --adapter js_kb <pattern>
+pnpm --filter @prisma-kb/client test:functional --adapter js_kb_oracle <pattern>
+pnpm --filter @prisma/integration-tests test:kingbase-oracle
 ```
 
-Then, back in `prisma` repo:
+- 命令中的 `<pattern>` 是占位符，不原样执行。Client functional 参数放在 pattern 前，不额外加 `--`；入口和选项以 `packages/client/helpers/functional-test/run-tests.ts` 为准。
+- 两套生成器与 code/types 入口分别说明；`--generate-only` 不等于运行 DB 测试，未运行 beforeAll 的产物不能证明完整类型覆盖。生成目录中的旧文件和 TS/JS 冲突需先辨别归属再处理。
+- 金仓 functional 为 adapter 路径，使用 `TEST_FUNCTIONAL_KINGBASE_MYSQL_URI`/`TEST_FUNCTIONAL_KINGBASE_ORACLE_URI`，URL 按 harness 使用 `PRISMA_DB_NAME`。由金仓 helper 创建/清理选中测试 schema，不发送到通用 force-reset 路径。
+- 普通 adapter DB 测试使用 `TEST_KINGBASE_MYSQL_URI`/`TEST_KINGBASE_ORACLE_URI`；不要与 functional 或 Rust 环境变量混用。缺少变量导致的 skip 不计实库覆盖。
+- `_matrix.ts`、provider/adapter 注册、optOut、describeIf 与生成类型都影响覆盖。新增测试应接入既有功能矩阵并保留原生对照；只增加独立金仓测试不能证明共享入口已接入。
+- 直接 SQL 的 MySQL 模式标识符使用反引号；便携 ID 用 `idForProvider`。Oracle NUMBER 的 TypedSQL结果可为 Decimal，即使模型字段是 Int/BigInt；不要因此弱化模型类型断言。
+- 集成测试在 Schema Engine/Client 操作前关闭 setup 连接，afterEach重新连接清理本场景 schema；保留传给 `Database.afterEach` 的 Context。
+- 临时 DB/schema 使用唯一自有名称，清理前确认归属；不按前缀批量删除未知对象，不更改实例/服务/许可配置来让测试通过。
+- 正常验证不自动更新快照；确认正确预期后才使用对应测试框架的更新机制，检查 diff，再关闭更新重跑。对已有精确诊断不改成宽泛断言。
+- 测试中不临时联网安装依赖；复用/链接仓库已固定依赖。CLI fixture 所需依赖需明确链接；二进制入口反复运行时优先已有 runner，避免每次额外启动包管理器。
+- 只报告实际执行且去重的通过数。Cargo/Jest/Vitest 标题、内部早退、ignored、skip、重复、生成文件、手工探针各自说明；旧验收数不代表当前全项目全绿。
+- 文档或其他低影响可逆修改按实际风险做静态校验，不为凑计数启动数据库或添加镜像测试。
 
-```sh
-pnpm upgrade -r @prisma/prisma-schema-wasm@file:$PRISMA_ENGINES_ROOT/target/prisma-schema-wasm
-pnpm upgrade -r @prisma/query-compiler-wasm@file:$PRISMA_ENGINES_ROOT/query-compiler/query-compiler-wasm/pkg
-pnpm build
-```
+## CLI、远端执行与工具
 
-You may only need to build and update one of these modules if your changes are isolated in scope:
+- CLI 连接配置来自 `PrismaConfigInternal.datasource`；SQLite 相对路径相对于配置文件。更新帮助文本时按实际命令参数核对，不保留已移除选项。
+- `packages/cli/src/mcp/MCP.ts` 目前注册 `migrate-status`、`migrate-dev`、`Prisma-Studio`，没有 `migrate-reset`；不要按历史工具列表调用不存在的工具。
+- 保留 `packages/migrate/src/utils/ai-safety.ts` 的检测和用户同意机制，不绕过或替换为另一套检测，不新增破坏性 MCP 工具。
+- `packages/query-plan-executor` 是内部库，自托管 host需 HTTP listener、OpenTelemetry上下文和 active logger；不能假定托管 Accelerate 理解 fork-only 金仓 provider。示例 host 的通过不等于生产鉴权、HTTPS、缓存、限流、多租户或全球部署已验收。
+- Studio 是否可编辑先核实表/列可写性；服务入口和静态资源使用 `packages/cli/src/Studio.ts`、`studio-server.ts` 的现有约定。
 
-1. Build only `prisma-schema-wasm` if your changes are isolated to schema and DMMF, and you are only going to run the CLI and generator tests, not Client.
-2. Build only `query-compiler-wasm` if your changes are related to query planning and execution but do not touch the schema or DMMF in any way.
+## 未决事项与持久记录
 
-When in doubt, build both to avoid unexpected behavior. Time and cost of compilation is always less than of debugging.
+- 仍延期：MySQL 映射枚举 DDL 引号边界；人工共享序列的 ACL/comment/view/function 等额外属性保护；DMMF/版本基线；共享 identity 额外属性；`relationMode=prisma` deleteMany cardinality 问题的原生对照与复查。不要根据相邻功能通过就宣称这些已修复。
+- Client/CLI/Rust 共享测试全量接入盘点仍有待办，包括 Rust QE/QC 金仓 tag/provider/adapter/executor 桥接、query introspection/CLI 建库入口和公共矩阵/guard。具体范围按持久回归文档逐项核对，不能靠一轮 headline 数字认定完成。
+- 正式 release 引擎、Wasm/包发布、全项目全部组合不因历史聚焦回归而自动验收。
+- 旧 `/tmp` 日志及已归档/移除的 JSON 可能不存在；引用失效不等于重新验证通过，更不能补造原始记录。

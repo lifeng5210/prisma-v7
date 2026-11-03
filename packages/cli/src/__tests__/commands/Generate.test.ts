@@ -48,7 +48,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -68,7 +68,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./prisma/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -88,7 +88,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -112,7 +112,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -136,7 +136,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -164,7 +164,7 @@ describe('using cli', () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to <output> in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to <output> in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -257,7 +257,7 @@ it('should hide hints with --no-hints', async () => {
 
   expect(data.stdout).toMatchInlineSnapshot(`
     "
-    ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+    ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
     "
   `)
   expect(data.stderr).toMatchInlineSnapshot(`
@@ -424,7 +424,7 @@ describe('--schema from project directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -447,7 +447,7 @@ describe('--schema from project directory', () => {
 
     expect(output).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -499,7 +499,7 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./subdirectory/@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./subdirectory/@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -524,7 +524,7 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./subdirectory/@prisma/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./subdirectory/@prisma-kb/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -553,7 +553,7 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -570,9 +570,9 @@ describe('--schema from parent directory', () => {
 
     expect(result).toMatchInlineSnapshot(`
       "
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client in XXXms
 
-      ✔ Generated Prisma Client (v0.0.0) to ./generated/client_3 in XXXms
+      ✔ Generated Prisma Client (v7.10.0-kb.1) to ./generated/client_3 in XXXms
 
       Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -630,14 +630,14 @@ describe('with --sql', () => {
   it('throws error on mssql', async () => {
     ctx.fixture('typed-sql-invalid-mssql')
     await expect(Generate.new().parse(['--sql'], await ctx.config())).rejects.toMatchInlineSnapshot(
-      `"Typed SQL is supported only for postgresql, cockroachdb, mysql, sqlite providers"`,
+      `"Typed SQL is supported only for postgresql, cockroachdb, mysql, kingbase-mysql, kingbase-oracle, sqlite providers"`,
     )
   })
 
   it('throws error on mongo', async () => {
     ctx.fixture('typed-sql-invalid-mongo')
     await expect(Generate.new().parse(['--sql'], await ctx.config())).rejects.toMatchInlineSnapshot(
-      `"Typed SQL is supported only for postgresql, cockroachdb, mysql, sqlite providers"`,
+      `"Typed SQL is supported only for postgresql, cockroachdb, mysql, kingbase-mysql, kingbase-oracle, sqlite providers"`,
     )
   })
 })

@@ -1,0 +1,1 @@
+SELECT nextrowid() AS "rowId"

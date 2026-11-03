@@ -64,7 +64,9 @@ testMatrix.setupTestSuite(
       expect(products).toEqual([])
     })
 
-    testIf(provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB)('string filter', async () => {
+    testIf(
+      provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE,
+    )('string filter', async () => {
       await prisma.product.createMany({
         data: [
           {
@@ -84,7 +86,7 @@ testMatrix.setupTestSuite(
       const products = await prisma.product.findMany({
         where: {
           properties1: {
-            // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB
+            // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE
             path: ['kind'],
             string_ends_with: prisma.product.fields.title,
           },
@@ -94,7 +96,9 @@ testMatrix.setupTestSuite(
       expect(products).toEqual([expect.objectContaining({ title: 'apple' })])
     })
 
-    testIf(provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB)('array filter', async () => {
+    testIf(
+      provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE,
+    )('array filter', async () => {
       await prisma.product.createMany({
         data: [
           {
@@ -112,7 +116,7 @@ testMatrix.setupTestSuite(
       const products = await prisma.product.findMany({
         where: {
           properties1: {
-            // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB
+            // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE
             path: ['object', 'meta', 'tags'],
             array_contains: prisma.product.fields.properties2,
           },

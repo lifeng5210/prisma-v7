@@ -1,4 +1,4 @@
-import { defineConfig } from 'prisma/config'
+import { defineConfig } from 'prisma-kb/config'
 
 export default defineConfig({
   engine: 'classic',

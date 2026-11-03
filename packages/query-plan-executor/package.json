@@ -1,12 +1,12 @@
 {
-  "name": "@prisma/query-plan-executor",
-  "version": "0.0.0",
-  "description": "This package is intended for Prisma's internal use",
+  "name": "@prisma-kb/query-plan-executor",
+  "version": "7.10.0-kb.1",
+  "description": "Query plan executor with Kingbase MySQL and Kingbase Oracle support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/query-plan-executor"
   },
   "license": "Apache-2.0",
@@ -17,10 +17,11 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@prisma/adapter-pg": "workspace:*",
+    "@prisma-kb/adapter-kb": "workspace:*",
     "@prisma/adapter-mariadb": "workspace:*",
     "@prisma/adapter-mssql": "workspace:*",
     "@prisma/client-engine-runtime": "workspace:*",
-    "@prisma/driver-adapter-utils": "workspace:*",
+    "@prisma-kb/driver-adapter-utils": "workspace:*",
     "hono": "^4.12.23",
     "temporal-polyfill": "0.3.0",
     "zod": "4.1.3"

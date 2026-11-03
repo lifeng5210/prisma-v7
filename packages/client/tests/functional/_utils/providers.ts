@@ -5,6 +5,8 @@ export enum Providers {
   MONGODB = 'mongodb',
   COCKROACHDB = 'cockroachdb',
   SQLSERVER = 'sqlserver',
+  KINGBASE_MYSQL = 'kingbase-mysql',
+  KINGBASE_ORACLE = 'kingbase-oracle',
 }
 
 export enum AdapterProviders {
@@ -16,6 +18,8 @@ export enum AdapterProviders {
   JS_BETTER_SQLITE3 = 'js_better_sqlite3',
   JS_MSSQL = 'js_mssql',
   JS_MARIADB = 'js_mariadb',
+  JS_KB = 'js_kb',
+  JS_KB_ORACLE = 'js_kb_oracle',
 
   // entries below are not driver adapters,
   // they are used for testing different databases
@@ -37,6 +41,8 @@ export const adaptersForProvider = {
   [Providers.MONGODB]: [],
   [Providers.COCKROACHDB]: [AdapterProviders.JS_PG_COCKROACHDB],
   [Providers.SQLSERVER]: [AdapterProviders.JS_MSSQL],
+  [Providers.KINGBASE_MYSQL]: [AdapterProviders.JS_KB],
+  [Providers.KINGBASE_ORACLE]: [AdapterProviders.JS_KB_ORACLE],
 } satisfies Record<Providers, AdapterProviders[]>
 
 export const relationModesForAdapter = {
@@ -49,10 +55,12 @@ export const relationModesForAdapter = {
   [AdapterProviders.VITESS_8]: RelationModes.PRISMA,
   [AdapterProviders.JS_MSSQL]: undefined,
   [AdapterProviders.JS_MARIADB]: undefined,
+  [AdapterProviders.JS_KB]: undefined,
+  [AdapterProviders.JS_KB_ORACLE]: undefined,
   [AdapterProviders.JS_PG_COCKROACHDB]: undefined,
 } satisfies Record<AdapterProviders, RelationModes | undefined>
 
-export const allProviders = Object.values(Providers).map((p) => ({ provider: p }))
+export const allProviders = Object.values(Providers).map((provider) => ({ provider }))
 
 export const sqlProviders = allProviders.filter(({ provider }) => provider !== Providers.MONGODB)
 

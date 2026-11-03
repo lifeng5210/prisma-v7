@@ -1,13 +1,13 @@
-# `@prisma/engines`
+# `@prisma-kb/engines`
 
-⚠️ **Warning**: This package is intended for Prisma's internal use.
-Its release cycle does not follow SemVer, which means we might release breaking changes (change APIs, remove functionality) without any prior warning.
+⚠️ **Warning**: This package is intended for the Prisma Kingbase distribution.
+Its release cycle does not follow SemVer, so its APIs can change between releases.
 
-The postinstall hook of this package downloads all Prisma engines available for the current platform, namely the Query Engine and the Schema Engine from the Prisma CDN.
+The postinstall hook downloads the native Schema Engine for the current platform from the Kingbase engine mirror.
 
-The engines version to be downloaded is directly determined by the version of its `@prisma/engines-version` dependency.
+The engine revision to download is directly determined by its `@prisma-kb/engines-version` dependency.
 
 You should probably not use this package directly, but instead use one of these:
 
-- [`prisma` CLI](https://www.npmjs.com/package/prisma)
-- [`@prisma/client`](https://www.npmjs.com/package/@prisma/client)
+- the Prisma Kingbase CLI distribution
+- the Prisma Kingbase Client distribution

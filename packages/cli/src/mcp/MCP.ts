@@ -38,9 +38,9 @@ export class Mcp implements Command {
   private constructor() {}
 
   public help = createHelp({
-    usageLine: 'prisma mcp [options]',
+    usageLine: 'prisma-kb mcp [options]',
     options: [['--early-access', '', 'Enable early access features']],
-    examples: ['prisma mcp --early-access'],
+    examples: ['prisma-kb mcp --early-access'],
     additionalContent: [
       'Starts an MCP server to use with AI development tools such as Cursor, Windsurf and Claude Desktop',
       `For additional help visit ${link('https://pris.ly/cli/mcp')}`,
@@ -55,7 +55,7 @@ export class Mcp implements Command {
 
     server.tool(
       'migrate-status',
-      `The prisma migrate status command looks up the migrations in ./prisma/migrations/* folder and the entries in the _prisma_migrations table and compiles information about the state of the migrations in your database.
+      `The prisma-kb migrate status command looks up the migrations in ./prisma/migrations/* folder and the entries in the _prisma_migrations table and compiles information about the state of the migrations in your database.
             Example output:
 
             Status

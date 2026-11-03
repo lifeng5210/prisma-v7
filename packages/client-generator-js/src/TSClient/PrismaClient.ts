@@ -334,7 +334,7 @@ function queryRawTypedDefinition(context: GenerateContext) {
         Executes a typed SQL query and returns a typed result
         @example
         \`\`\`
-        import { myQuery } from '@prisma/client/sql'
+        import { myQuery } from '@prisma-kb/client/sql'
 
         const result = await prisma.$queryRawTyped(myQuery())
         \`\`\`

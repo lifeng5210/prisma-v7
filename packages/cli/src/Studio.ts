@@ -23,7 +23,7 @@ import { UserFacingError } from './utils/errors'
 import { getPpgInfo } from './utils/ppgInfo'
 
 /**
- * `prisma dev`'s `51_213 - 1`
+ * `prisma-kb dev`'s `51_213 - 1`
  */
 const DEFAULT_PORT = 51_212
 
@@ -207,7 +207,7 @@ Browse your data with Prisma Studio
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma studio [options]
+  ${dim('$')} prisma-kb studio [options]
 
 ${bold('Options')}
 
@@ -220,24 +220,24 @@ ${bold('Options')}
 ${bold('Examples')}
 
   Start Studio on the default port
-    ${dim('$')} prisma studio
+    ${dim('$')} prisma-kb studio
 
   Start Studio on a custom port
-    ${dim('$')} prisma studio --port 5555
+    ${dim('$')} prisma-kb studio --port 5555
 
   Start Studio in a specific browser
-    ${dim('$')} prisma studio --port 5555 --browser firefox
-    ${dim('$')} BROWSER=firefox prisma studio --port 5555
+    ${dim('$')} prisma-kb studio --port 5555 --browser firefox
+    ${dim('$')} BROWSER=firefox prisma-kb studio --port 5555
 
   Start Studio without opening in a browser
-    ${dim('$')} prisma studio --port 5555 --browser none
-    ${dim('$')} BROWSER=none prisma studio --port 5555
+    ${dim('$')} prisma-kb studio --port 5555 --browser none
+    ${dim('$')} BROWSER=none prisma-kb studio --port 5555
 
   Specify a custom prisma config file
-    ${dim('$')} prisma studio --config=./prisma.config.ts
+    ${dim('$')} prisma-kb studio --config=./prisma.config.ts
 
   Specify a direct database connection string
-    ${dim('$')} prisma studio --url="postgresql://user:password@localhost:5432/dbname"
+    ${dim('$')} prisma-kb studio --url="postgresql://user:password@localhost:5432/dbname"
 `)
 
   static new(): Studio {

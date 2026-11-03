@@ -171,8 +171,10 @@ export async function setupTestSuiteDatabase({
     } else {
       const dbPushParams = [] as string[]
 
-      // we reuse and clean the db when it is explicitly required
-      if (process.env.TEST_REUSE_DATABASE === 'true') {
+      if (isKingbaseProvider(suiteConfig.matrixOptions.provider)) {
+        await resetKingbaseSchema(datasourceInfo.databaseUrl, suiteConfig.matrixOptions.provider)
+      } else if (process.env.TEST_REUSE_DATABASE === 'true') {
+        // We reuse and clean the database when it is explicitly required.
         dbPushParams.push('--force-reset')
       }
 
@@ -329,6 +331,10 @@ export async function dropTestSuiteDatabase({
     return await prepareD1Database({ cfWorkerBindings: cfWorkerBindings! })
   }
 
+  if (isKingbaseProvider(suiteConfig.matrixOptions.provider)) {
+    return await dropKingbaseSchema(datasourceInfo.databaseUrl, suiteConfig.matrixOptions.provider)
+  }
+
   try {
     const consoleInfoMock = jest.spyOn(console, 'info').mockImplementation()
     const runtimeConfig = buildPrismaConfig({ suiteConfig, suiteMeta, datasourceInfo })
@@ -456,6 +462,10 @@ function getDbUrl(provider: Providers): string {
       return requireEnvVariable('TEST_FUNCTIONAL_COCKROACH_URI')
     case Providers.SQLSERVER:
       return requireEnvVariable('TEST_FUNCTIONAL_MSSQL_URI')
+    case Providers.KINGBASE_MYSQL:
+      return requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI')
+    case Providers.KINGBASE_ORACLE:
+      return requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_ORACLE_URI')
     default:
       return assertNever(provider, `No URL for provider ${provider} configured`)
   }
@@ -476,6 +486,8 @@ function getDbUrlFromFlavor(driverAdapterOrFlavor: `${AdapterProviders}` | undef
       .with(AdapterProviders.JS_PG, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_URI'))
       .with(AdapterProviders.JS_NEON, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_16_URI'))
       .with(AdapterProviders.JS_PLANETSCALE, () => requireEnvVariable('TEST_FUNCTIONAL_VITESS_8_URI'))
+      .with(AdapterProviders.JS_KB, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI'))
+      .with(AdapterProviders.JS_KB_ORACLE, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_ORACLE_URI'))
       .with(AdapterProviders.JS_LIBSQL, () => requireEnvVariable('TEST_FUNCTIONAL_LIBSQL_FILE_URI'))
       .with(AdapterProviders.JS_BETTER_SQLITE3, () => requireEnvVariable('TEST_FUNCTIONAL_BETTER_SQLITE3_FILE_URI'))
       .otherwise(() => getDbUrl(provider))
@@ -500,4 +512,67 @@ function requireEnvVariable(varName: string): string {
     )
   }
   return value
+}
+
+function isKingbaseProvider(provider: Providers): provider is Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE {
+  return provider === Providers.KINGBASE_MYSQL || provider === Providers.KINGBASE_ORACLE
+}
+
+async function resetKingbaseSchema(
+  databaseUrl: string,
+  provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
+): Promise<void> {
+  const schema = getKingbaseSchema(databaseUrl, provider)
+  const adapter = await connectKingbaseAdmin(databaseUrl, provider)
+
+  try {
+    await adapter.underlyingDriver().query(`DROP SCHEMA IF EXISTS ${schema} CASCADE; CREATE SCHEMA ${schema};`)
+  } finally {
+    await adapter.dispose()
+  }
+}
+
+async function dropKingbaseSchema(
+  databaseUrl: string,
+  provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
+): Promise<void> {
+  const schema = getKingbaseSchema(databaseUrl, provider)
+  const adapter = await connectKingbaseAdmin(databaseUrl, provider)
+
+  try {
+    await adapter.underlyingDriver().query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`)
+  } finally {
+    await adapter.dispose()
+  }
+}
+
+function getKingbaseSchema(
+  databaseUrl: string,
+  provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
+): string {
+  const schema = new URL(databaseUrl).searchParams.get('schema')
+
+  if (!schema) {
+    throw new Error(`${provider} functional test URLs must set the schema query parameter`)
+  }
+
+  return `"${schema.replaceAll('"', '""')}"`
+}
+
+async function connectKingbaseAdmin(
+  databaseUrl: string,
+  provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
+) {
+  const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
+  const adminUrl = getKingbaseAdminUrl(databaseUrl)
+
+  return provider === Providers.KINGBASE_MYSQL
+    ? await new PrismaKb(adminUrl).connect()
+    : await new PrismaKbOracle(adminUrl).connect()
+}
+
+function getKingbaseAdminUrl(databaseUrl: string): string {
+  const url = new URL(databaseUrl)
+  url.searchParams.delete('schema')
+  return url.toString()
 }

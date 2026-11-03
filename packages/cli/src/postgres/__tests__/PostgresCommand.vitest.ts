@@ -7,14 +7,14 @@ describe('PostgresCommand', () => {
   test('shows help with no arguments', async () => {
     const cmd = PostgresCommand.new({})
     const result = await cmd.parse([], defaultTestConfig(), '/tmp')
-    expect(result).toContain('prisma postgres')
+    expect(result).toContain('prisma-kb postgres')
     expect(result).toContain('link')
   })
 
   test('shows help with --help flag', async () => {
     const cmd = PostgresCommand.new({})
     const result = await cmd.parse(['--help'], defaultTestConfig(), '/tmp')
-    expect(result).toContain('prisma postgres')
+    expect(result).toContain('prisma-kb postgres')
   })
 
   test('dispatches to subcommand', async () => {

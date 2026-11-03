@@ -17,7 +17,7 @@ import {
 import { bold, dim, red, underline } from 'kleur/colors'
 
 /**
- * $ prisma format
+ * $ prisma-kb format
  */
 export class Format implements Command {
   public static new(): Format {
@@ -29,7 +29,7 @@ Format a Prisma schema.
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma format [options]
+  ${dim('$')} prisma-kb format [options]
 
 ${bold('Options')}
 
@@ -40,10 +40,10 @@ ${bold('Options')}
 ${bold('Examples')}
 
 With an existing Prisma schema
-  ${dim('$')} prisma format
+  ${dim('$')} prisma-kb format
 
 Or specify a Prisma schema path
-  ${dim('$')} prisma format --schema=./schema.prisma
+  ${dim('$')} prisma-kb format --schema=./schema.prisma
 
   `)
 
@@ -95,7 +95,7 @@ Or specify a Prisma schema path
         const [, originalSchema] = originalSchemaTuple
         if (originalSchema !== formattedSchema) {
           return new HelpError(
-            `${bold(red(`!`))} There are unformatted files. Run ${underline('prisma format')} to format them.`,
+            `${bold(red(`!`))} There are unformatted files. Run ${underline('prisma-kb format')} to format them.`,
           )
         }
       }

@@ -212,6 +212,13 @@ testMatrix.setupTestSuite(
           FROM User u
           LEFT JOIN Profile p ON u.id = p.userId
         `
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        return `
+          CREATE VIEW \`UserInfo\`
+          AS SELECT u.id, email, name, p.bio
+          FROM \`User\` u
+          LEFT JOIN \`Profile\` p ON u.id = p.\`userId\`
+        `
       } else {
         return `
           CREATE VIEW "UserInfo"

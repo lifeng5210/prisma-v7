@@ -9,7 +9,7 @@ declare let Prisma: typeof PrismaNamespace
 testMatrix.setupTestSuite(
   ({ provider }) => {
     test('Uint8Array ($queryRaw)', async () => {
-      if (provider === Providers.MYSQL) {
+      if (provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL) {
         await prisma.$queryRaw`INSERT INTO \`Entry\` (\`id\`, \`binary\`) VALUES ('1', ${Uint8Array.from([1, 2, 3])})`
       } else {
         await prisma.$queryRaw`INSERT INTO "Entry" ("id", "binary") VALUES ('1', ${Uint8Array.from([1, 2, 3])})`
@@ -25,7 +25,7 @@ testMatrix.setupTestSuite(
     })
 
     test('Uint8Array ($executeRaw)', async () => {
-      if (provider === Providers.MYSQL) {
+      if (provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL) {
         await prisma.$executeRaw`INSERT INTO \`Entry\` (\`id\`, \`binary\`) VALUES ('2', ${Uint8Array.from([1, 2, 3])})`
       } else {
         await prisma.$executeRaw`INSERT INTO "Entry" ("id", "binary") VALUES ('2', ${Uint8Array.from([1, 2, 3])})`
@@ -41,7 +41,7 @@ testMatrix.setupTestSuite(
     })
 
     test('Uint8Array ($queryRaw + Prisma.sql)', async () => {
-      if (provider === Providers.MYSQL) {
+      if (provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL) {
         await prisma.$queryRaw(
           Prisma.sql`INSERT INTO \`Entry\` (\`id\`, \`binary\`) VALUES ('3', ${Uint8Array.from([1, 2, 3])})`,
         )
@@ -61,7 +61,7 @@ testMatrix.setupTestSuite(
     })
 
     test('Uint8Array ($executeRaw + Prisma.sql)', async () => {
-      if (provider === Providers.MYSQL) {
+      if (provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL) {
         await prisma.$executeRaw(
           Prisma.sql`INSERT INTO \`Entry\` (\`id\`, \`binary\`) VALUES ('4', ${Uint8Array.from([1, 2, 3])})`,
         )

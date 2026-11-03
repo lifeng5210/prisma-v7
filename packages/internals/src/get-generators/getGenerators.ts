@@ -1,5 +1,4 @@
 import Debug from '@prisma/debug'
-import { enginesVersion } from '@prisma/engines'
 import type {
   BinaryTargetsEnvValue,
   EngineType,
@@ -10,6 +9,7 @@ import type {
 } from '@prisma/generator'
 import type { BinaryTarget } from '@prisma/get-platform'
 import { binaryTargets, getBinaryTargetForCurrentPlatform } from '@prisma/get-platform'
+import { enginesVersion } from '@prisma-kb/engines'
 import { bold, gray, green, red, underline, yellow } from 'kleur/colors'
 import pMap from 'p-map'
 import path from 'path'

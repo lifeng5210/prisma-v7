@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 
-import { defineConfig, env } from 'prisma/config'
+import { defineConfig, env } from 'prisma-kb/config'
 
 export default defineConfig({
   datasource: {

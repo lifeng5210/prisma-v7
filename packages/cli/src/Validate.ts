@@ -19,7 +19,7 @@ import {
 import { bold, dim, red, underline } from 'kleur/colors'
 
 /**
- * $ prisma validate
+ * $ prisma-kb validate
  */
 export class Validate implements Command {
   public static new(): Validate {
@@ -31,7 +31,7 @@ Validate a Prisma schema.
 
 ${bold('Usage')}
 
-  ${dim('$')} prisma validate [options]
+  ${dim('$')} prisma-kb validate [options]
 
 ${bold('Options')}
 
@@ -42,13 +42,13 @@ ${bold('Options')}
 ${bold('Examples')}
 
   With an existing Prisma schema
-    ${dim('$')} prisma validate
+    ${dim('$')} prisma-kb validate
 
   With a Prisma config file
-    ${dim('$')} prisma validate --config=./prisma.config.ts
+    ${dim('$')} prisma-kb validate --config=./prisma.config.ts
 
   Or specify a Prisma schema path
-    ${dim('$')} prisma validate --schema=./schema.prisma
+    ${dim('$')} prisma-kb validate --schema=./schema.prisma
 
 `)
 

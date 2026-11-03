@@ -20,5 +20,5 @@ This test verifies that the `@prisma/sqlcommenter-query-tags` package works corr
 ## Running the test
 
 ```bash
-pnpm --filter @prisma/client test:e2e --verbose sqlcommenter-query-tags
+pnpm --filter @prisma-kb/client test:e2e --verbose sqlcommenter-query-tags
 ```

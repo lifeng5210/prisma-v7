@@ -47,7 +47,7 @@ export default {
     const usersCount = await prisma.user.count()
 
     // Return result
-    return new Response(usersCount)
+    return new Response(String(usersCount))
   },
 }
 ```
@@ -71,7 +71,7 @@ export default {
       const usersCount = await prisma.user.count()
 
       // Return result
-      return new Response(usersCount)
+      return new Response(String(usersCount))
     },
   }
   ```
