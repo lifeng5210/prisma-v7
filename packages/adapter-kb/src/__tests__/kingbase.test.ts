@@ -53,6 +53,70 @@ function createPool(): { pool: MockPool; connection: MockConnection } {
 }
 
 test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
+  'real MYSQL BIT byte parameters preserve non-byte-aligned numeric values',
+  async () => {
+    const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
+    const transaction = await adapter.startTransaction()
+    const sqlQuery = (sql: string): SqlQuery => ({ sql, args: [], argTypes: [] })
+    try {
+      for (const width of [1, 7, 8, 9, 16, 17, 63, 64]) {
+        const table = `adapter_bit_${randomUUID().replaceAll('-', '')}`
+        await transaction.executeRaw(
+          sqlQuery(`CREATE TEMPORARY TABLE \`${table}\` (id INT PRIMARY KEY, value BIT(${width}))`),
+        )
+        const maximum = (1n << BigInt(width)) - 1n
+        const maxBytes = Buffer.from(maximum.toString(16).padStart(Math.ceil(width / 8) * 2, '0'), 'hex')
+        const inputs = [Buffer.alloc(0), Buffer.from([0]), Buffer.from([1]), Buffer.from([0, 1]), maxBytes, null]
+        for (const [id, value] of inputs.entries()) {
+          await transaction.executeRaw({
+            sql: `INSERT INTO \`${table}\` VALUES (?, ?)`,
+            args: [id, value],
+            argTypes: [
+              { scalarType: 'int', arity: 'scalar' },
+              { scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' },
+            ],
+          })
+        }
+        const result = await transaction.queryRaw(sqlQuery(`SELECT value FROM \`${table}\` ORDER BY id`))
+        expect(result.columnTypes).toEqual([width === 1 ? ColumnTypeEnum.Boolean : ColumnTypeEnum.Bytes])
+        const zero = Buffer.alloc(Math.ceil(width / 8))
+        const one = Buffer.from(zero)
+        one[one.length - 1] = 1
+        expect(result.rows).toEqual(
+          width === 1
+            ? [[false], [false], [true], [true], [true], [null]]
+            : [[zero], [zero], [one], [one], [maxBytes], [null]],
+        )
+        if (width < 64) {
+          const overflow = Buffer.from(
+            (1n << BigInt(width)).toString(16).padStart(Math.ceil((width + 1) / 8) * 2, '0'),
+            'hex',
+          )
+          await transaction.executeRaw(sqlQuery('SAVEPOINT bit_overflow'))
+          await expect(
+            transaction.executeRaw({
+              sql: `INSERT INTO \`${table}\` VALUES (100, ?)`,
+              args: [overflow],
+              argTypes: [{ scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' }],
+            }),
+          ).rejects.toMatchObject({ cause: { kind: 'LengthMismatch' } })
+          await transaction.executeRaw(sqlQuery('ROLLBACK TO SAVEPOINT bit_overflow'))
+          await transaction.executeRaw(sqlQuery('RELEASE SAVEPOINT bit_overflow'))
+        }
+      }
+    } finally {
+      try {
+        await transaction.executeRaw(sqlQuery('ROLLBACK'))
+      } finally {
+        await transaction.rollback()
+        await adapter.dispose()
+      }
+    }
+  },
+  20000,
+)
+
+test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   'real MYSQL JSON results preserve scalar strings and SQL NULL',
   async () => {
     const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
@@ -120,13 +184,103 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
       })
       expect(JSON.parse(jsonArray.rows[0][0] as string)).toEqual([1, '123', null])
       const ordinaryDriverResult = await adapter.underlyingDriver().query({
-        text: 'SELECT CAST($1 AS JSON) AS value',
+        // JSONB has a driver parser on both versions; R3 MYSQL_JSON does not.
+        text: 'SELECT CAST($1 AS JSONB) AS value',
         values: ['"123"'],
         rowMode: 'array',
       })
       expect(ordinaryDriverResult.rows).toEqual([['123']])
       const nulls = await adapter.queryRaw({ sql: 'SELECT CAST(NULL AS JSON) AS value', args: [], argTypes: [] })
       expect(nulls.rows).toEqual([[null]])
+    } finally {
+      await adapter.dispose()
+    }
+  },
+  20000,
+)
+
+test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
+  'real R3 MYSQL JSON columns and functions preserve wire text',
+  async () => {
+    const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
+    try {
+      const driverQuery = { text: 'SELECT CAST($1 AS JSON) AS value', values: ['"123"'], rowMode: 'array' as const }
+      const before = await adapter.underlyingDriver().query(driverQuery)
+      expect(before.fields?.[0].dataTypeID).toBe(4802)
+      expect(before.rows).toEqual([['"123"']])
+
+      const transaction = await adapter.startTransaction()
+      try {
+        const table = `adapter_json_${randomUUID().replaceAll('-', '')}`
+        const sqlQuery = (sql: string): SqlQuery => ({ sql, args: [], argTypes: [] })
+        await transaction.executeRaw(
+          sqlQuery(`CREATE TEMPORARY TABLE \`${table}\` (id INTEGER PRIMARY KEY, value JSON)`),
+        )
+        const documents = [
+          '{"n":"123","array":[true,null]}',
+          '[1,"123",null]',
+          'null',
+          '"null"',
+          '123456789012345678901234567890',
+          '0.123456789012345678901234567890',
+        ]
+        for (const [index, document] of documents.entries()) {
+          await transaction.executeRaw({
+            sql: `INSERT INTO \`${table}\` VALUES (?, CAST(? AS JSON))`,
+            args: [index + 1, document],
+            argTypes: [
+              { scalarType: 'int', arity: 'scalar' },
+              { scalarType: 'json', arity: 'scalar' },
+            ],
+          })
+        }
+        await transaction.executeRaw(sqlQuery(`INSERT INTO \`${table}\` VALUES (7, NULL)`))
+        const result = await transaction.queryRaw(sqlQuery(`SELECT value FROM \`${table}\` ORDER BY id`))
+        expect(result.columnTypes).toEqual([ColumnTypeEnum.Json])
+        expect(result.rows).toHaveLength(7)
+        for (let index = 0; index < 4; index++) {
+          expect(JSON.parse(result.rows[index][0] as string)).toEqual(JSON.parse(documents[index]))
+        }
+        expect(result.rows.slice(4)).toEqual([[documents[4]], [documents[5]], [null]])
+        expect(result.rows[2][0]).toBe('null')
+        expect(result.rows[3][0]).toBe('"null"')
+
+        for (const [expression, expected] of [
+          ["JSON_EXTRACT(value, '$.n')", '123'],
+          ['JSON_ARRAYAGG(value)', [JSON.parse(documents[0])]],
+          ["JSON_OBJECTAGG('n', value)", { n: JSON.parse(documents[0]) }],
+        ] as const) {
+          const functionResult = await transaction.queryRaw(
+            sqlQuery(`SELECT ${expression} AS value FROM \`${table}\` WHERE id=1`),
+          )
+          expect(functionResult.columnTypes).toEqual([ColumnTypeEnum.Json])
+          expect(JSON.parse(functionResult.rows[0][0] as string)).toEqual(expected)
+        }
+        const empty = await transaction.queryRaw(sqlQuery(`SELECT value FROM \`${table}\` WHERE false`))
+        expect(empty.columnTypes).toEqual([ColumnTypeEnum.Json])
+        expect(empty.rows).toEqual([])
+
+        for (const [sql, type] of [
+          ["SELECT ARRAY[CAST('null' AS JSON)] AS value", 'sys_json_array'],
+          ['SELECT NULL::JSON[] AS value', 'sys_json_array'],
+          ["SELECT ARRAY[CAST('null' AS JSON)] AS value WHERE false", 'sys_json_array'],
+          ["SELECT ARRAY['null'::sys.mysql_json] AS value", 'mysql_json_array'],
+          ['SELECT NULL::sys.mysql_json[] AS value', 'mysql_json_array'],
+          ["SELECT ARRAY['null'::sys.mysql_json] AS value WHERE false", 'mysql_json_array'],
+        ]) {
+          await expect(transaction.queryRaw(sqlQuery(sql))).rejects.toMatchObject({
+            cause: { kind: 'UnsupportedNativeDataType', type },
+          })
+        }
+      } finally {
+        try {
+          await transaction.executeRaw({ sql: 'ROLLBACK', args: [], argTypes: [] })
+        } finally {
+          await transaction.rollback()
+        }
+      }
+      const after = await adapter.underlyingDriver().query(driverQuery)
+      expect(after.rows).toEqual(before.rows)
     } finally {
       await adapter.dispose()
     }
@@ -155,7 +309,7 @@ describe('PrismaKbAdapterFactory', () => {
       types: expect.objectContaining({ getTypeParser: expect.any(Function) }),
     })
     const config = pool.query.mock.calls[0][0]
-    for (const oid of [114, 3802, 7024]) {
+    for (const oid of [114, 3802, 4802, 7024]) {
       expect(config.types.getTypeParser(oid, 'text')('"123"')).toBe('"123"')
     }
     expect(config.types.getTypeParser(23, 'text')('7')).toBe(7)

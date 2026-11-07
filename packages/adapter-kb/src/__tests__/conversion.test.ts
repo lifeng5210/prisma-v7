@@ -28,6 +28,7 @@ describe('Kingbase field conversion', () => {
     [7954, ColumnTypeEnum.DateTime],
     [114, ColumnTypeEnum.Json],
     [3802, ColumnTypeEnum.Json],
+    [4802, ColumnTypeEnum.Json],
     [7024, ColumnTypeEnum.Json],
     [17, ColumnTypeEnum.Bytes],
     [3383, ColumnTypeEnum.Bytes],
@@ -42,7 +43,8 @@ describe('Kingbase field conversion', () => {
   })
 
   test.each([
-    1000, 1001, 1005, 1007, 1016, 1021, 1022, 1231, 1182, 1183, 1115, 199, 3807, 2951, 7083, 7953, 1002, 8101,
+    1000, 1001, 1005, 1007, 1016, 1021, 1022, 1231, 1182, 1183, 1115, 199, 3807, 4807, 12554, 2951, 7083, 7953, 1002,
+    8101,
   ])('rejects SQL array type id %s', (typeId) => {
     expect(() => fieldToColumnType(typeId)).toThrow('Unsupported column type')
     for (const value of [[], [1, 2], null]) {
@@ -83,7 +85,7 @@ describe('Kingbase field conversion', () => {
     expect(mapRow([['SGVsbG8=', 'hello']], [{ dataTypeID: 7024 }])).toEqual(['["SGVsbG8=","hello"]'])
   })
 
-  test.each([114, 3802, 7024])('preserves JSON value types for wire OID %s', (dataTypeID) => {
+  test.each([114, 3802, 4802, 7024])('preserves JSON value types for wire OID %s', (dataTypeID) => {
     for (const value of [
       '123',
       'true',
@@ -104,6 +106,9 @@ describe('Kingbase field conversion', () => {
       expect(mapRow([text], [{ dataTypeID }])).toEqual([text])
     }
     expect(mapRow([null], [{ dataTypeID }])).toEqual([null])
+    for (const text of ['123456789012345678901234567890', '0.123456789012345678901234567890']) {
+      expect(mapRow([text], [{ dataTypeID }])).toEqual([text])
+    }
   })
 
   test('decodes BIT(1) values as booleans rather than byte arrays', () => {
@@ -115,6 +120,30 @@ describe('Kingbase field conversion', () => {
     ])
     // wider BIT values keep their byte-array form
     expect(mapRow(['0xAA'], [{ dataTypeID: 4655, dataTypeModifier: 8 }])).toEqual([Buffer.from([0xaa])])
+  })
+
+  test.each([
+    [[], 1, [0]],
+    [[0, 0], 1, [0]],
+    [[1], 1, [0x80]],
+    [[0, 1], 1, [0x80]],
+    [[0x7f], 7, [0xfe]],
+    [[0xaa], 8, [0xaa]],
+    [[1, 1], 9, [0x80, 0x80]],
+    [[1, 0xff], 9, [0xff, 0x80]],
+    [[1, 1, 1], 17, [0x80, 0x80, 0x80]],
+    [Array(8).fill(0xff), 64, Array(8).fill(0xff)],
+  ])('encodes BIT numeric bytes %j as %i significant bits', (input, length, payload) => {
+    const type = { scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' } as const
+    const expected = Buffer.alloc(8 + payload.length)
+    expected.writeBigUInt64BE(BigInt(length), 0)
+    Buffer.from(payload).copy(expected, 8)
+    const bytes = new Uint8Array(input)
+    expect(mapArg(bytes, type)).toEqual(expected)
+    expect(mapArg(Buffer.from(bytes).toString('base64'), type)).toEqual(expected)
+    // A subarray must not include its backing buffer's neighboring bytes.
+    expect(mapArg(new Uint8Array([0xff, ...input, 0xff]).subarray(1, input.length + 1), type)).toEqual(expected)
+    expect(Array.from(bytes)).toEqual(input)
   })
 
   test('maps Prisma bytes and datetime arguments', () => {

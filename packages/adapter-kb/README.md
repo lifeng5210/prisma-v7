@@ -42,21 +42,29 @@ scores can therefore differ between modes even with the same query expression.
 
 ## MySQL-mode type boundaries
 
+Kingbase MySQL adaptation targets R3; the tested baseline is V009R003C018.
+Compatibility with R1 is not required.
+
 The connector uses Kingbase's native conversion and aggregate rules. BLOB-to-BIT
 column changes return the server's unsupported-conversion error; Prisma does not
 parse decimal prefixes or emulate MySQL strict/non-strict conversion behavior.
 Temporal-to-numeric changes use native casts, including server-defined precision
-and overflow behavior. SUM parameters retain their actual types; required casts disambiguate parameters
-without promoting integer inputs to MySQL DECIMAL.
+and overflow behavior. Parameterized SUM uses the upstream MySQL `SUM(?)` SQL
+without additional casts. Parameters are encoded for the type described by the
+server; aggregate result types and precision follow the database's behavior.
 
-`UnsignedTinyInt`, `UnsignedSmallInt`, and `UnsignedMediumInt` are rejected by
-schema validation. `UnsignedInt` and `UnsignedBigInt` remain supported. Prisma
-no longer creates domains or range triggers to emulate small unsigned integers.
-Existing emulation objects are preserved and introspected as unsupported fields;
-models without a supported unique identifier are ignored. Incompatible foreign
-keys between legacy emulation storage types require explicit migration before
-introspection or schema migration can proceed. Migrate those columns
-explicitly before using them through Prisma Client.
+R3 supports `Int @db.UnsignedTinyInt`, `Int @db.UnsignedSmallInt`, and
+`Int @db.UnsignedMediumInt` through native unsigned columns. All three use the
+existing INT4 codecs. `UnsignedTinyInt` accepts Int fields only and cannot be
+combined with `autoincrement()`; `UnsignedSmallInt` and `UnsignedMediumInt`
+support native auto-increment. `Int @db.UnsignedInt` and
+`BigInt @db.UnsignedBigInt` remain supported.
+
+The connector targets new R3 databases and does not create domains, CHECK
+constraints, or protective triggers to emulate small unsigned integers. It no
+longer maintains special detection or migration guards for earlier emulation
+objects; general unsupported-type and foreign-key handling still applies.
+These code changes do not remove existing database objects.
 
 ## Source layout
 

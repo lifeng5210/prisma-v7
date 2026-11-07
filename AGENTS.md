@@ -8,9 +8,10 @@
 
 - 保留用户已有改动、未跟踪文档和相邻仓库的工作。未经授权，不提交、推送、发布，不调整驱动 pin、实例配置、服务、角色或权限。此前拒绝推送 rust-kingbase 的决定仍有效。
 - 金仓适配默认只改自己的生产路径及必要的共享登记点，不顺带改原生 PostgreSQL/MySQL 的生产行为。Oracle 与 MySQL 两模式分别处理；协议相同不等于类型和 SQL 语义相同。
+- Kingbase MySQL 后续适配遵循 [独立适配要求](../prisma-engines/record/kingbase-mysql-adaptation-requirements.md)：以 R3 为验收基线，先对照原生 MySQL，再验证 R3，必要时才替代；不要求同时兼容 R1。
 - adapter-kb 的组织以 `packages/adapter-pg` 的职责布局为唯一参照。连接地址、PoolConfig、TLS、schema 处理留在 `kingbase.ts`、`kingbase-oracle.ts`，不要重新抽取 `connection-string.ts` 或参照其他 adapter 额外拆分文件。
 - 不在框架额外模拟数据库表达式语义。MySQL 模式的 BLOB→BIT 使用普通 MODIFY 交数据库接受或拒绝；时间→数字使用原生 CAST，不恢复十进制前缀/饱和/sql_mode模拟、`to_char` 时间编码或按容量不足删列的补偿。
-- 三种小 unsigned 原生类型被 PSL 拒绝，不恢复域、CHECK 或保护触发器模拟。`UnsignedInt`/`sys.uint4`、`UnsignedBigInt`/`sys.uint8` 及默认 Boolean 保留。旧模拟对象的识别和人工迁移边界见 engines 仓库的现行约定。
+- 三种小 unsigned 原生类型基于 R3 接入，使用现有 INT4 编解码，R1 不支持；不恢复域、CHECK 或保护触发器模拟。UnsignedTinyInt 仅用于 Int，且不支持 autoincrement()；UnsignedSmallInt/UnsignedMediumInt 可使用原生自增。`UnsignedInt`/`sys.uint4`、`UnsignedBigInt`/`sys.uint8` 及默认 Boolean 保留。按 R3 新库验收，不维护旧 unsigned 模拟对象的专用识别和兼容路径；通用 Unsupported、外键反查和校验保留。
 - 两模式全文输入统一为金仓原生 tsquery，例如 `John & !Smith`；参数原样绑定。MySQL visitor 保留 SQL 重写及 simple/GIN 配置，不恢复 Boolean Mode 解析器或 `PRISMA_MYSQL_BOOLEAN_QUERY` 标记。
 - 两模式 JS `executeScript` 均保留签名并同步抛出 `Error('Not implemented yet')`，不能访问连接或执行 SQL。不要恢复脚本拆分器；普通事务、savepoint、MySQL 占位符扫描及 Rust 原生迁移脚本不受此限制。
 - Kingbase MySQL 独立 SQL 数组绑定/结果不支持，已知数组 OID 仅用于拒绝。不要误删标量 JSON 数组编码或 `IN` 参数展开，也不要扩展为 PSL ScalarLists。底层驱动内部 catalog 数组与 escape hatch 不属于已删除接口。
@@ -87,7 +88,8 @@ pnpm --filter @prisma/integration-tests test:kingbase-oracle
 
 ## 未决事项与持久记录
 
-- 仍延期：MySQL 映射枚举 DDL 引号边界；人工共享序列的 ACL/comment/view/function 等额外属性保护；DMMF/版本基线；共享 identity 额外属性；`relationMode=prisma` deleteMany cardinality 问题的原生对照与复查。不要根据相邻功能通过就宣称这些已修复。
+- 原生 MySQL 路径同样复现的问题按用户要求不纳入金仓待修：已确认包括映射枚举 DDL 引号、一对一 `relationMode=prisma` deleteMany cardinality，以及时间精度提前校验。保留对照记录，不单独修金仓或顺带改共享实现。
+- 仍待核对：人工共享序列的 ACL/comment/view/function 等额外属性保护；DMMF/版本基线；共享 identity 额外属性。普通共享序列的基本保护已复验正常，不能据此宣称所有附加属性均已验收。
 - Client/CLI/Rust 共享测试全量接入盘点仍有待办，包括 Rust QE/QC 金仓 tag/provider/adapter/executor 桥接、query introspection/CLI 建库入口和公共矩阵/guard。具体范围按持久回归文档逐项核对，不能靠一轮 headline 数字认定完成。
 - 正式 release 引擎、Wasm/包发布、全项目全部组合不因历史聚焦回归而自动验收。
 - 旧 `/tmp` 日志及已归档/移除的 JSON 可能不存在；引用失效不等于重新验证通过，更不能补造原始记录。
