@@ -1,4 +1,8 @@
+import { randomUUID } from 'node:crypto'
+
 import { ColumnTypeEnum, type SqlQuery } from '@prisma-kb/driver-adapter-utils'
+// @ts-ignore: kingbasedb does not publish TypeScript declarations.
+import * as kingbaseModule from 'kingbasedb'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { PrismaKbOracleAdapterFactory } from '../kingbase-oracle'
@@ -25,6 +29,99 @@ const query: SqlQuery = {
   args: [1],
   argTypes: [{ scalarType: 'int', arity: 'scalar' }],
 }
+
+test.skipIf(!process.env.TEST_KINGBASE_ORACLE_URI).each([
+  ['owned', 'Asia/Shanghai'],
+  ['external', 'Asia/Shanghai'],
+  ['owned', 'America/New_York'],
+  ['external', 'America/New_York'],
+])(
+  'real Oracle %s pool preserves %s and DateTime instants',
+  async (ownership, timezone) => {
+    const runtime = kingbaseModule.default ?? kingbaseModule
+    const config = {
+      connectionString: process.env.TEST_KINGBASE_ORACLE_URI!.replace(/^kingbase-oracle:/, 'kingbase:'),
+      options: `-c timezone=${timezone}`,
+      max: 1,
+    }
+    const pool = ownership === 'external' ? new runtime.Pool(config) : undefined
+    const adapter = await new PrismaKbOracleAdapterFactory(pool ?? config).connect()
+    const table = `oracle_time_${randomUUID().replaceAll('-', '')}`
+    const args = [
+      '2026-01-02T00:00:00.123Z',
+      '2026-01-02T08:00:00.123+08:00',
+      '2026-07-02T05:30:00.123+05:30',
+      // This UTC wall time does not exist in New York's local DST clock.
+      '2026-03-08T02:30:00.123Z',
+      null,
+    ]
+    const dbTypes = ['DATE', 'TIMESTAMP', 'TIMESTAMPTZ', 'TIMESTAMPLOCALTZ']
+    const sql = (sql: string): SqlQuery => ({ sql, args: [], argTypes: [] })
+    try {
+      expect((await adapter.queryRaw(sql('SHOW TIME ZONE'))).rows).toEqual([[timezone]])
+      const transaction = await adapter.startTransaction()
+      try {
+        await transaction.executeRaw(
+          sql(
+            `CREATE TEMPORARY TABLE "${table}" (d DATE, plain TIMESTAMP(3), zoned TIMESTAMP(3) WITH TIME ZONE, localized TIMESTAMP(3) WITH LOCAL TIME ZONE)`,
+          ),
+        )
+        for (const nativeTypeHints of [true, false]) {
+          for (const input of args) {
+            const parameters: Pick<SqlQuery, 'args' | 'argTypes'> = {
+              args: dbTypes.map(() => (nativeTypeHints || input === null ? input : new Date(input))),
+              argTypes: dbTypes.map((dbType) => ({
+                scalarType: 'datetime',
+                arity: 'scalar',
+                ...(nativeTypeHints ? { dbType } : {}),
+              })),
+            }
+            const expected = input === null ? null : new Date(input).toISOString()
+            const dateExpected = expected?.replace('.123Z', '.000Z') ?? null
+            const expectInstants = (result: Awaited<ReturnType<typeof transaction.queryRaw>>) => {
+              expect(result.columnTypes).toEqual(dbTypes.map(() => ColumnTypeEnum.DateTime))
+              expect(
+                result.rows.map((row) =>
+                  row.map((value) => (value === null ? null : new Date(value as string).toISOString())),
+                ),
+              ).toEqual([[dateExpected, expected, expected, expected]])
+            }
+            if (!nativeTypeHints) {
+              expectInstants(
+                await transaction.queryRaw({
+                  sql: 'SELECT CAST($1 AS DATE), CAST($2 AS TIMESTAMP(3)), CAST($3 AS TIMESTAMP(3) WITH TIME ZONE), CAST($4 AS TIMESTAMP(3) WITH LOCAL TIME ZONE)',
+                  ...parameters,
+                }),
+              )
+            }
+            await transaction.executeRaw({
+              sql: `INSERT INTO "${table}" VALUES ($1, $2, $3, $4)`,
+              ...parameters,
+            })
+            expectInstants(await transaction.queryRaw(sql(`SELECT * FROM "${table}"`)))
+            await transaction.executeRaw(sql(`DELETE FROM "${table}"`))
+          }
+        }
+        expect((await transaction.queryRaw(sql('SHOW TIME ZONE'))).rows).toEqual([[timezone]])
+      } finally {
+        // The runtime sends ROLLBACK; the adapter hook only releases the connection.
+        try {
+          await transaction.executeRaw(sql('ROLLBACK'))
+        } finally {
+          await transaction.rollback()
+        }
+      }
+      expect((await adapter.queryRaw(sql('SHOW TIME ZONE'))).rows).toEqual([[timezone]])
+      if (pool) {
+        expect((await pool.query('SHOW TIME ZONE')).rows[0].TimeZone).toBe(timezone)
+      }
+    } finally {
+      await adapter.dispose()
+      await pool?.end()
+    }
+  },
+  20000,
+)
 
 function createPool(): { pool: MockPool; connection: MockConnection } {
   const connection: MockConnection = {
@@ -120,8 +217,7 @@ describe('PrismaKbOracleAdapterFactory', () => {
       columnTypes: [ColumnTypeEnum.Int32],
       rows: [[1]],
     })
-    expect(connection.query).toHaveBeenNthCalledWith(1, "SET TIME ZONE 'UTC'")
-    expect(connection.query).toHaveBeenNthCalledWith(2, {
+    expect(connection.query).toHaveBeenNthCalledWith(1, {
       text: 'SELECT "id" FROM "UserTest" WHERE "id" = $1',
       values: [1],
       rowMode: 'array',
@@ -129,9 +225,12 @@ describe('PrismaKbOracleAdapterFactory', () => {
     })
     expect(connection.release).toHaveBeenCalledOnce()
     expect(adapter.underlyingDriver()).toBe(pool)
-    const config = connection.query.mock.calls[1][0]
+    const config = connection.query.mock.calls[0][0]
     for (const oid of [114, 3802]) {
       expect(config.types.getTypeParser(oid, 'text')('"123"')).toBe('"123"')
+    }
+    for (const oid of [1114, 8020]) {
+      expect(config.types.getTypeParser(oid, 'text')('2026-03-08 02:30:00')).toBe('2026-03-08 02:30:00')
     }
     expect(config.types.getTypeParser(23, 'text')('7')).toBe(7)
     expect(adapter.provider).toBe('kingbase-oracle')
@@ -168,7 +267,6 @@ describe('PrismaKbOracleAdapterFactory', () => {
     const adapter = await new PrismaKbOracleAdapterFactory(pool).connect()
     const transaction = await adapter.startTransaction('READ COMMITTED')
 
-    expect(connection.query).toHaveBeenNthCalledWith(1, "SET TIME ZONE 'UTC'")
     expect(connection.query).toHaveBeenCalledWith({
       text: 'BEGIN',
       values: [],
@@ -186,15 +284,14 @@ describe('PrismaKbOracleAdapterFactory', () => {
     expect(connection.release).toHaveBeenCalledOnce()
   })
 
-  test('configures every external pool connection with UTC and the selected schema', async () => {
+  test('configures every external pool connection with the selected schema', async () => {
     const { pool, connection } = createPool()
     const adapter = await new PrismaKbOracleAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await adapter.queryRaw(query)
 
-    expect(connection.query).toHaveBeenNthCalledWith(1, "SET TIME ZONE 'UTC'")
-    expect(connection.query).toHaveBeenNthCalledWith(2, 'SET search_path TO "app_schema"')
-    expect(connection.query).toHaveBeenNthCalledWith(3, {
+    expect(connection.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
+    expect(connection.query).toHaveBeenNthCalledWith(2, {
       text: 'SELECT "id" FROM "UserTest" WHERE "id" = $1',
       values: [1],
       rowMode: 'array',
@@ -219,7 +316,7 @@ describe('PrismaKbOracleAdapterFactory', () => {
     await adapter.dispose()
   })
 
-  test('configures owned pool connections with UTC and the selected schema', async () => {
+  test('configures owned pool connections with the selected schema', async () => {
     const adapter = await new PrismaKbOracleAdapterFactory(
       'kingbase-oracle://user:password@localhost:54325/app?schema=app_schema',
     ).connect()
@@ -234,8 +331,7 @@ describe('PrismaKbOracleAdapterFactory', () => {
       pool.options.verify(client, (error) => (error ? reject(error) : resolve()))
     })
 
-    expect(client.query).toHaveBeenNthCalledWith(1, "SET TIME ZONE 'UTC'")
-    expect(client.query).toHaveBeenNthCalledWith(2, 'SET search_path TO "app_schema"')
+    expect(client.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
 
     await adapter.dispose()
   })

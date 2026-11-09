@@ -20,9 +20,9 @@ import { name as packageName } from '../package.json'
 import { convertDriverError } from './errors'
 import {
   fieldToOracleColumnType,
-  jsonTypeIds,
   mapOracleArg,
   mapOracleRow,
+  textTypeIds,
   UnsupportedOracleNativeDataType,
 } from './kingbase-oracle-conversion'
 
@@ -136,7 +136,9 @@ class KingbaseOracleQueryable<Client extends KingbaseOracleQueryableClient> impl
             // Preserve JSON wire text for the Client's decoder. In particular,
             // decoded strings such as "123" cannot be distinguished from JSON
             // numbers by inspecting their contents.
-            if (format === 'text' && jsonTypeIds.has(oid)) {
+            // Keep offset-less timestamps as text too: a local JS Date parser
+            // can change their wall time across a Node process's DST gap.
+            if (format === 'text' && textTypeIds.has(oid)) {
               return (value) => value
             }
             return runtime.types.getTypeParser(oid, format)
@@ -433,11 +435,6 @@ async function configureOracleClientSession(
   client: KingbaseOracleQueryableClient,
   schema: string | undefined,
 ): Promise<void> {
-  // TIMESTAMP WITH LOCAL TIME ZONE is returned as a plain TIMESTAMP in the
-  // session time zone. Configure both owned and external pool connections so
-  // the adapter can consistently expose Prisma DateTime values as UTC.
-  await client.query("SET TIME ZONE 'UTC'")
-
   if (schema !== undefined) {
     await client.query(`SET search_path TO "${schema.replaceAll('"', '""')}"`)
   }

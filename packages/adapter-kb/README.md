@@ -66,6 +66,14 @@ longer maintains special detection or migration guards for earlier emulation
 objects; general unsupported-type and foreign-key handling still applies.
 These code changes do not remove existing database objects.
 
+## Oracle-mode date/time handling
+
+On the tested R2 V009R002C016 baseline, the adapter preserves the connection's
+time zone, including connections borrowed from an application-owned pool.
+Prisma DateTime values round-trip as UTC instants without requiring a UTC
+session. `TimestampLocalTz` uses the server's plain TIMESTAMP representation;
+`TimestampTz` retains its time-zone-aware binding and decoding.
+
 ## Source layout
 
 - `src/index.ts` exports the two adapter factories and their options.

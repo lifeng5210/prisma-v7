@@ -186,13 +186,18 @@ export function mapOracleArg<A>(arg: A | Date, argType: ArgType): null | unknown
       case 'TIME':
       case 'TIMETZ':
         return formatTime(arg)
+      // Raw queries have no model native type. Keep their instant explicit so
+      // a zoned SQL target cannot interpret the value in the session time zone.
+      case undefined:
       case 'TIMESTAMPTZ':
-      case 'TIMESTAMPLOCALTZ':
         return arg.toISOString()
       default:
         // Oracle DATE stores both calendar and wall-clock components. It is
         // therefore intentionally handled like TIMESTAMP rather than the
         // PostgreSQL DATE OID used for Prisma's date-only values.
+        // R2 also stores TIMESTAMP WITH LOCAL TIME ZONE as wire TIMESTAMP.
+        // Bind UTC wall-clock components to match how that type is decoded,
+        // without a session-dependent conversion from TIMESTAMPTZ.
         return formatDateTime(arg)
     }
   }
@@ -213,6 +218,7 @@ type ResultField = {
 }
 
 export const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB])
+export const textTypeIds = new Set<number>([...jsonTypeIds, PostgresTypeId.TIMESTAMP, KingbaseOracleTypeId.SYS_DATE])
 const dateTypeIds = new Set<number>([PostgresTypeId.DATE])
 const timeTypeIds = new Set<number>([PostgresTypeId.TIME, PostgresTypeId.TIMETZ])
 const dateTimeTypeIds = new Set<number>([

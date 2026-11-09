@@ -107,11 +107,18 @@ describe('Kingbase Oracle field conversion', () => {
     )
   })
 
+  test.each([new Date('2026-01-02T00:00:00.123Z'), '2026-01-02T08:00:00.123+08:00'])(
+    'preserves the instant of raw DateTime arguments without a native type: %s',
+    (input) => {
+      expect(mapOracleArg(input, { scalarType: 'datetime', arity: 'scalar' })).toBe('2026-01-02T00:00:00.123Z')
+    },
+  )
+
   test.each([
     ['DATE', '2025-01-02 03:04:05.678'],
     ['TIMESTAMP', '2025-01-02 03:04:05.678'],
     ['TIMESTAMPTZ', '2025-01-02T03:04:05.678Z'],
-    ['TIMESTAMPLOCALTZ', '2025-01-02T03:04:05.678Z'],
+    ['TIMESTAMPLOCALTZ', '2025-01-02 03:04:05.678'],
     ['TIME', '03:04:05.678'],
   ])('maps Oracle %s arguments without losing their temporal components', (dbType, expected) => {
     expect(
