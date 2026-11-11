@@ -1,4 +1,4 @@
-import { type ArgType, type ColumnType, ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
+import { type ArgType, type ColumnType, ColumnTypeEnum, DriverAdapterError } from '@prisma-kb/driver-adapter-utils'
 
 import { FIRST_NORMAL_OBJECT_ID } from './constants'
 
@@ -262,13 +262,16 @@ export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint
     }
   }
 
-  if (typeof arg === 'boolean' && argType.scalarType === 'boolean' && argType.dbType?.toLowerCase() === 'bit') {
-    return encodeMysqlBitBoolean(arg)
+  const bitType = argType.dbType?.match(/^bit(?:\((\d+)\))?$/i)
+  const bitWidth = bitType?.[1] === undefined ? undefined : Number(bitType[1])
+
+  if (typeof arg === 'boolean' && argType.scalarType === 'boolean' && bitType) {
+    return encodeMysqlBit(new Uint8Array([arg ? 1 : 0]), bitWidth ?? 1)
   }
 
   if (typeof arg === 'string' && argType.scalarType === 'bytes') {
     const bytes = Buffer.from(arg, 'base64')
-    return argType.dbType?.toLowerCase() === 'bit' ? encodeMysqlBit(bytes) : bytes
+    return bitType ? encodeMysqlBit(bytes, bitWidth) : bytes
   }
 
   if (ArrayBuffer.isView(arg)) {
@@ -276,8 +279,8 @@ export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint
 
     // BIT uses a length-prefixed, MSB-first payload; ordinary binary values
     // keep their byte representation.
-    if (argType.scalarType === 'bytes' && argType.dbType?.toLowerCase() === 'bit') {
-      return encodeMysqlBit(bytes)
+    if (argType.scalarType === 'bytes' && bitType) {
+      return encodeMysqlBit(bytes, bitWidth)
     }
 
     return bytes
@@ -286,7 +289,31 @@ export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint
   return arg
 }
 
-function encodeMysqlBit(bytes: Uint8Array): Buffer {
+function encodeMysqlBit(bytes: Uint8Array, bitWidth?: number): Buffer {
+  if (bitWidth !== undefined) {
+    if (!Number.isInteger(bitWidth) || bitWidth < 1 || bitWidth > 64) {
+      throw new DriverAdapterError({ kind: 'ValueOutOfRange', cause: 'BIT width must be between 1 and 64.' })
+    }
+    let value = 0n
+    for (const byte of bytes) value = (value << 8n) | BigInt(byte)
+    if (bytes.byteLength > 8 || value >= 1n << BigInt(bitWidth)) {
+      throw new DriverAdapterError({ kind: 'LengthMismatch', column: undefined })
+    }
+
+    const size = Math.ceil(bitWidth / 8)
+    const encoded = Buffer.alloc(8 + size)
+    encoded.writeBigUInt64BE(BigInt(bitWidth), 0)
+    // Prisma bytes are a big-endian integer; KES BIT payloads are left-aligned.
+    let payload = value << BigInt(size * 8 - bitWidth)
+    for (let index = encoded.length - 1; index >= 8; index--) {
+      encoded[index] = Number(payload & 0xffn)
+      payload >>= 8n
+    }
+    return encoded
+  }
+
+  // Older query compilers and direct adapter calls may omit the declared
+  // width. Keep the existing numeric encoding for those callers.
   // Prisma/MySQL Bytes are a big-endian numeric value. Leading byte padding
   // must not make that value too wide for a non-byte-aligned BIT column.
   const first = bytes.findIndex((byte) => byte !== 0)

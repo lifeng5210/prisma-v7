@@ -1877,7 +1877,7 @@ export const scenarios = [
     do: async (client) => {
       await client.kingbase_native_types.create({
         data: {
-          tiny_bool: true,
+          tiny_bool: 1,
           tiny_int: 7,
           medium_int: 123,
           bits: new Uint8Array([0b10101010]),
@@ -1908,7 +1908,7 @@ export const scenarios = [
     },
     expect: {
       id: 1,
-      tiny_bool: true,
+      tiny_bool: 1,
       tiny_int: 7,
       medium_int: 123,
       bits: [0b10101010],

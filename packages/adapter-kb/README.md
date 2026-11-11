@@ -49,6 +49,12 @@ scores can therefore differ between modes even with the same query expression.
 Kingbase MySQL adaptation targets R3; the tested baseline is V009R003C018.
 Compatibility with R1 is not required.
 
+BIT parameters from the matching Kingbase query compiler carry their declared
+width. The MySQL adapter preserves that width, including leading zeros, and
+rejects values that do not fit. Deploy the updated query compiler Wasm together
+with the adapter; older compilers and direct adapter calls that provide only
+`Bit` retain the existing numeric encoding without a declared width.
+
 The connector uses Kingbase's native conversion and aggregate rules. BLOB-to-BIT
 column changes return the server's unsupported-conversion error; Prisma does not
 parse decimal prefixes or emulate MySQL strict/non-strict conversion behavior.

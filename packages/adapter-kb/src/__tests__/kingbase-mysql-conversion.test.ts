@@ -146,6 +146,51 @@ describe('Kingbase MySQL field conversion', () => {
     expect(Array.from(bytes)).toEqual(input)
   })
 
+  test.each([
+    [7, [1], [2]],
+    [8, [0, 1], [1]],
+    [9, [0, 1], [0, 0x80]],
+    [9, [1, 0xff], [0xff, 0x80]],
+    [17, [1], [0, 0, 0x80]],
+    [64, [0, 0, 0, 0, 0, 6, 107, 58], [0, 0, 0, 0, 0, 6, 107, 58]],
+    [64, [], Array(8).fill(0)],
+    [64, Array(8).fill(0xff), Array(8).fill(0xff)],
+  ])('preserves declared BIT(%i) width for numeric bytes %j', (width, input, payload) => {
+    const type = { scalarType: 'bytes', dbType: `BIT(${width})`, arity: 'scalar' } as const
+    const expected = Buffer.alloc(8 + payload.length)
+    expected.writeBigUInt64BE(BigInt(width), 0)
+    Buffer.from(payload).copy(expected, 8)
+    const bytes = new Uint8Array(input)
+    expect(mapArg(bytes, type)).toEqual(expected)
+    expect(mapArg(Buffer.from(bytes).toString('base64'), type)).toEqual(expected)
+    expect(mapArg(new Uint8Array([0xff, ...input, 0xff]).subarray(1, input.length + 1), type)).toEqual(expected)
+    expect(Array.from(bytes)).toEqual(input)
+    expect(mapArg(null, type)).toBeNull()
+  })
+
+  test.each([
+    [7, [0x80]],
+    [9, [2, 0]],
+    [17, [2, 0, 0]],
+    [64, Array(9).fill(0)],
+  ])('rejects values wider than BIT(%i)', (width, input) => {
+    expect.assertions(1)
+    try {
+      mapArg(new Uint8Array(input), { scalarType: 'bytes', dbType: `BIT(${width})`, arity: 'scalar' })
+    } catch (error) {
+      expect(error).toMatchObject({ name: 'DriverAdapterError', cause: { kind: 'LengthMismatch', column: undefined } })
+    }
+  })
+
+  test.each([0, 65])('rejects invalid BIT width %i', (width) => {
+    expect.assertions(1)
+    try {
+      mapArg(new Uint8Array([1]), { scalarType: 'bytes', dbType: `BIT(${width})`, arity: 'scalar' })
+    } catch (error) {
+      expect(error).toMatchObject({ name: 'DriverAdapterError', cause: { kind: 'ValueOutOfRange' } })
+    }
+  })
+
   test('maps Prisma bytes and datetime arguments', () => {
     expect(mapArg('aGVsbG8=', { scalarType: 'bytes', arity: 'scalar' })).toEqual(Buffer.from('hello'))
     expect(mapArg('qg==', { scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' })).toEqual(

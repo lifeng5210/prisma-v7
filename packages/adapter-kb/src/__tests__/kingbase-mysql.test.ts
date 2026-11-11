@@ -52,14 +52,15 @@ function createPool(): { pool: MockPool; connection: MockConnection } {
   return { pool, connection }
 }
 
-test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
-  'real MYSQL BIT byte parameters preserve non-byte-aligned numeric values',
-  async () => {
+test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI).each([false, true])(
+  'real MYSQL BIT byte parameters preserve numeric values with declared width: %s',
+  async (declaredWidth) => {
     const adapter = await new PrismaKbMysqlAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
     const transaction = await adapter.startTransaction()
     const sqlQuery = (sql: string): SqlQuery => ({ sql, args: [], argTypes: [] })
     try {
       for (const width of [1, 7, 8, 9, 16, 17, 63, 64]) {
+        const dbType = declaredWidth ? `BIT(${width})` : 'Bit'
         const table = `adapter_bit_${randomUUID().replaceAll('-', '')}`
         await transaction.executeRaw(
           sqlQuery(`CREATE TEMPORARY TABLE \`${table}\` (id INT PRIMARY KEY, value BIT(${width}))`),
@@ -67,13 +68,14 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
         const maximum = (1n << BigInt(width)) - 1n
         const maxBytes = Buffer.from(maximum.toString(16).padStart(Math.ceil(width / 8) * 2, '0'), 'hex')
         const inputs = [Buffer.alloc(0), Buffer.from([0]), Buffer.from([1]), Buffer.from([0, 1]), maxBytes, null]
+        if (width === 64) inputs.push(Buffer.from([0, 0, 0, 0, 0, 6, 107, 58]))
         for (const [id, value] of inputs.entries()) {
           await transaction.executeRaw({
             sql: `INSERT INTO \`${table}\` VALUES (?, ?)`,
             args: [id, value],
             argTypes: [
               { scalarType: 'int', arity: 'scalar' },
-              { scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' },
+              { scalarType: 'bytes', dbType, arity: 'scalar' },
             ],
           })
         }
@@ -82,11 +84,12 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
         const zero = Buffer.alloc(Math.ceil(width / 8))
         const one = Buffer.from(zero)
         one[one.length - 1] = 1
-        expect(result.rows).toEqual(
+        const expected =
           width === 1
             ? [[false], [false], [true], [true], [true], [null]]
-            : [[zero], [zero], [one], [one], [maxBytes], [null]],
-        )
+            : [[zero], [zero], [one], [one], [maxBytes], [null]]
+        if (width === 64) expected.push([Buffer.from([0, 0, 0, 0, 0, 6, 107, 58])])
+        expect(result.rows).toEqual(expected)
         if (width < 64) {
           const overflow = Buffer.from(
             (1n << BigInt(width)).toString(16).padStart(Math.ceil((width + 1) / 8) * 2, '0'),
@@ -97,7 +100,7 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
             transaction.executeRaw({
               sql: `INSERT INTO \`${table}\` VALUES (100, ?)`,
               args: [overflow],
-              argTypes: [{ scalarType: 'bytes', dbType: 'Bit', arity: 'scalar' }],
+              argTypes: [{ scalarType: 'bytes', dbType, arity: 'scalar' }],
             }),
           ).rejects.toMatchObject({ cause: { kind: 'LengthMismatch' } })
           await transaction.executeRaw(sqlQuery('ROLLBACK TO SAVEPOINT bit_overflow'))

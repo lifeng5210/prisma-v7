@@ -134,6 +134,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`authorId`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`authorId`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `PostOneToMany_authorId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -350,6 +352,10 @@ testMatrix.setupTestSuite(
                   undefined
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]:
+                        'Unique constraint failed on the constraint: `UserOneToMany_pkey`',
+                      [AdapterProviders.JS_KB_ORACLE]:
+                        'Unique constraint failed on the constraint: `UserOneToMany_pkey`',
                       [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`id`)',
                       [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`id`)',
                       [Providers.MYSQL]: ['DEFAULT', 'Cascade', 'SetNull'].includes(onUpdate)
@@ -365,6 +371,10 @@ testMatrix.setupTestSuite(
                         "The change you are trying to make would violate the required relation 'PostOneToManyToUserOneToMany' between the `PostOneToMany` and `UserOneToMany` models."
                       : // Other
                         {
+                          [AdapterProviders.JS_KB_MYSQL]:
+                            'Unique constraint failed on the constraint: `UserOneToMany_pkey`',
+                          [AdapterProviders.JS_KB_ORACLE]:
+                            'Unique constraint failed on the constraint: `UserOneToMany_pkey`',
                           [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.MYSQL]: 'Unique constraint failed on the constraint: `PRIMARY`',
@@ -530,6 +540,8 @@ testMatrix.setupTestSuite(
                   ` constraint `
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.MONGODB]:
                         "The change you are trying to make would violate the required relation 'PostOneToManyToUserOneToMany' between the `PostOneToMany` and `UserOneToMany` models.",
                       [Providers.POSTGRESQL]:
@@ -626,6 +638,8 @@ testMatrix.setupTestSuite(
               undefined
             : conditionalError.snapshot({
                 foreignKeys: {
+                  [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                  [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                   [Providers.POSTGRESQL]:
                     'Foreign key constraint violated on the constraint: `PostOneToMany_authorId_fkey`',
                   [Providers.COCKROACHDB]:

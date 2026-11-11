@@ -10,6 +10,22 @@ testMatrix.setupTestSuite(
     const isKingbase = provider === Providers.KINGBASE_MYSQL
 
     describe('bytes field', () => {
+      test.each([
+        ['uint7', [1], [1]],
+        ['uint9', [0, 1], [0, 1]],
+        ['uint17', [1], [0, 0, 1]],
+        ['uint64', [0, 0, 0, 0, 0, 6, 107, 58], [0, 0, 0, 0, 0, 6, 107, 58]],
+      ] as const)('preserves leading zeros and column width for %s', async (field, input, output) => {
+        const result = await prisma.testModel.create({ data: { [field]: Uint8Array.from(input) } })
+        expect(result[field]).toEqual(Uint8Array.from(output))
+        expect(await prisma.testModel.findUnique({ where: { id: result.id } })).toEqual(result)
+        const updated = await prisma.testModel.update({
+          where: { id: result.id },
+          data: { [field]: Uint8Array.from([0]) },
+        })
+        expect(updated[field]).toEqual(new Uint8Array(output.length))
+      })
+
       test('all bytes', async () => {
         const bytes = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8])
 
