@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+import { PrismaKbMysql, PrismaKbOracle } from '@prisma-kb/adapter-kb'
 import {
   ColumnTypeEnum,
   type SqlDriverAdapter,
@@ -21,7 +21,7 @@ vi.mock('@prisma/adapter-pg', () => {
 })
 
 vi.mock('@prisma-kb/adapter-kb', () => ({
-  PrismaKb: vi.fn().mockImplementation(function () {
+  PrismaKbMysql: vi.fn().mockImplementation(function () {
     return { adapterName: '@prisma-kb/adapter-kb', provider: 'kingbase-mysql' }
   }),
   PrismaKbOracle: vi.fn().mockImplementation(function () {
@@ -61,7 +61,7 @@ describe('createAdapter', () => {
 
     expect(mysqlAdapter.adapterName).toBe('@prisma-kb/adapter-kb')
     expect(oracleAdapter.adapterName).toBe('@prisma-kb/adapter-kb')
-    expect(PrismaKb).toHaveBeenCalledWith('kingbase-mysql://user:pass@localhost:54321/db')
+    expect(PrismaKbMysql).toHaveBeenCalledWith('kingbase-mysql://user:pass@localhost:54321/db')
     expect(PrismaKbOracle).toHaveBeenCalledWith('kingbase-oracle://user:pass@localhost:54325/db')
   })
 

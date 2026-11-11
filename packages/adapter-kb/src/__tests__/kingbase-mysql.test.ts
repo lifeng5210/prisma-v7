@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { ColumnTypeEnum, type SqlQuery } from '@prisma-kb/driver-adapter-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { PrismaKbAdapterFactory, rewriteQuestionMarkPlaceholders } from '../kingbase'
+import { PrismaKbMysqlAdapterFactory, rewriteQuestionMarkPlaceholders } from '../kingbase-mysql'
 
 type MockConnection = {
   query: ReturnType<typeof vi.fn>
@@ -55,7 +55,7 @@ function createPool(): { pool: MockPool; connection: MockConnection } {
 test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   'real MYSQL BIT byte parameters preserve non-byte-aligned numeric values',
   async () => {
-    const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
     const transaction = await adapter.startTransaction()
     const sqlQuery = (sql: string): SqlQuery => ({ sql, args: [], argTypes: [] })
     try {
@@ -119,7 +119,7 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
 test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   'real MYSQL JSON results preserve scalar strings and SQL NULL',
   async () => {
-    const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
     const values = [
       '123',
       'true',
@@ -202,7 +202,7 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
 test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   'real R3 MYSQL JSON columns and functions preserve wire text',
   async () => {
-    const adapter = await new PrismaKbAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(process.env.TEST_KINGBASE_MYSQL_URI!).connect()
     try {
       const driverQuery = { text: 'SELECT CAST($1 AS JSON) AS value', values: ['"123"'], rowMode: 'array' as const }
       const before = await adapter.underlyingDriver().query(driverQuery)
@@ -288,14 +288,14 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   20000,
 )
 
-describe('PrismaKbAdapterFactory', () => {
+describe('PrismaKbMysqlAdapterFactory', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   test('executes a query through an externally supplied pool', async () => {
     const { pool } = createPool()
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
 
     await expect(adapter.queryRaw(query)).resolves.toEqual({
       columnNames: ['id'],
@@ -322,7 +322,7 @@ describe('PrismaKbAdapterFactory', () => {
 
   test('rejects SQL array bindings before database access and array result metadata without rows', async () => {
     const { pool, connection } = createPool()
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
     await expect(
       adapter.executeRaw({ sql: 'SELECT ?', args: [[1, 2]], argTypes: [{ scalarType: 'int', arity: 'list' }] }),
     ).rejects.toThrow('Arrays are not supported')
@@ -343,7 +343,7 @@ describe('PrismaKbAdapterFactory', () => {
       rows: [[1]],
       rowCount: 1,
     })
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await expect(adapter.queryRaw(query)).resolves.toMatchObject({ rows: [[1]] })
 
@@ -369,7 +369,7 @@ describe('PrismaKbAdapterFactory', () => {
         rows: [[42]],
         rowCount: 1,
       })
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await expect(
       adapter.queryRaw({
@@ -406,7 +406,7 @@ describe('PrismaKbAdapterFactory', () => {
       .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 0 })
       .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
       .mockRejectedValueOnce(error)
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     await expect(
       adapter.queryRaw({
@@ -424,7 +424,7 @@ describe('PrismaKbAdapterFactory', () => {
     'reports the marked explicit ID %s instead of a stale generated ID',
     async (id) => {
       const { pool, connection } = createPool()
-      const adapter = await new PrismaKbAdapterFactory(pool).connect()
+      const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
       const result = await adapter.queryRaw({
         sql: 'INSERT INTO `UserTest` (`other`, `id`) VALUES (?, ?)',
         args: [999, id],
@@ -450,7 +450,7 @@ describe('PrismaKbAdapterFactory', () => {
       .mockResolvedValueOnce({ fields: [], rows: [], rowCount: 1 })
       .mockResolvedValueOnce({ fields: [], rows: [[mode]], rowCount: 1 })
       .mockResolvedValueOnce({ fields: [], rows: [[42]], rowCount: 1 })
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
     await expect(
       adapter.queryRaw({
         sql: 'INSERT INTO `UserTest` (`id`) VALUES (?)',
@@ -468,7 +468,7 @@ describe('PrismaKbAdapterFactory', () => {
 
   test('starts and releases a transaction connection', async () => {
     const { pool, connection } = createPool()
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
     const transaction = await adapter.startTransaction('READ COMMITTED')
 
     expect(connection.query).toHaveBeenNthCalledWith(1, 'SET search_path TO "app_schema"')
@@ -491,7 +491,7 @@ describe('PrismaKbAdapterFactory', () => {
   })
 
   test('translates strict sslaccept to certificate-verifying driver settings', async () => {
-    const adapter = await new PrismaKbAdapterFactory(
+    const adapter = await new PrismaKbMysqlAdapterFactory(
       'kingbase-mysql://user:password@localhost:54321/app?sslaccept=strict',
     ).connect()
     const pool = adapter.underlyingDriver() as unknown as {
@@ -507,7 +507,7 @@ describe('PrismaKbAdapterFactory', () => {
   })
 
   test('translates accept_invalid_certs sslaccept to the driver no-verify mode', async () => {
-    const adapter = await new PrismaKbAdapterFactory(
+    const adapter = await new PrismaKbMysqlAdapterFactory(
       'kingbase-mysql://user:password@localhost:54321/app?sslaccept=accept_invalid_certs',
     ).connect()
     const pool = adapter.underlyingDriver() as unknown as {
@@ -533,7 +533,7 @@ describe('PrismaKbAdapterFactory', () => {
         rows: [[42]],
         rowCount: 1,
       })
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
     const transaction = await adapter.startTransaction()
 
     await expect(
@@ -583,7 +583,7 @@ describe('PrismaKbAdapterFactory', () => {
       if (sql.startsWith('INSERT')) return Promise.reject(violation)
       return Promise.resolve({ rows: [], rowCount: 0 })
     })
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
     const transaction = await adapter.startTransaction()
     const calls = connection.query.mock.calls.length
     await expect(
@@ -604,7 +604,7 @@ describe('PrismaKbAdapterFactory', () => {
       if (sql.includes('sys_catalog.sys_description')) return Promise.reject(new Error('metadata unavailable'))
       return Promise.resolve({ rows: [], rowCount: 0 })
     })
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
     const transaction = await adapter.startTransaction()
     await transaction.executeRaw({ sql: 'SELECT 1', args: [], argTypes: [] })
     await transaction.executeRaw({ sql: 'ROLLBACK', args: [], argTypes: [] })
@@ -623,7 +623,7 @@ describe('PrismaKbAdapterFactory', () => {
         message: 'duplicate',
       })
       .mockRejectedValueOnce(new Error('metadata unavailable'))
-    const adapter = await new PrismaKbAdapterFactory(pool).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool).connect()
     await expect(adapter.executeRaw({ sql: 'UPDATE items SET value=1', args: [], argTypes: [] })).rejects.toMatchObject(
       {
         cause: {
@@ -649,7 +649,7 @@ describe('PrismaKbAdapterFactory', () => {
 
   test('rejects script execution without borrowing a connection or executing SQL', async () => {
     const { pool, connection } = createPool()
-    const adapter = await new PrismaKbAdapterFactory(pool, { schema: 'app_schema' }).connect()
+    const adapter = await new PrismaKbMysqlAdapterFactory(pool, { schema: 'app_schema' }).connect()
 
     expect(() => adapter.executeScript('BEGIN; INSERT INTO records VALUES (1); ROLLBACK;')).toThrow(
       'Not implemented yet',
@@ -666,7 +666,7 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
   'real MYSQL unique errors restore custom names before and inside a single-connection transaction',
   async () => {
     const namespace = `kb_unique_${randomUUID().replaceAll('-', '')}`
-    const adapter = await new PrismaKbAdapterFactory(
+    const adapter = await new PrismaKbMysqlAdapterFactory(
       { connectionString: process.env.TEST_KINGBASE_MYSQL_URI!, max: 1 },
       { schema: namespace },
     ).connect()

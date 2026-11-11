@@ -3,8 +3,12 @@
 Prisma Driver Adapter for KingbaseES using the `kingbasedb` Node.js driver.
 
 The adapter follows the `pg`-compatible API exposed by `kingbasedb` and exports
-two factories: `PrismaKb` for the `kingbase-mysql` Prisma provider, and
+two factories: `PrismaKbMysql` for the `kingbase-mysql` Prisma provider, and
 `PrismaKbOracle` for `kingbase-oracle`.
+
+`PrismaKb` remains available as a compatibility alias for `PrismaKbMysql`.
+MySQL adapter options are exported as `PrismaKbMysqlOptions`, with
+`PrismaKbOptions` retained as a compatibility alias.
 
 Install this package together with the Prisma Kingbase Client distribution.
 
@@ -77,7 +81,16 @@ session. `TimestampLocalTz` uses the server's plain TIMESTAMP representation;
 ## Source layout
 
 - `src/index.ts` exports the two adapter factories and their options.
-- `src/kingbase.ts` and `src/kingbase-oracle.ts` handle queries, transactions, connection configuration, and mode-specific sessions.
-- `src/conversion.ts` and `src/kingbase-oracle-conversion.ts` handle each mode's parameter and result conversion.
+- `src/kingbase-mysql.ts` and `src/kingbase-oracle.ts` handle queries, transactions, connection configuration, and mode-specific sessions.
+- `src/kingbase-mysql-conversion.ts` and `src/kingbase-oracle-conversion.ts` handle each mode's parameter and result conversion.
 - `src/constants.ts` defines the shared wire type boundary; `src/errors.ts` maps driver errors.
 - `src/__tests__/` contains adapter, conversion, and error regression tests.
+
+## Functional tests
+
+From the repository root, select the adapter for the compatibility mode:
+
+```sh
+pnpm --filter @prisma-kb/client test:functional:code --adapter js_kb_mysql
+pnpm --filter @prisma-kb/client test:functional:code --adapter js_kb_oracle
+```

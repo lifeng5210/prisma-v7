@@ -270,8 +270,8 @@ export function setupTestSuiteClientDriverAdapter({
     }
   }
 
-  if (driverAdapter === AdapterProviders.JS_KB || driverAdapter === AdapterProviders.JS_KB_ORACLE) {
-    const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
+  if (driverAdapter === AdapterProviders.JS_KB_MYSQL || driverAdapter === AdapterProviders.JS_KB_ORACLE) {
+    const { PrismaKbMysql, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
     const schema = new URL(datasourceInfo.databaseUrl).searchParams.get('schema')
 
     if (!schema) {
@@ -280,8 +280,8 @@ export function setupTestSuiteClientDriverAdapter({
 
     return {
       adapter:
-        driverAdapter === AdapterProviders.JS_KB
-          ? new PrismaKb(datasourceInfo.databaseUrl, { schema })
+        driverAdapter === AdapterProviders.JS_KB_MYSQL
+          ? new PrismaKbMysql(datasourceInfo.databaseUrl, { schema })
           : new PrismaKbOracle(datasourceInfo.databaseUrl, { schema }),
     }
   }

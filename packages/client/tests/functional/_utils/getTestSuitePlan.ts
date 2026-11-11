@@ -260,7 +260,7 @@ const excludeEnvToProviderFlavorMap = {
   TEST_SKIP_BETTER_SQLITE3: AdapterProviders.JS_BETTER_SQLITE3,
   TEST_SKIP_MSSQL: AdapterProviders.JS_MSSQL,
   TEST_SKIP_MARIADB: AdapterProviders.JS_MARIADB,
-  TEST_SKIP_KB: AdapterProviders.JS_KB,
+  TEST_SKIP_KB_MYSQL: AdapterProviders.JS_KB_MYSQL,
   TEST_SKIP_KB_ORACLE: AdapterProviders.JS_KB_ORACLE,
   TEST_SKIP_PG_COCKROACHDB: AdapterProviders.JS_PG_COCKROACHDB,
 }

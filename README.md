@@ -47,7 +47,7 @@ Prisma Client can be used in _any_ Node.js or TypeScript backend application (in
 
 This distribution adds two KingbaseES providers:
 
-- `kingbase-mysql`, used with the `PrismaKb` driver adapter
+- `kingbase-mysql`, used with the `PrismaKbMysql` driver adapter
 - `kingbase-oracle`, used with the `PrismaKbOracle` driver adapter
 
 Create a TypeScript project and install the Prisma Kingbase packages:
@@ -134,14 +134,14 @@ npx prisma-kb migrate dev --name init
 npx prisma-kb generate
 ```
 
-For `kingbase-mysql`, create the Client with `PrismaKb`:
+For `kingbase-mysql`, create the Client with `PrismaKbMysql`:
 
 ```ts
 import 'dotenv/config'
-import { PrismaKb } from '@prisma-kb/adapter-kb'
+import { PrismaKbMysql } from '@prisma-kb/adapter-kb'
 import { PrismaClient } from './generated/prisma/client'
 
-const adapter = new PrismaKb(process.env.DATABASE_URL!)
+const adapter = new PrismaKbMysql(process.env.DATABASE_URL!)
 const prisma = new PrismaClient({ adapter })
 
 const users = await prisma.user.findMany()
@@ -149,6 +149,8 @@ console.log(users)
 
 await prisma.$disconnect()
 ```
+
+`PrismaKb` remains available as a compatibility alias for `PrismaKbMysql`.
 
 For `kingbase-oracle`, use `PrismaKbOracle` instead:
 

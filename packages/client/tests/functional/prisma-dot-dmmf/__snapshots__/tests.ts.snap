@@ -153,7 +153,7 @@ exports[`prisma-dot-dmmf (provider=cockroachdb) Prisma.dmmf in JS client exports
 }
 `;
 
-exports[`prisma-dot-dmmf (provider=kingbase-mysql, js_kb) Prisma.dmmf in JS client exports Prisma.dmmf (default) 1`] = `
+exports[`prisma-dot-dmmf (provider=kingbase-mysql, js_kb_mysql) Prisma.dmmf in JS client exports Prisma.dmmf (default) 1`] = `
 {
   "datamodel": {
     "enums": [],

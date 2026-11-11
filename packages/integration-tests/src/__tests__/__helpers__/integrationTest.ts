@@ -6,7 +6,7 @@ import path from 'path'
 import hash from 'string-hash'
 import VError, { MultiError } from 'verror'
 
-import { PrismaKb, PrismaKbOracle } from '../../../../adapter-kb/src'
+import { PrismaKbMysql, PrismaKbOracle } from '../../../../adapter-kb/src'
 import { PrismaLibSql } from '../../../../adapter-libsql/src/index-node'
 import { PrismaMariaDb } from '../../../../adapter-mariadb/src'
 import { PrismaMssql } from '../../../../adapter-mssql/src'
@@ -245,7 +245,7 @@ export function runtimeIntegrationTest<Client>(input: Input<Client>) {
 
       switch (input.database.name) {
         case 'kingbase-mysql':
-          adapter = new PrismaKb(connectionString, { schema: ctx.id })
+          adapter = new PrismaKbMysql(connectionString, { schema: ctx.id })
           break
         case 'kingbase-oracle':
           adapter = new PrismaKbOracle(connectionString, { schema: ctx.id })

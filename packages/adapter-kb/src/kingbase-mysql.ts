@@ -17,8 +17,8 @@ import { Debug, DriverAdapterError } from '@prisma-kb/driver-adapter-utils'
 import * as kingbaseModule from 'kingbasedb'
 
 import { name as packageName } from '../package.json'
-import { fieldToColumnType, jsonTypeIds, mapArg, mapRow, UnsupportedNativeDataType } from './conversion'
 import { convertDriverError } from './errors'
+import { fieldToColumnType, jsonTypeIds, mapArg, mapRow, UnsupportedNativeDataType } from './kingbase-mysql-conversion'
 
 const debug = Debug('prisma:driver-adapter:kb')
 
@@ -100,13 +100,13 @@ async function readIndexNames(client: KingbaseQueryableClient): Promise<Map<stri
   return names
 }
 
-class KingbaseQueryable<Client extends KingbaseQueryableClient> implements SqlQueryable {
+class KingbaseMysqlQueryable<Client extends KingbaseQueryableClient> implements SqlQueryable {
   readonly provider = 'kingbase-mysql' as const
   readonly adapterName = packageName
 
   constructor(
     protected readonly client: Client,
-    protected readonly adapterOptions?: PrismaKbOptions,
+    protected readonly adapterOptions?: PrismaKbMysqlOptions,
     private readonly pool?: KingbasePool,
     private readonly transactionIndexNames?: ReadonlyMap<string, string>,
   ) {}
@@ -283,11 +283,11 @@ function normalizeLastInsertId(value: string | number | bigint | undefined): str
   return value === undefined || value === null ? undefined : String(value)
 }
 
-class KingbaseTransaction extends KingbaseQueryable<KingbaseClient> implements Transaction {
+class KingbaseMysqlTransaction extends KingbaseMysqlQueryable<KingbaseClient> implements Transaction {
   constructor(
     client: KingbaseClient,
     readonly options: TransactionOptions,
-    readonly kbOptions?: PrismaKbOptions,
+    readonly kbOptions?: PrismaKbMysqlOptions,
     readonly cleanup?: () => void,
     indexNames?: ReadonlyMap<string, string>,
   ) {
@@ -321,7 +321,7 @@ class KingbaseTransaction extends KingbaseQueryable<KingbaseClient> implements T
   }
 }
 
-export type PrismaKbOptions = {
+export type PrismaKbMysqlOptions = {
   /** The schema/database name used by the generated query plan. */
   schema?: string
   /** Whether an externally supplied pool should be closed by the adapter. */
@@ -332,10 +332,10 @@ export type PrismaKbOptions = {
   onConnectionError?: (error: unknown) => void
 }
 
-export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements SqlDriverAdapter {
+export class PrismaKbMysqlAdapter extends KingbaseMysqlQueryable<KingbasePool> implements SqlDriverAdapter {
   constructor(
     client: KingbasePool,
-    protected readonly kbOptions?: PrismaKbOptions,
+    protected readonly kbOptions?: PrismaKbMysqlOptions,
     private readonly release?: () => Promise<void>,
     private readonly underlyingPool: KingbasePool = client,
   ) {
@@ -358,7 +358,7 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
       // Catalog access only improves diagnostics; it must not prevent a normal
       // transaction when the connection can otherwise execute application SQL.
       const indexNames = await readIndexNames(connection).catch(() => new Map<string, string>())
-      const transaction = new KingbaseTransaction(connection, options, this.kbOptions, cleanup, indexNames)
+      const transaction = new KingbaseMysqlTransaction(connection, options, this.kbOptions, cleanup, indexNames)
       await transaction.executeRaw({ sql: 'BEGIN', args: [], argTypes: [] })
       if (isolationLevel) {
         await transaction.executeRaw({
@@ -398,15 +398,15 @@ export class PrismaKbAdapter extends KingbaseQueryable<KingbasePool> implements 
   }
 }
 
-export class PrismaKbAdapterFactory implements SqlDriverAdapterFactory {
+export class PrismaKbMysqlAdapterFactory implements SqlDriverAdapterFactory {
   readonly provider = 'kingbase-mysql' as const
   readonly adapterName = packageName
 
   private readonly poolOrConfig: { type: 'pool'; pool: KingbasePool } | { type: 'config'; config: PoolConfig }
-  private readonly options?: PrismaKbOptions
+  private readonly options?: PrismaKbMysqlOptions
   private externalPoolClaimed = false
 
-  constructor(poolOrConfig: KingbasePool | PoolConfig | string, options?: PrismaKbOptions) {
+  constructor(poolOrConfig: KingbasePool | PoolConfig | string, options?: PrismaKbMysqlOptions) {
     this.poolOrConfig = isPool(poolOrConfig)
       ? { type: 'pool', pool: poolOrConfig }
       : { type: 'config', config: normalizePoolConfig(poolOrConfig) }
@@ -414,7 +414,7 @@ export class PrismaKbAdapterFactory implements SqlDriverAdapterFactory {
     this.options = schema === undefined ? options : { ...options, schema }
   }
 
-  connect(): Promise<PrismaKbAdapter> {
+  connect(): Promise<PrismaKbMysqlAdapter> {
     const poolOrConfig = this.poolOrConfig
     const ownsPool = poolOrConfig.type === 'config' || this.options?.disposeExternalPool === true
 
@@ -437,7 +437,7 @@ export class PrismaKbAdapterFactory implements SqlDriverAdapterFactory {
     underlyingPool.on?.('error', onPoolError)
 
     return Promise.resolve(
-      new PrismaKbAdapter(
+      new PrismaKbMysqlAdapter(
         pool,
         this.options,
         async () => {

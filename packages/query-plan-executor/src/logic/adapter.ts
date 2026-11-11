@@ -1,7 +1,7 @@
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import { PrismaMssql } from '@prisma/adapter-mssql'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+import { PrismaKbMysql, PrismaKbOracle } from '@prisma-kb/adapter-kb'
 import type { SqlDriverAdapter, SqlDriverAdapterFactory, Transaction } from '@prisma-kb/driver-adapter-utils'
 
 export function createAdapter(url: string, supportedFactories: Factory[] = defaultFactories): SqlDriverAdapterFactory {
@@ -63,7 +63,7 @@ const defaultFactories: Factory[] = [
   {
     protocols: ['kingbase', 'kingbase-mysql'],
     create(url) {
-      return new PrismaKb(url)
+      return new PrismaKbMysql(url)
     },
   },
 

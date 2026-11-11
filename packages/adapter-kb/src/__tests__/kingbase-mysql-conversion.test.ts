@@ -1,9 +1,9 @@
 import { ColumnTypeEnum } from '@prisma-kb/driver-adapter-utils'
 import { describe, expect, test } from 'vitest'
 
-import { fieldToColumnType, mapArg, mapRow } from '../conversion'
+import { fieldToColumnType, mapArg, mapRow } from '../kingbase-mysql-conversion'
 
-describe('Kingbase field conversion', () => {
+describe('Kingbase MySQL field conversion', () => {
   test.each([
     [21, ColumnTypeEnum.Int32],
     [23, ColumnTypeEnum.Int32],

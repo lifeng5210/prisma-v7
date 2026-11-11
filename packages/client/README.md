@@ -20,12 +20,14 @@ the `generator` block of your Prisma schema:
 import { PrismaClient } from './generated/prisma/client'
 ```
 
-Use `PrismaKb` with the `kingbase-mysql` provider and `PrismaKbOracle` with the
+Use `PrismaKbMysql` with the `kingbase-mysql` provider and `PrismaKbOracle` with the
 `kingbase-oracle` provider:
 
 ```ts
-import { PrismaKb, PrismaKbOracle } from '@prisma-kb/adapter-kb'
+import { PrismaKbMysql, PrismaKbOracle } from '@prisma-kb/adapter-kb'
 ```
+
+`PrismaKb` remains available as a compatibility alias for `PrismaKbMysql`.
 
 The Prisma Kingbase packages are versioned independently. Install their current
 `latest` releases together, or pin a set of versions that you have tested

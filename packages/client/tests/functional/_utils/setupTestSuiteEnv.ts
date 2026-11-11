@@ -486,7 +486,7 @@ function getDbUrlFromFlavor(driverAdapterOrFlavor: `${AdapterProviders}` | undef
       .with(AdapterProviders.JS_PG, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_URI'))
       .with(AdapterProviders.JS_NEON, () => requireEnvVariable('TEST_FUNCTIONAL_POSTGRES_16_URI'))
       .with(AdapterProviders.JS_PLANETSCALE, () => requireEnvVariable('TEST_FUNCTIONAL_VITESS_8_URI'))
-      .with(AdapterProviders.JS_KB, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI'))
+      .with(AdapterProviders.JS_KB_MYSQL, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_MYSQL_URI'))
       .with(AdapterProviders.JS_KB_ORACLE, () => requireEnvVariable('TEST_FUNCTIONAL_KINGBASE_ORACLE_URI'))
       .with(AdapterProviders.JS_LIBSQL, () => requireEnvVariable('TEST_FUNCTIONAL_LIBSQL_FILE_URI'))
       .with(AdapterProviders.JS_BETTER_SQLITE3, () => requireEnvVariable('TEST_FUNCTIONAL_BETTER_SQLITE3_FILE_URI'))
@@ -563,11 +563,11 @@ async function connectKingbaseAdmin(
   databaseUrl: string,
   provider: Providers.KINGBASE_MYSQL | Providers.KINGBASE_ORACLE,
 ) {
-  const { PrismaKb, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
+  const { PrismaKbMysql, PrismaKbOracle } = require('@prisma-kb/adapter-kb') as typeof import('@prisma-kb/adapter-kb')
   const adminUrl = getKingbaseAdminUrl(databaseUrl)
 
   return provider === Providers.KINGBASE_MYSQL
-    ? await new PrismaKb(adminUrl).connect()
+    ? await new PrismaKbMysql(adminUrl).connect()
     : await new PrismaKbOracle(adminUrl).connect()
 }
 
