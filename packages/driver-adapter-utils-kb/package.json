@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/driver-adapter-utils",
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.4",
   "description": "Driver adapter utilities with Prisma Kingbase provider types.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

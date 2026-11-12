@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/query-plan-executor",
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.4",
   "description": "Query plan executor with Kingbase MySQL and Kingbase Oracle support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

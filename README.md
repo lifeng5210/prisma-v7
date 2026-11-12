@@ -60,7 +60,7 @@ npx tsc --init
 npm pkg set type=module
 ```
 
-Initialize the project for one of the two providers:
+Initialize the project by choosing one of the following provider commands:
 
 ```sh
 # Kingbase MySQL mode

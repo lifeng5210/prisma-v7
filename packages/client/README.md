@@ -29,9 +29,8 @@ import { PrismaKbMysql, PrismaKbOracle } from '@prisma-kb/adapter-kb'
 
 `PrismaKb` remains available as a compatibility alias for `PrismaKbMysql`.
 
-The Prisma Kingbase packages are versioned independently. Install their current
-`latest` releases together, or pin a set of versions that you have tested
-together in your lockfile.
+The Prisma Kingbase packages are versioned independently. Pin a compatible set
+of CLI, Client, adapter, and engine/Wasm versions in your lockfile.
 
 ## License
 

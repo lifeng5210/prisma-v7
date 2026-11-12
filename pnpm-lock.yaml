@@ -253,8 +253,8 @@ importers:
   packages/adapter-kb:
     dependencies:
       '@prisma-kb/driver-adapter-utils':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: workspace:*
+        version: link:../driver-adapter-utils-kb
       kingbasedb:
         specifier: 8.22.0
         version: 8.22.0
@@ -718,8 +718,11 @@ importers:
         specifier: workspace:*
         version: link:../engines-version
       '@prisma-kb/query-compiler-wasm':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: 7.10.0-kb.4
+        version: 7.10.0-kb.4
+      '@prisma-kb/query-plan-executor':
+        specifier: workspace:*
+        version: link:../query-plan-executor
       '@prisma/adapter-better-sqlite3':
         specifier: workspace:*
         version: link:../adapter-better-sqlite3
@@ -801,9 +804,6 @@ importers:
       '@prisma/param-graph-builder':
         specifier: workspace:*
         version: link:../param-graph-builder
-      '@prisma-kb/query-plan-executor':
-        specifier: workspace:*
-        version: link:../query-plan-executor
       '@prisma/sqlcommenter':
         specifier: workspace:*
         version: link:../sqlcommenter
@@ -1247,8 +1247,8 @@ importers:
   packages/engines:
     dependencies:
       '@prisma-kb/engines-version':
-        specifier: 7.10.0-kb.2
-        version: 7.10.0-kb.2
+        specifier: workspace:*
+        version: link:../engines-version
       '@prisma/debug':
         specifier: 7.10.0
         version: 7.10.0
@@ -1390,8 +1390,8 @@ importers:
   packages/get-dmmf:
     dependencies:
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: 7.10.0-kb.4
+        version: 7.10.0-kb.4
       '@prisma/debug':
         specifier: workspace:*
         version: link:../debug
@@ -1561,8 +1561,8 @@ importers:
         specifier: workspace:*
         version: link:../engines
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: 7.10.0-kb.4
+        version: 7.10.0-kb.4
       '@prisma/config':
         specifier: workspace:*
         version: link:../config
@@ -1900,8 +1900,8 @@ importers:
   packages/schema-files-loader:
     dependencies:
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.1
-        version: 7.10.0-kb.1
+        specifier: 7.10.0-kb.4
+        version: 7.10.0-kb.4
       fs-extra:
         specifier: 11.3.0
         version: 11.3.0
@@ -3857,17 +3857,11 @@ packages:
     peerDependencies:
       prettier: '*'
 
-  '@prisma-kb/driver-adapter-utils@7.10.0-kb.1':
-    resolution: {integrity: sha512-PEUFkWhKLQSasl+vFUXHbkcIsHaFQbpFVyB5nqz/QK49aX0UDYoJu8Ub2YDyVsye5lhs/uTiVRLKc9sh3UDSSA==}
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.4':
+    resolution: {integrity: sha512-9/5zsmlkxwIKQwqhNo75ouh+r4Zyap5dwtdogxzpm+IWwCG08M+l1LOLuAUwyn/x2jZkQMJBFqMXSYkEeFmbiw==}
 
-  '@prisma-kb/engines-version@7.10.0-kb.2':
-    resolution: {integrity: sha512-DbxObQClQtDirG5YsdM8xsQwfj/6sHNyJ1SscFsU+7Qj0iQ07BX9VIHtwZEJNUQZxkG2Quhr11qfQAls9iBd5Q==}
-
-  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1':
-    resolution: {integrity: sha512-nm7l6Idc82NSr99p3NS9UQhXXST49aUfhVkl+28HG/C4hnH5ZBiUfKJa8aX07p9edZRDD73ZFyeHlWJUWzCD/g==}
-
-  '@prisma-kb/query-compiler-wasm@7.10.0-kb.1':
-    resolution: {integrity: sha512-qrkslO2mFLY4gh15yjNqPRo0WOo0ogTHU8ze8QVfyRyIIssUdJBfIonRvLb9Yl2zaogw3En43gi4eCR5rVzTGA==}
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.4':
+    resolution: {integrity: sha512-P/J6jwoq8sDAZqlun3Yghgq5EodRo1tTD6mmBxLMpYFVKny0HAxTfeTnlgnSXwBCe4QWLR2Ti3z6Gnf6GQLmQA==}
 
   '@prisma/client-runtime-utils@7.10.0':
     resolution: {integrity: sha512-cnCy7lUV8/CctgKVEmqAbSLAmwqJdE/qAlqTBk/0NDk59zEb2cZ0M0M0E4vVPnqbSEYudRroQDvOWfUZH6RIfw==}
@@ -10866,15 +10860,9 @@ snapshots:
       make-synchronized: 0.4.2
       prettier: 3.5.3
 
-  '@prisma-kb/driver-adapter-utils@7.10.0-kb.1':
-    dependencies:
-      '@prisma/driver-adapter-utils': 7.10.0
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.4': {}
 
-  '@prisma-kb/engines-version@7.10.0-kb.2': {}
-
-  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.1': {}
-
-  '@prisma-kb/query-compiler-wasm@7.10.0-kb.1': {}
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.4': {}
 
   '@prisma/client-runtime-utils@7.10.0': {}
 

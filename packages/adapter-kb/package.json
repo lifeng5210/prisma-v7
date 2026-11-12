@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/adapter-kb",
-  "version": "7.10.0-kb.1",
+  "version": "7.10.0-kb.4",
   "description": "Prisma's driver adapter for KingbaseES",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -40,7 +40,7 @@
   "license": "Apache-2.0",
   "sideEffects": false,
   "dependencies": {
-    "@prisma-kb/driver-adapter-utils": "7.10.0-kb.1",
+    "@prisma-kb/driver-adapter-utils": "workspace:*",
     "kingbasedb": "8.22.0"
   }
 }

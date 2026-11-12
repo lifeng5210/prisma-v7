@@ -13,7 +13,7 @@ MySQL adapter options are exported as `PrismaKbMysqlOptions`, with
 Install this package together with the Prisma Kingbase Client distribution.
 
 `executeScript` is not implemented in either compatibility mode and throws
-`Not implemented yet`, matching the upstream MySQL adapter's interface behavior.
+`Not implemented yet`.
 Use Prisma's supported query and transaction APIs for application operations.
 
 The Kingbase MySQL adapter does not bind or decode standalone SQL arrays.
@@ -33,11 +33,9 @@ await prisma.user.findMany({
 ```
 
 Use `&` for AND, `|` for OR, `!` for NOT, `<->` for a phrase, and `:*` for a
-prefix. Invalid expressions are reported by the database. Existing MySQL-mode
-queries such as `+John +Smith`, `John Smith`, or `John*` must be rewritten to
-`John & Smith`, `John | Smith`, or `John:*` respectively. This is an input
-contract change from earlier Kingbase adapter builds; it does not change the
-upstream MySQL provider.
+prefix. Invalid expressions are reported by the database. For example,
+`John & Smith` matches both terms, `John | Smith` matches either term, and
+`John:*` performs prefix matching.
 
 MySQL-mode full-text queries keep the fixed `simple` configuration used by
 Prisma-managed `@@fulltext` indexes. Oracle-mode queries keep the database's
@@ -46,40 +44,28 @@ scores can therefore differ between modes even with the same query expression.
 
 ## MySQL-mode type boundaries
 
-Kingbase MySQL adaptation targets R3; the tested baseline is V009R003C018.
-Compatibility with R1 is not required.
+Kingbase MySQL adaptation targets R3 V009R003C018.
 
-BIT parameters from the matching Kingbase query compiler carry their declared
-width. The MySQL adapter preserves that width, including leading zeros, and
-rejects values that do not fit. Deploy the updated query compiler Wasm together
-with the adapter; older compilers and direct adapter calls that provide only
-`Bit` retain the existing numeric encoding without a declared width.
+BIT parameters with a declared `BIT(n)` width preserve that width, including
+leading zeros, and reject values that do not fit. Use matching Kingbase query
+compiler Wasm and adapter builds to pass the declared width. Calls that supply
+only `Bit` without a width use numeric encoding based on significant bits.
 
-The connector uses Kingbase's native conversion and aggregate rules. BLOB-to-BIT
-column changes return the server's unsupported-conversion error; Prisma does not
-parse decimal prefixes or emulate MySQL strict/non-strict conversion behavior.
-Temporal-to-numeric changes use native casts, including server-defined precision
-and overflow behavior. Parameterized SUM uses the upstream MySQL `SUM(?)` SQL
-without additional casts. Parameters are encoded for the type described by the
-server; aggregate result types and precision follow the database's behavior.
+Column conversions and aggregates follow Kingbase's native rules. Unsupported
+conversions are reported by the database; result types, precision, and overflow
+handling follow the server's behavior.
 
 R3 supports `Int @db.UnsignedTinyInt`, `Int @db.UnsignedSmallInt`, and
-`Int @db.UnsignedMediumInt` through native unsigned columns. All three use the
-existing INT4 codecs. `UnsignedTinyInt` accepts Int fields only and cannot be
-combined with `autoincrement()`; `UnsignedSmallInt` and `UnsignedMediumInt`
+`Int @db.UnsignedMediumInt` through native unsigned columns.
+`UnsignedTinyInt` accepts Int fields only and cannot be combined with
+`autoincrement()`; `UnsignedSmallInt` and `UnsignedMediumInt`
 support native auto-increment. `Int @db.UnsignedInt` and
 `BigInt @db.UnsignedBigInt` remain supported.
 
-The connector targets new R3 databases and does not create domains, CHECK
-constraints, or protective triggers to emulate small unsigned integers. It no
-longer maintains special detection or migration guards for earlier emulation
-objects; general unsupported-type and foreign-key handling still applies.
-These code changes do not remove existing database objects.
-
 ## Oracle-mode date/time handling
 
-On the tested R2 V009R002C016 baseline, the adapter preserves the connection's
-time zone, including connections borrowed from an application-owned pool.
+On R2 V009R002C016, the adapter preserves the connection's time zone, including
+connections borrowed from an application-owned pool.
 Prisma DateTime values round-trip as UTC instants without requiring a UTC
 session. `TimestampLocalTz` uses the server's plain TIMESTAMP representation;
 `TimestampTz` retains its time-zone-aware binding and decoding.
@@ -94,7 +80,10 @@ session. `TimestampLocalTz` uses the server's plain TIMESTAMP representation;
 
 ## Functional tests
 
-From the repository root, select the adapter for the compatibility mode:
+Configure `TEST_FUNCTIONAL_KINGBASE_MYSQL_URI` and
+`TEST_FUNCTIONAL_KINGBASE_ORACLE_URI` in `.db.env` with connections to dedicated
+test databases. From the repository root, select the command for the mode being
+tested:
 
 ```sh
 pnpm --filter @prisma-kb/client test:functional:code --adapter js_kb_mysql

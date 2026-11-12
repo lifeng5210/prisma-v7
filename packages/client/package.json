@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/client",
-  "version": "7.10.0-kb.2",
+  "version": "7.10.0-kb.4",
   "description": "Prisma Client distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
     "ORM",
@@ -207,7 +207,7 @@
     "@prisma/migrate": "workspace:*",
     "@prisma/param-graph": "workspace:*",
     "@prisma/param-graph-builder": "workspace:*",
-    "@prisma-kb/query-compiler-wasm": "7.10.0-kb.1",
+    "@prisma-kb/query-compiler-wasm": "7.10.0-kb.4",
     "@prisma-kb/query-plan-executor": "workspace:*",
     "@prisma/sqlcommenter": "workspace:*",
     "@prisma/sqlcommenter-trace-context": "workspace:*",
