@@ -106,7 +106,6 @@ class KingbaseMysqlQueryable<Client extends KingbaseQueryableClient> implements 
 
   constructor(
     protected readonly client: Client,
-    protected readonly adapterOptions?: PrismaKbMysqlOptions,
     private readonly pool?: KingbasePool,
     private readonly transactionIndexNames?: ReadonlyMap<string, string>,
   ) {}
@@ -190,7 +189,7 @@ class KingbaseMysqlQueryable<Client extends KingbaseQueryableClient> implements 
     const lastInsertId =
       (suppliedZero ? undefined : suppliedId) ??
       normalizeLastInsertId(result.insertId ?? result.lastInsertId) ??
-      (await this.fetchLastInsertId(query.sql, client, suppliedZero))
+      (await this.fetchLastInsertId(client, suppliedZero))
 
     return { result, lastInsertId }
   }
@@ -201,14 +200,9 @@ class KingbaseMysqlQueryable<Client extends KingbaseQueryableClient> implements 
    * it as a fallback for INSERT statements used by the query compiler.
    */
   private async fetchLastInsertId(
-    sql: string,
     client: KingbaseQueryableClient = this.client,
     suppliedZero = false,
   ): Promise<string | undefined> {
-    if (!isInsertQuery(sql)) {
-      return undefined
-    }
-
     try {
       if (suppliedZero) {
         const modes = await client.query({ text: 'SHOW sql_mode', values: [], rowMode: 'array' })
@@ -287,11 +281,10 @@ class KingbaseMysqlTransaction extends KingbaseMysqlQueryable<KingbaseClient> im
   constructor(
     client: KingbaseClient,
     readonly options: TransactionOptions,
-    readonly kbOptions?: PrismaKbMysqlOptions,
     readonly cleanup?: () => void,
     indexNames?: ReadonlyMap<string, string>,
   ) {
-    super(client, kbOptions, undefined, indexNames)
+    super(client, undefined, indexNames)
   }
 
   commit(): Promise<void> {
@@ -339,7 +332,7 @@ export class PrismaKbMysqlAdapter extends KingbaseMysqlQueryable<KingbasePool> i
     private readonly release?: () => Promise<void>,
     private readonly underlyingPool: KingbasePool = client,
   ) {
-    super(client, kbOptions, client)
+    super(client, client)
   }
 
   async startTransaction(isolationLevel?: IsolationLevel): Promise<Transaction> {
@@ -358,7 +351,7 @@ export class PrismaKbMysqlAdapter extends KingbaseMysqlQueryable<KingbasePool> i
       // Catalog access only improves diagnostics; it must not prevent a normal
       // transaction when the connection can otherwise execute application SQL.
       const indexNames = await readIndexNames(connection).catch(() => new Map<string, string>())
-      const transaction = new KingbaseMysqlTransaction(connection, options, this.kbOptions, cleanup, indexNames)
+      const transaction = new KingbaseMysqlTransaction(connection, options, cleanup, indexNames)
       await transaction.executeRaw({ sql: 'BEGIN', args: [], argTypes: [] })
       if (isolationLevel) {
         await transaction.executeRaw({

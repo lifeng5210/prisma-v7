@@ -82,10 +82,7 @@ class KingbaseOracleQueryable<Client extends KingbaseOracleQueryableClient> impl
   readonly provider = 'kingbase-oracle' as const
   readonly adapterName = packageName
 
-  constructor(
-    protected readonly client: Client,
-    protected readonly adapterOptions?: PrismaKbOracleOptions,
-  ) {}
+  constructor(protected readonly client: Client) {}
 
   async queryRaw(query: SqlQuery): Promise<SqlResultSet> {
     const tag = '[js::query_raw]'
@@ -160,10 +157,9 @@ class KingbaseOracleTransaction extends KingbaseOracleQueryable<KingbaseOracleCl
   constructor(
     client: KingbaseOracleClient,
     readonly options: TransactionOptions,
-    readonly oracleOptions?: PrismaKbOracleOptions,
     readonly cleanup?: () => void,
   ) {
-    super(client, oracleOptions)
+    super(client)
   }
 
   commit(): Promise<void> {
@@ -211,7 +207,7 @@ export class PrismaKbOracleAdapter extends KingbaseOracleQueryable<KingbaseOracl
     private readonly release?: () => Promise<void>,
     private readonly underlyingPool: KingbaseOraclePool = client,
   ) {
-    super(client, oracleOptions)
+    super(client)
   }
 
   async startTransaction(isolationLevel?: IsolationLevel): Promise<Transaction> {
@@ -227,7 +223,7 @@ export class PrismaKbOracleAdapter extends KingbaseOracleQueryable<KingbaseOracl
     const cleanup = () => connection.off?.('error', onError)
 
     try {
-      const transaction = new KingbaseOracleTransaction(connection, options, this.oracleOptions, cleanup)
+      const transaction = new KingbaseOracleTransaction(connection, options, cleanup)
       await transaction.executeRaw({ sql: 'BEGIN', args: [], argTypes: [] })
       if (isolationLevel) {
         await transaction.executeRaw({

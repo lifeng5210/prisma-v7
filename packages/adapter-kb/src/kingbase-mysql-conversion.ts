@@ -366,8 +366,11 @@ const binaryTypeIds = new Set<number>([
   KingbaseMysqlTypeId.BLOB,
 ])
 
+function pad(n: number, z = 2): string {
+  return String(n).padStart(z, '0')
+}
+
 function formatDateTime(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   const ms = date.getUTCMilliseconds()
   return (
     pad(date.getUTCFullYear(), 4) +
@@ -386,12 +389,10 @@ function formatDateTime(date: Date): string {
 }
 
 function formatDate(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   return pad(date.getUTCFullYear(), 4) + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate())
 }
 
 function formatTime(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   const ms = date.getUTCMilliseconds()
   return (
     pad(date.getUTCHours()) +

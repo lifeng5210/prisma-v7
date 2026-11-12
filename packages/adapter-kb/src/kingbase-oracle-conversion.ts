@@ -287,8 +287,11 @@ function mapOracleResultValue(value: unknown, typeId?: number): unknown {
   return value
 }
 
+function pad(n: number, z = 2): string {
+  return String(n).padStart(z, '0')
+}
+
 function formatDateTime(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   const ms = date.getUTCMilliseconds()
   return (
     pad(date.getUTCFullYear(), 4) +
@@ -307,12 +310,10 @@ function formatDateTime(date: Date): string {
 }
 
 function formatDate(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   return pad(date.getUTCFullYear(), 4) + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate())
 }
 
 function formatTime(date: Date): string {
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   const ms = date.getUTCMilliseconds()
   return (
     pad(date.getUTCHours()) +
@@ -351,7 +352,6 @@ function formatOracleDateTime(date: Date): string {
   // from the database's offset-less wall-clock components in the Node process
   // time zone. Local getters recover those original components; UTC getters
   // would shift Oracle DATE/TIMESTAMP values outside UTC environments.
-  const pad = (n: number, z = 2) => String(n).padStart(z, '0')
   const ms = date.getMilliseconds()
   return (
     pad(date.getFullYear(), 4) +
