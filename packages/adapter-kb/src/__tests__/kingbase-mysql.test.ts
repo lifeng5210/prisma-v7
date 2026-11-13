@@ -317,7 +317,7 @@ describe('PrismaKbMysqlAdapterFactory', () => {
     }
     expect(config.types.getTypeParser(23, 'text')('7')).toBe(7)
     expect(adapter.provider).toBe('kingbase-mysql')
-    expect(adapter.getConnectionInfo()).toMatchObject({ maxBindValues: 32767 })
+    expect(adapter.getConnectionInfo()).toMatchObject({ maxBindValues: 32767, supportsRelationJoins: true })
 
     await adapter.dispose()
     expect(pool.off).toHaveBeenCalled()

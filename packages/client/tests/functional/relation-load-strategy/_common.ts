@@ -4,6 +4,7 @@ export const providersSupportingRelationJoins = [
   Providers.POSTGRESQL,
   Providers.COCKROACHDB,
   Providers.MYSQL,
+  Providers.KINGBASE_MYSQL,
   Providers.KINGBASE_ORACLE,
 ]
 

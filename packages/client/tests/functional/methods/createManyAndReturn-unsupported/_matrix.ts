@@ -12,5 +12,8 @@ export default defineMatrix(() => [
     {
       provider: Providers.MYSQL,
     },
+    {
+      provider: Providers.KINGBASE_MYSQL,
+    },
   ],
 ])

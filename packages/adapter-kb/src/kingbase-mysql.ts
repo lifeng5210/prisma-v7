@@ -378,7 +378,7 @@ export class PrismaKbMysqlAdapter extends KingbaseMysqlQueryable<KingbasePool> i
       // Kingbase accepts at most i16::MAX bind parameters, even though its
       // MySQL-compatible SQL dialect otherwise follows MySQL semantics.
       maxBindValues: 32767,
-      supportsRelationJoins: false,
+      supportsRelationJoins: true,
     }
   }
 

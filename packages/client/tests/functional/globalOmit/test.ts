@@ -449,7 +449,7 @@ testMatrix.setupTestSuite(
       expect(result._sum.highScore).toBe(0)
     })
 
-    skipTestIf([Providers.SQLSERVER, Providers.MONGODB, Providers.MYSQL].includes(provider))(
+    skipTestIf([Providers.SQLSERVER, Providers.MONGODB, Providers.MYSQL, Providers.KINGBASE_MYSQL].includes(provider))(
       'createManyAndReturn',
       async () => {
         const client = clientWithOmit({
@@ -459,7 +459,7 @@ testMatrix.setupTestSuite(
             },
           },
         })
-        // @ts-test-if: provider !== Providers.SQLSERVER && provider !== Providers.MONGODB && provider !== Providers.MYSQL
+        // @ts-test-if: provider !== Providers.SQLSERVER && provider !== Providers.MONGODB && provider !== Providers.MYSQL && provider !== Providers.KINGBASE_MYSQL
         const users = await client.user.createManyAndReturn({
           data: [
             {
@@ -477,7 +477,7 @@ testMatrix.setupTestSuite(
         expectTypeOf(users[0]).toHaveProperty('id')
         expectTypeOf(users[0]).toHaveProperty('email')
         expectTypeOf(users[0]).toHaveProperty('highScore')
-        // @ts-test-if: provider !== Providers.SQLSERVER && provider !== Providers.MONGODB && provider !== Providers.MYSQL
+        // @ts-test-if: provider !== Providers.SQLSERVER && provider !== Providers.MONGODB && provider !== Providers.MYSQL && provider !== Providers.KINGBASE_MYSQL
         expectTypeOf(users[0]).not.toHaveProperty('password')
       },
     )

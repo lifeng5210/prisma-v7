@@ -184,8 +184,8 @@ testMatrix.setupTestSuite(
           Invalid \`prisma.user.createMany()\` invocation in
           /client/tests/functional/relation-load-strategy/unsupported-queries.ts:0:0
 
-            XX 
-            XX testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB].includes(provider))('createMany', async () => {
+            XX 'createMany',
+            XX async () => {
             XX   await expect(
           → XX     prisma.user.createMany({
                       relationLoadStrategy: "query",
