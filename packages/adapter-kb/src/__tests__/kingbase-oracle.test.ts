@@ -372,3 +372,91 @@ test.skipIf(!process.env.TEST_KINGBASE_ORACLE_URI)(
   },
   20000,
 )
+
+test.skipIf(!process.env.TEST_KINGBASE_ORACLE_URI)(
+  'real Oracle byte strings, ROWID, UROWID and BINARY_INTEGER preserve native values',
+  async () => {
+    const adapter = await new PrismaKbOracleAdapterFactory({
+      connectionString: process.env.TEST_KINGBASE_ORACLE_URI!.replace(/^kingbase-oracle:/, 'kingbase:'),
+      max: 1,
+    }).connect()
+    const query = (sql: string, args: SqlQuery['args'] = [], argTypes: SqlQuery['argTypes'] = []): SqlQuery => ({
+      sql,
+      args,
+      argTypes,
+    })
+    const transaction = await adapter.startTransaction()
+    try {
+      await transaction.executeRaw(
+        query(
+          'CREATE TEMPORARY TABLE oracle_additional_native_values (id INTEGER PRIMARY KEY, fixed CHAR(8 BYTE), variable VARCHAR2(8 BYTE), rid ROWID, universal UROWID(4000), integer BINARY_INTEGER)',
+        ),
+      )
+      const identifier = (await transaction.queryRaw(query('SELECT nextrowid()::text AS value'))).rows[0][0]
+      expect(typeof identifier).toBe('string')
+      const dbTypes = ['INT4', 'CHARBYTE', 'VARCHAR2BYTE', 'ROWID', 'UROWID', 'BINARYINTEGER']
+      const argTypes: SqlQuery['argTypes'] = dbTypes.map((dbType, index) => ({
+        scalarType: index === 0 || index === 5 ? 'int' : 'string',
+        arity: 'scalar',
+        dbType,
+      }))
+      for (const [id, integer] of [
+        [1, -2147483648],
+        [2, 2147483647],
+      ]) {
+        const args = [id, '中文ab', '中文ab', identifier, identifier, integer]
+        const result = await transaction.queryRaw(
+          query(
+            'INSERT INTO oracle_additional_native_values VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,fixed,variable,rid,universal,integer',
+            args,
+            argTypes,
+          ),
+        )
+        expect(result.columnTypes).toEqual([
+          ColumnTypeEnum.Int32,
+          ColumnTypeEnum.Text,
+          ColumnTypeEnum.Text,
+          ColumnTypeEnum.Text,
+          ColumnTypeEnum.Text,
+          ColumnTypeEnum.Int32,
+        ])
+        expect(result.rows).toEqual([args])
+      }
+      const selected = await transaction.queryRaw(
+        query(
+          'SELECT id FROM oracle_additional_native_values WHERE rid=$1 ORDER BY id',
+          [identifier],
+          [{ scalarType: 'string', arity: 'scalar', dbType: 'ROWID' }],
+        ),
+      )
+      expect(selected.rows).toEqual([[1], [2]])
+      const nulls = await transaction.queryRaw(
+        query(
+          'INSERT INTO oracle_additional_native_values VALUES ($1,$2,$3,$4,$5,$6) RETURNING fixed,variable,rid,universal,integer',
+          [3, null, null, null, null, null],
+          argTypes,
+        ),
+      )
+      expect(nulls.rows).toEqual([[null, null, null, null, null]])
+      for (const sql of [
+        "INSERT INTO oracle_additional_native_values(id,fixed) VALUES (4,'中文国')",
+        "INSERT INTO oracle_additional_native_values(id,variable) VALUES (4,'中文国')",
+        "INSERT INTO oracle_additional_native_values(id,universal) VALUES (4,repeat('x',4001))",
+        'INSERT INTO oracle_additional_native_values(id,integer) VALUES (4,2147483648)',
+        'INSERT INTO oracle_additional_native_values(id,integer) VALUES (4,-2147483649)',
+      ]) {
+        await transaction.executeRaw(query('SAVEPOINT invalid_input'))
+        await expect(transaction.executeRaw(query(sql))).rejects.toThrow()
+        await transaction.executeRaw(query('ROLLBACK TO SAVEPOINT invalid_input'))
+      }
+    } finally {
+      try {
+        await transaction.executeRaw(query('ROLLBACK'))
+      } finally {
+        await transaction.rollback()
+        await adapter.dispose()
+      }
+    }
+  },
+  20000,
+)

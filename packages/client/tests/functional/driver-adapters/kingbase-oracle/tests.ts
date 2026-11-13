@@ -258,6 +258,51 @@ testMatrix.setupTestSuite(
       const [{ rowId }] = await prisma.$queryRaw<Array<{ rowId: string }>>`SELECT nextrowid() AS "rowId"`
       expect(rowId).toMatch(/^[A-Za-z0-9+/]{23}$/)
     })
+
+    test('creates, filters, updates and deletes Oracle native values', async () => {
+      const [{ value: rowId }] = await prisma.$queryRawUnsafe<{ value: string }[]>(
+        'SELECT nextrowid()::text AS "value"',
+      )
+      const input = { id: 1, fixed: '中文ab', variable: '中文ab', rowId, universal: rowId, integer: -2147483648 }
+      expect(await prisma.oracleNativeValue.create({ data: input })).toEqual(input)
+      expect(await prisma.oracleNativeValue.findUnique({ where: { rowId } })).toEqual(input)
+      expect(await prisma.oracleNativeValue.findMany({ where: { universal: rowId, integer: { lt: 0 } } })).toEqual([
+        input,
+      ])
+      const updated = await prisma.oracleNativeValue.update({
+        where: { rowId },
+        data: { fixed: 'abc', variable: 'short', integer: 2147483647 },
+      })
+      expect(updated).toEqual({ ...input, fixed: 'abc     ', variable: 'short', integer: 2147483647 })
+      expect(await prisma.oracleNativeValue.delete({ where: { rowId } })).toEqual(updated)
+    })
+
+    test('preserves nullable values and native integer defaults', async () => {
+      expect(await prisma.oracleNativeValue.create({ data: { id: 2 } })).toEqual({
+        id: 2,
+        fixed: null,
+        variable: null,
+        rowId: null,
+        universal: null,
+        integer: 7,
+      })
+      const input = { id: 3, fixed: null, variable: null, rowId: null, universal: null, integer: null }
+      expect(await prisma.oracleNativeValue.create({ data: input })).toEqual(input)
+    })
+
+    test('rejects native length and integer overflow without inserting rows', async () => {
+      for (const data of [
+        { id: 4, fixed: '中文国' },
+        { id: 4, variable: '中文国' },
+        { id: 4, universal: 'x'.repeat(4001) },
+        { id: 4, integer: 2147483648 },
+        { id: 4, integer: -2147483649 },
+        { id: 4, rowId: 'invalid-rowid' },
+      ]) {
+        await expect(prisma.oracleNativeValue.create({ data })).rejects.toThrow()
+      }
+      expect(await prisma.oracleNativeValue.findUnique({ where: { id: 4 } })).toBeNull()
+    })
   },
   {
     skipDefaultClientInstance: false,

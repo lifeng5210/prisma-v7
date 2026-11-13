@@ -218,7 +218,15 @@ type ResultField = {
 }
 
 export const jsonTypeIds = new Set<number>([PostgresTypeId.JSON, PostgresTypeId.JSONB])
-export const textTypeIds = new Set<number>([...jsonTypeIds, PostgresTypeId.TIMESTAMP, KingbaseOracleTypeId.SYS_DATE])
+export const textTypeIds = new Set<number>([
+  ...jsonTypeIds,
+  PostgresTypeId.TIMESTAMP,
+  KingbaseOracleTypeId.SYS_DATE,
+  KingbaseOracleTypeId.ROWID,
+  KingbaseOracleTypeId.UROWID,
+  KingbaseOracleTypeId.BPCHARBYTE,
+  KingbaseOracleTypeId.VARCHARBYTE,
+])
 const dateTypeIds = new Set<number>([PostgresTypeId.DATE])
 const timeTypeIds = new Set<number>([PostgresTypeId.TIME, PostgresTypeId.TIMETZ])
 const dateTimeTypeIds = new Set<number>([

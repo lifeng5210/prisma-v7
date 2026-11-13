@@ -67,5 +67,14 @@ export default testMatrix.setupSchema(({ provider }) => {
     id    Int @id
     value Int @db.TinyInt
   }
+
+  model OracleNativeValue {
+    id Int @id
+    fixed String? @db.CharByte(8)
+    variable String? @db.VarChar2Byte(8)
+    rowId String? @unique @db.RowId
+    universal String? @db.URowId(4000)
+    integer Int? @db.BinaryInteger @default(7)
+  }
   `
 })
