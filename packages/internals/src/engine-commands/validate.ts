@@ -99,7 +99,7 @@ export function validate(options: ValidateOptions): void {
         const panic = new RustPanic(
           /* message */ message,
           /* rustStack */ stack,
-          /* request */ '@prisma/prisma-schema-wasm validate',
+          /* request */ '@prisma-kb/prisma-schema-wasm validate',
           ErrorArea.FMT_CLI,
         )
         return panic

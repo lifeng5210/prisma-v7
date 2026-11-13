@@ -632,9 +632,9 @@ testMatrix.setupTestSuite(() => {
       expectTypeOf<typeof _updateMany>().toEqualTypeOf<typeof updateMany>()
 
       const _updateManyAndReturn = xprisma.user._updateManyAndReturn({ where: { id: '1' }, data: { email: '' } })
-      // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+      // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
       const updateManyAndReturn = await prisma.user.updateManyAndReturn({ where: { id: '1' }, data: { email: '' } })
-      // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE
+      // @ts-test-if: provider == Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.SQLITE || provider === Providers.KINGBASE_ORACLE
       expectTypeOf<typeof _updateManyAndReturn>().toEqualTypeOf<typeof updateManyAndReturn>()
 
       const _upsert = xprisma.user._upsert({

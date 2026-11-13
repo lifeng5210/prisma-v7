@@ -1,5 +1,5 @@
 const { PrismaPg } = require('@prisma/adapter-pg')
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('@prisma-kb/client')
 
 export async function generateStaticParams() {
   return [{ id: '1' }]

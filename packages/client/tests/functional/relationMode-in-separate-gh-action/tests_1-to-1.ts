@@ -118,6 +118,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`userId`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `ProfileOneToOne_userId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -505,6 +507,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `ProfileOneToOne_userId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -584,6 +588,9 @@ testMatrix.setupTestSuite(
                     // Note: The test suite does not test `SetNull` with providers that errors during migration
                     // see _utils/relationMode/computeMatrix.ts
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Unique constraint failed on the constraint: `UserOneToOne_pkey`',
+                      [AdapterProviders.JS_KB_ORACLE]:
+                        'Unique constraint failed on the constraint: `UserOneToOne_pkey`',
                       [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`id`)',
                       [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`id`)',
                       [Providers.MYSQL]: ['Restrict', 'NoAction'].includes(onUpdate)
@@ -608,6 +615,10 @@ testMatrix.setupTestSuite(
                         "The change you are trying to make would violate the required relation 'ProfileOneToOneToUserOneToOne' between the `ProfileOneToOne` and `UserOneToOne` models."
                       : // DEFAULT / SetNull
                         {
+                          [AdapterProviders.JS_KB_MYSQL]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_userId_key`',
+                          [AdapterProviders.JS_KB_ORACLE]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_userId_key`',
                           [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`userId`)',
                           [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`userId`)',
                           [Providers.MYSQL]: 'Unique constraint failed on the constraint: `ProfileOneToOne_userId_key`',
@@ -682,6 +693,10 @@ testMatrix.setupTestSuite(
                       `Unique constraint failed on the`
                     : conditionalError.snapshot({
                         foreignKeys: {
+                          [AdapterProviders.JS_KB_MYSQL]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_pkey`',
+                          [AdapterProviders.JS_KB_ORACLE]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_pkey`',
                           [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.MYSQL]: 'Unique constraint failed on the constraint: `PRIMARY`',
@@ -689,6 +704,10 @@ testMatrix.setupTestSuite(
                           [Providers.SQLITE]: 'Unique constraint failed on the fields: (`id`)',
                         },
                         prisma: {
+                          [AdapterProviders.JS_KB_MYSQL]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_pkey`',
+                          [AdapterProviders.JS_KB_ORACLE]:
+                            'Unique constraint failed on the constraint: `ProfileOneToOne_pkey`',
                           [Providers.POSTGRESQL]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.COCKROACHDB]: 'Unique constraint failed on the fields: (`id`)',
                           [Providers.MYSQL]: 'Unique constraint failed on the constraint: `PRIMARY`',
@@ -878,6 +897,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.MONGODB]:
                         "The change you are trying to make would violate the required relation 'ProfileOneToOneToUserOneToOne' between the `ProfileOneToOne` and `UserOneToOne` models.",
                       [Providers.POSTGRESQL]:
@@ -947,6 +968,8 @@ testMatrix.setupTestSuite(
                 `Foreign key constraint violated`
               : conditionalError.snapshot({
                   foreignKeys: {
+                    [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                    [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                     [Providers.POSTGRESQL]:
                       'Foreign key constraint violated on the constraint: `ProfileOneToOne_userId_fkey`',
                     [Providers.COCKROACHDB]:

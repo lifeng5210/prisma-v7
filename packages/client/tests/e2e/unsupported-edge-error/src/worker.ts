@@ -1,6 +1,6 @@
 // Import the browser build explicitly to test the browser stub error in edge runtime
 // @ts-expect-error - index-browser is a generated file
-import { PrismaClient } from '@prisma/client/index-browser'
+import { PrismaClient } from '@prisma-kb/client/index-browser'
 
 export interface Env {}
 

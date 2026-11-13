@@ -170,14 +170,16 @@ testMatrix.setupTestSuite(
         `)
       })
 
-      testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB].includes(provider))('createMany', async () => {
-        await expect(
-          prisma.user.createMany({
-            // @ts-test-if: provider === 'sqlite'
-            relationLoadStrategy: 'query',
-            data: [{ login: 'user' }],
-          }),
-        ).rejects.toMatchPrismaErrorInlineSnapshot(`
+      testIf(![Providers.SQLITE, Providers.SQLSERVER, Providers.MONGODB, Providers.KINGBASE_ORACLE].includes(provider))(
+        'createMany',
+        async () => {
+          await expect(
+            prisma.user.createMany({
+              // @ts-test-if: provider === 'sqlite'
+              relationLoadStrategy: 'query',
+              data: [{ login: 'user' }],
+            }),
+          ).rejects.toMatchPrismaErrorInlineSnapshot(`
           "
           Invalid \`prisma.user.createMany()\` invocation in
           /client/tests/functional/relation-load-strategy/unsupported-queries.ts:0:0
@@ -194,6 +196,36 @@ testMatrix.setupTestSuite(
                         }
                       ],
                     ? skipDuplicates?: Boolean
+                    })
+
+          Unknown argument \`relationLoadStrategy\`. Available options are marked with ?."
+        `)
+        },
+      )
+
+      testIf(provider === Providers.KINGBASE_ORACLE)('createMany', async () => {
+        await expect(
+          prisma.user.createMany({
+            // @ts-expect-error
+            relationLoadStrategy: 'query',
+            data: [{ login: 'user' }],
+          }),
+        ).rejects.toMatchPrismaErrorInlineSnapshot(`
+          "
+          Invalid \`prisma.user.createMany()\` invocation in
+          /client/tests/functional/relation-load-strategy/unsupported-queries.ts:0:0
+
+            XX 
+            XX testIf(provider === Providers.KINGBASE_ORACLE)('createMany', async () => {
+            XX   await expect(
+          → XX     prisma.user.createMany({
+                      relationLoadStrategy: "query",
+                      ~~~~~~~~~~~~~~~~~~~~
+                      data: [
+                        {
+                          login: "user"
+                        }
+                      ]
                     })
 
           Unknown argument \`relationLoadStrategy\`. Available options are marked with ?."

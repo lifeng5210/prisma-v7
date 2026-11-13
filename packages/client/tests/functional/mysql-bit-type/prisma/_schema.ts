@@ -15,6 +15,9 @@ export default testMatrix.setupSchema(({ provider }) => {
     model TestModel {
       id       ${idForProvider(provider)}
       uint64 Bytes?   @db.Bit(64)
+      uint7  Bytes?   @db.Bit(7)
+      uint9  Bytes?   @db.Bit(9)
+      uint17 Bytes?   @db.Bit(17)
       bool1  Boolean? @db.Bit(1)
       bool2  Boolean? @db.Bit(1)
     }

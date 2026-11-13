@@ -36,7 +36,7 @@ export function handleLintPanic<T>(tryCb: () => T) {
     const panic = new RustPanic(
       /* message */ message,
       /* rustStack */ stack,
-      /* request */ '@prisma/prisma-schema-wasm lint',
+      /* request */ '@prisma-kb/prisma-schema-wasm lint',
       ErrorArea.FMT_CLI,
     )
 

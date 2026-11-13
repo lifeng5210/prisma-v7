@@ -34,11 +34,11 @@ Open the ${green('schema.prisma')} file and define your first models. Check the 
 
 ${bold('2. Apply migrations')}
 Run the following command to create and apply a migration:
-${green('npx prisma migrate dev --name init')}
+${green('npx prisma-kb migrate dev --name init')}
 
 ${bold('3. Manage your data')}
 View and edit your data locally by running this command:
-${green('npx prisma studio')}
+${green('npx prisma-kb studio')}
 ${
   environmentId !== undefined
     ? `...or online in Console:
@@ -80,11 +80,11 @@ ${green('const prisma = new PrismaClient({ adapter });')}
 
 ${bold('2. Apply migrations')}
 Run the following command to create and apply a migration:
-${green('npx prisma migrate dev')}
+${green('npx prisma-kb migrate dev')}
 
 ${bold(`3. Manage your data`)}
 View and edit your data locally by running this command:
-${green('npx prisma studio')}
+${green('npx prisma-kb studio')}
 ${
   environmentId !== undefined
     ? `...or online in Console:

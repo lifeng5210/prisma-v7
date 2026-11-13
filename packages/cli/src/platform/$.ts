@@ -6,7 +6,7 @@ import { bold, red } from 'kleur/colors'
 import { dispatchToSubCommand } from './_lib/cli/dispatch-to-sub-command'
 import { createHelp } from './_lib/help'
 
-/** $ prisma platform */
+/** $ prisma-kb platform */
 export class $ implements Command {
   static new(cmds: Commands): $ {
     return new $(cmds)
@@ -45,6 +45,6 @@ export class $ implements Command {
 
   private static help = createHelp({
     subcommands: [['status', 'Show Prisma Data Platform service status']],
-    examples: ['prisma platform status'],
+    examples: ['prisma-kb platform status'],
   })
 }

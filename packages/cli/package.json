@@ -1,7 +1,7 @@
 {
-  "version": "0.0.0",
-  "name": "prisma",
-  "description": "Prisma is an open-source database toolkit. It includes a JavaScript/TypeScript ORM for Node.js, migrations and a modern GUI to view and edit the data in your database. You can use Prisma in new projects or add it to an existing one.",
+  "version": "7.10.0-kb.4",
+  "name": "prisma-kb",
+  "description": "Prisma CLI distribution with Kingbase MySQL and Kingbase Oracle support.",
   "keywords": [
     "CLI",
     "ORM",
@@ -31,12 +31,12 @@
   "main": "build/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://www.prisma.io",
+  "homepage": "https://github.com/lifeng5210/prisma-v7",
   "author": "Tim Suchanek <suchanek@prisma.io>",
-  "bugs": "https://github.com/prisma/prisma/issues",
+  "bugs": "https://github.com/lifeng5210/prisma-v7/issues",
   "license": "Apache-2.0",
   "engines": {
     "node": "^20.19 || ^22.12 || >=24.0"
@@ -65,12 +65,15 @@
       "build/**/*",
       "runtime/**/*",
       "prisma-client/**/*",
-      "node_modules/@prisma/engines/**/*",
-      "node_modules/@prisma/engines/*"
+      "node_modules/@prisma-kb/engines/**/*",
+      "node_modules/@prisma-kb/engines/*"
     ]
   },
   "bin": {
-    "prisma": "build/index.js"
+    "prisma-kb": "build/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "types": "./dist/cli/src/types.d.ts",
   "exports": {
@@ -115,7 +118,7 @@
     "@opentelemetry/context-async-hooks": "2.1.0",
     "@opentelemetry/sdk-trace-base": "2.1.0",
     "@prisma/adapter-libsql": "workspace:*",
-    "@prisma/client": "workspace:*",
+    "@prisma-kb/client": "workspace:*",
     "@prisma/client-generator-registry": "workspace:*",
     "@prisma/credentials-store": "workspace:*",
     "@prisma/debug": "workspace:*",
@@ -171,7 +174,7 @@
     "zod": "3.24.2"
   },
   "scripts": {
-    "prisma": "tsx src/bin.ts",
+    "prisma-kb": "tsx src/bin.ts",
     "platform": "tsx src/bin.ts platform --early-access",
     "pm": "tsx src/bin.ts platform --early-access",
     "dev": "DEV=true tsx helpers/build.ts",
@@ -181,12 +184,12 @@
     "test:platform": "dotenv -e ../../.db.env -- tsx helpers/run-tests.ts src/platform",
     "tsc": "tsc -d -p tsconfig.build.json",
     "preinstall": "node scripts/preinstall-entry.js",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "node scripts/ensure-pnpm-publish.js && pnpm run build"
   },
   "dependencies": {
     "@prisma/config": "workspace:*",
     "@prisma/dev": "0.24.17",
-    "@prisma/engines": "workspace:*",
+    "@prisma-kb/engines": "workspace:*",
     "@prisma/studio-core": "0.33.0",
     "mysql2": "3.15.3",
     "postgres": "3.4.7"

@@ -5,7 +5,7 @@ void build([
     name: 'default',
     entryPoints: ['src/index.ts'],
     outfile: 'dist/index',
-    external: ['fs-extra', '@prisma/prisma-schema-wasm'],
+    external: ['fs-extra', '@prisma-kb/prisma-schema-wasm'],
     bundle: true,
     emitTypes: true,
   },

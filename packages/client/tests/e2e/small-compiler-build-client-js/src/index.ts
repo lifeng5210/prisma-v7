@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 
 async function main() {
   const adapter = new PrismaBetterSqlite3({

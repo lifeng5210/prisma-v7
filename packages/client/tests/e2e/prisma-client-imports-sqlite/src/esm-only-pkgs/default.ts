@@ -1,5 +1,5 @@
 import { PrismaLibSql } from '@prisma/adapter-libsql'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 
 export const libsqlPrismaClient = new PrismaClient({
   adapter: new PrismaLibSql({

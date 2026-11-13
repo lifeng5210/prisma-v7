@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 
 export async function call() {
   // outside of try/catch, error has to happens on access only

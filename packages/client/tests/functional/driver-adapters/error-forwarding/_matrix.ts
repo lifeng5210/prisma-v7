@@ -1,16 +1,4 @@
 import { defineMatrix } from '../../_utils/defineMatrix'
-import { Providers } from '../../_utils/providers'
+import { driverAdaptersTestProviders } from '../_utils/provider'
 
-export default defineMatrix(() => [
-  [
-    {
-      provider: Providers.SQLITE,
-    },
-    {
-      provider: Providers.POSTGRESQL,
-    },
-    {
-      provider: Providers.MYSQL,
-    },
-  ],
-])
+export default defineMatrix(() => [driverAdaptersTestProviders])

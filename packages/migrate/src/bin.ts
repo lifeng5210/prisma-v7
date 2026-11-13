@@ -4,8 +4,8 @@ import path from 'node:path'
 
 import { loadConfigFromFile } from '@prisma/config'
 import Debug from '@prisma/debug'
-import { enginesVersion } from '@prisma/engines-version'
 import { arg, handlePanic, HelpError, isError } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines-version'
 import { bold, red } from 'kleur/colors'
 
 import { version as packageVersion } from '../package.json'

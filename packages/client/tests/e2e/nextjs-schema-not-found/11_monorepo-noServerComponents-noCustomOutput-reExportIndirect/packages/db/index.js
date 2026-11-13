@@ -1,5 +1,5 @@
 const { PrismaPg } = require('@prisma/adapter-pg')
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('@prisma-kb/client')
 
 const adapter = new PrismaPg({
   connectionString: process.env['TEST_E2E_POSTGRES_URI'],

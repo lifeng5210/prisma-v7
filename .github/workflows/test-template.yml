@@ -913,6 +913,10 @@ jobs:
         working-directory: packages/adapter-mariadb
 
       - run: pnpm run test
+        name: 'adapter-kb'
+        working-directory: packages/adapter-kb
+
+      - run: pnpm run test
         name: 'adapter-d1'
         working-directory: packages/adapter-d1
 

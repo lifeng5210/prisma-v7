@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
-import { getEmail } from '@prisma/client/sql'
+import { PrismaClient } from '@prisma-kb/client'
+import { getEmail } from '@prisma-kb/client/sql'
 
 const adapter = new PrismaPg({
   connectionString: process.env['TEST_E2E_POSTGRES_URI'],

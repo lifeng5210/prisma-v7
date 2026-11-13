@@ -1,16 +1,16 @@
 {
-  "name": "@prisma/engines",
-  "version": "0.0.0",
-  "description": "This package is intended for Prisma's internal use",
+  "name": "@prisma-kb/engines",
+  "version": "7.10.0-kb.4",
+  "description": "Native schema-engine downloader for the Prisma Kingbase distribution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prisma/prisma.git",
+    "url": "https://github.com/lifeng5210/prisma-v7.git",
     "directory": "packages/engines"
   },
   "license": "Apache-2.0",
-  "author": "Tim Suchanek <suchanek@prisma.io>",
+  "author": "lifeng5210",
   "devDependencies": {
     "@swc/core": "1.11.5",
     "@swc/jest": "0.2.37",
@@ -20,10 +20,10 @@
     "typescript": "5.4.5"
   },
   "dependencies": {
-    "@prisma/debug": "workspace:*",
-    "@prisma/engines-version": "7.10.0-4.0edf323efd1d98336f3f0a68684b56f689b900d3",
-    "@prisma/fetch-engine": "workspace:*",
-    "@prisma/get-platform": "workspace:*"
+    "@prisma/debug": "7.10.0",
+    "@prisma-kb/engines-version": "workspace:*",
+    "@prisma/fetch-engine": "7.10.0",
+    "@prisma/get-platform": "7.10.0"
   },
   "scripts": {
     "dev": "DEV=true tsx helpers/build.ts",

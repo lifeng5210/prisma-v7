@@ -96,6 +96,8 @@ testMatrix.setupTestSuite(
               conditionalError.snapshot({
                 foreignKeys: {
                   [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`userId`)',
+                  [Providers.KINGBASE_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
+                  [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
                   [AdapterProviders.JS_MARIADB]: 'Foreign key constraint violated on the fields: (`userId`)',
                 },
               }),
@@ -156,6 +158,8 @@ testMatrix.setupTestSuite(
                 [Providers.COCKROACHDB]:
                   'Foreign key constraint violated on the constraint: `PostOneToMany_userId_fkey`',
                 [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`userId`)',
+                [Providers.KINGBASE_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
+                [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
                 [Providers.SQLSERVER]: 'Foreign key constraint violated on the constraint: `PostOneToMany_userId_fkey`',
                 [Providers.SQLITE]: 'Foreign key constraint violated on the foreign key',
                 [AdapterProviders.JS_D1]: 'D1_ERROR: FOREIGN KEY constraint failed',
@@ -187,6 +191,8 @@ testMatrix.setupTestSuite(
               conditionalError.snapshot({
                 foreignKeys: {
                   [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`userId`)',
+                  [Providers.KINGBASE_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
+                  [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
                   [AdapterProviders.JS_MARIADB]: 'Foreign key constraint violated on the fields: (`userId`)',
                 },
               }),
@@ -242,6 +248,8 @@ testMatrix.setupTestSuite(
                 [Providers.COCKROACHDB]:
                   'Foreign key constraint violated on the constraint: `PostOneToMany_userId_fkey`',
                 [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`userId`)',
+                [Providers.KINGBASE_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
+                [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`userId`)',
                 [Providers.SQLSERVER]: 'Foreign key constraint violated on the constraint: `PostOneToMany_userId_fkey`',
                 [Providers.SQLITE]: 'Foreign key constraint violated on the foreign key',
                 [AdapterProviders.JS_D1]: 'D1_ERROR: FOREIGN KEY constraint failed',

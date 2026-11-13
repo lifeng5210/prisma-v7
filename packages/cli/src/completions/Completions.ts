@@ -72,7 +72,7 @@ export function parseCompletionCommand(argv: string[]): string | Error {
   if (firstArg && (SUPPORTED_SHELLS as readonly string[]).includes(firstArg)) {
     setupCompletions()
     try {
-      t.setup('prisma', 'prisma', firstArg)
+      t.setup('prisma-kb', 'prisma-kb', firstArg)
       return ''
     } catch (e) {
       return new Error(`Failed to setup completions: ${e}`)

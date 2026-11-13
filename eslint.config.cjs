@@ -185,6 +185,18 @@ module.exports = [
     },
   },
   {
+    // This package intentionally publishes a small CommonJS entry point rather
+    // than build output. Give its JavaScript file a project which explicitly
+    // includes it, so type-aware linting can parse it during lint-staged.
+    files: ['packages/engines-version/index.js'],
+
+    languageOptions: {
+      parserOptions: {
+        project: path.resolve(__dirname, 'packages/engines-version/tsconfig.json'),
+      },
+    },
+  },
+  {
     // Tests are never published, so they may reach into a package's src/ for
     // helpers that the package entry does not export.
     files: ['**/*.test.ts', '**/*.vitest.ts', '**/__tests__/**', '**/tests/**'],

@@ -4,7 +4,7 @@
 
 ```sh
 pnpm install
-cd packages/service && pnpm exec prisma generate
+cd packages/service && pnpm exec prisma-kb generate
 pnpm exec next build
 rm -fr .next/standalone/node_modules/next # to workaround https://github.com/vercel/next.js/issues/42651
 node .next/standalone/server.js

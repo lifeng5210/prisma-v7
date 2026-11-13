@@ -3,7 +3,7 @@
 //
 // It speaks the JSON-RPC generator protocol directly instead of using
 // `@prisma/generator-helper`, because the test copies this fixture into a
-// temporary directory where only `@prisma/client` and `@prisma/config` are
+// temporary directory where only `@prisma-kb/client` and `@prisma/config` are
 // resolvable.
 
 const readline = require('node:readline')

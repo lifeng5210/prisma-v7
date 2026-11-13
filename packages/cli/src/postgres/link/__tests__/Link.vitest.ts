@@ -82,7 +82,7 @@ function setupMockApiSuccess() {
 describe('Link command — help and validation', () => {
   test('shows help with --help flag', async () => {
     const result = await Link.new().parse(['--help'], defaultTestConfig(), tmpDir)
-    expect(result).toContain('prisma postgres link')
+    expect(result).toContain('prisma-kb postgres link')
   })
 
   test('returns error when --api-key is given without --database', async () => {
@@ -159,8 +159,8 @@ model User {
     )
 
     const output = result as string
-    expect(output).toContain('prisma generate')
-    expect(output).toContain('prisma migrate dev')
+    expect(output).toContain('prisma-kb generate')
+    expect(output).toContain('prisma-kb migrate dev')
   })
 
   test('shows next steps for schema without models', async () => {
