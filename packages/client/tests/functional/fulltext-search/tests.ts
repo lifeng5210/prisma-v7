@@ -160,6 +160,27 @@ testMatrix.setupTestSuite(
       await expect(result).rejects.toMatchPrismaErrorSnapshot()
     })
 
+    test.each(['asc', 'desc'] as const)('paginates by relevance in %s order', async (sort) => {
+      for (const fields of [['name'], ['name', 'email']] as const) {
+        const orderBy = [{ _relevance: { fields: [...fields], search: 'John', sort } }, { id: 'asc' as const }]
+        const users = await prisma.user.findMany({ orderBy })
+
+        for (const [index, user] of users.entries()) {
+          const next = await prisma.user.findMany({ orderBy, cursor: { id: user.id }, skip: 1, take: 1 })
+          expect(next).toEqual(users.slice(index + 1, index + 2))
+
+          const previous = await prisma.user.findMany({ orderBy, cursor: { id: user.id }, skip: 1, take: -1 })
+          expect(previous).toEqual(users.slice(Math.max(0, index - 1), index))
+        }
+
+        const where = { name: { search: 'John' } }
+        const matches = await prisma.user.findMany({ where, orderBy })
+        expect(matches).toHaveLength(2)
+        const next = await prisma.user.findMany({ where, orderBy, cursor: { id: matches[0].id }, skip: 1, take: 1 })
+        expect(next).toEqual(matches.slice(1, 2))
+      }
+    })
+
     test('order by relevance on a single field', async () => {
       const users = await prisma.user.findMany({
         orderBy: {
