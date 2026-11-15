@@ -194,6 +194,51 @@ testMatrix.setupTestSuite(
       }
     })
 
+    test.each(['string_contains', 'string_starts_with', 'string_ends_with'] as const)(
+      'filters root JSON strings with %s and NOT',
+      async (operation) => {
+        const values = [
+          'foo',
+          'xfoox',
+          'FOO',
+          { label: 'foo' },
+          ['foo'],
+          true,
+          123,
+          `foo${'汉'.repeat(5000)}foo`,
+          'quote "foo" \\ foo',
+        ]
+        const ids = values.map((_, index) => 6101 + index)
+        const expected = {
+          string_contains: [6101, 6102, 6108, 6109],
+          string_starts_with: [6101, 6108],
+          string_ends_with: [6101, 6108, 6109],
+        }[operation]
+        try {
+          await prisma.oracleJsonPath.createMany({
+            data: values.map((payload, index) => ({ id: ids[index], payload })),
+          })
+          const payload = { [operation]: 'foo' }
+          const matched = await prisma.oracleJsonPath.findMany({
+            where: { id: { in: ids }, payload },
+            orderBy: { id: 'asc' },
+            select: { id: true },
+          })
+          expect(matched.map((row) => row.id)).toEqual(expected)
+          const unmatched = await prisma.oracleJsonPath.findMany({
+            where: { id: { in: ids }, NOT: { payload } },
+            orderBy: { id: 'asc' },
+            select: { id: true },
+          })
+          expect(unmatched.map((row) => row.id)).toEqual(
+            ids.filter((id, index) => typeof values[index] === 'string' && !expected.includes(id)),
+          )
+        } finally {
+          await prisma.oracleJsonPath.deleteMany({ where: { id: { in: ids } } })
+        }
+      },
+    )
+
     test('distinguishes numeric JSON object keys from array indexes', async () => {
       const payload = {
         map: {
