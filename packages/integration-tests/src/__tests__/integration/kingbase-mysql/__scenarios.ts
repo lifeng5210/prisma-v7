@@ -1988,6 +1988,273 @@ export const scenarios = [
     },
     expect: 0,
   },
+  {
+    name: 'BIT Boolean and byte filters retain their values after updates',
+    up: `
+      CREATE TABLE bit_filters (id INT PRIMARY KEY, flag BIT(1), bits BIT(8));
+    `,
+    do: async (client) => {
+      for (const [id, flag, byte] of [
+        [1, false, 0],
+        [2, true, 170],
+        [3, false, 255],
+      ] as const) {
+        await client.bit_filters.create({ data: { id, flag, bits: new Uint8Array([byte]) } })
+      }
+      const matches = {
+        false: await client.bit_filters.findMany({
+          where: { flag: false },
+          orderBy: { id: 'asc' },
+          select: { id: true },
+        }),
+        true: await client.bit_filters.findMany({ where: { flag: true }, select: { id: true } }),
+        bytes: await client.bit_filters.findMany({
+          where: { bits: { in: [new Uint8Array([0]), new Uint8Array([255])] } },
+          orderBy: { id: 'asc' },
+          select: { id: true },
+        }),
+      }
+      const updated = await client.bit_filters.updateMany({
+        where: { flag: false, bits: new Uint8Array([0]) },
+        data: { flag: true, bits: new Uint8Array([85]) },
+      })
+      const after = await client.bit_filters.findMany({
+        where: { flag: true, bits: new Uint8Array([85]) },
+        select: { id: true },
+      })
+      return { matches, updated, after }
+    },
+    expect: {
+      matches: { false: [{ id: 1 }, { id: 3 }], true: [{ id: 2 }], bytes: [{ id: 1 }, { id: 3 }] },
+      updated: { count: 1 },
+      after: [{ id: 1 }],
+    },
+  },
+  {
+    name: 'signed and unsigned integer boundaries survive introspection and writes',
+    up: `
+      CREATE TABLE integer_boundaries (
+        id INT PRIMARY KEY,
+        tiny TINYINT NOT NULL, unsigned_tiny TINYINT UNSIGNED NOT NULL,
+        small SMALLINT NOT NULL, unsigned_small SMALLINT UNSIGNED NOT NULL,
+        medium MEDIUMINT NOT NULL, unsigned_medium MEDIUMINT UNSIGNED NOT NULL,
+        integer_value INT NOT NULL, big BIGINT NOT NULL
+      );
+    `,
+    do: async (client) => {
+      const rows = [
+        {
+          id: 1,
+          tiny: -128,
+          unsigned_tiny: 0,
+          small: -32768,
+          unsigned_small: 0,
+          medium: -8388608,
+          unsigned_medium: 0,
+          integer_value: -2147483648,
+          big: -9223372036854775808n,
+        },
+        {
+          id: 2,
+          tiny: 127,
+          unsigned_tiny: 255,
+          small: 32767,
+          unsigned_small: 65535,
+          medium: 8388607,
+          unsigned_medium: 16777215,
+          integer_value: 2147483647,
+          big: 9223372036854775807n,
+        },
+      ]
+      for (const data of rows) await client.integer_boundaries.create({ data })
+      return client.integer_boundaries.findMany({ orderBy: { id: 'asc' } })
+    },
+    expect: [
+      {
+        id: 1,
+        tiny: -128,
+        unsigned_tiny: 0,
+        small: -32768,
+        unsigned_small: 0,
+        medium: -8388608,
+        unsigned_medium: 0,
+        integer_value: -2147483648,
+        big: -9223372036854775808n,
+      },
+      {
+        id: 2,
+        tiny: 127,
+        unsigned_tiny: 255,
+        small: 32767,
+        unsigned_small: 65535,
+        medium: 8388607,
+        unsigned_medium: 16777215,
+        integer_value: 2147483647,
+        big: 9223372036854775807n,
+      },
+    ],
+  },
+  {
+    name: 'binary and text type families preserve multibyte text and NULL',
+    up: `
+      CREATE TABLE type_families (
+        id INT PRIMARY KEY, fixed BINARY(4), variable VARBINARY(32),
+        tiny_blob TINYBLOB, blob_value BLOB, medium_blob MEDIUMBLOB, long_blob LONGBLOB,
+        char_value CHAR(4), varchar_value VARCHAR(32), tiny_text TINYTEXT, text_value TEXT, medium_text MEDIUMTEXT, long_text LONGTEXT
+      );
+    `,
+    do: async (client) => {
+      const bytes = new Uint8Array([0, 127, 128, 255])
+      const text = '金仓KES'
+      await client.type_families.create({
+        data: {
+          id: 1,
+          fixed: bytes,
+          variable: bytes,
+          tiny_blob: bytes,
+          blob_value: bytes,
+          medium_blob: bytes,
+          long_blob: bytes,
+          char_value: 'ABCD',
+          varchar_value: text,
+          tiny_text: text,
+          text_value: text,
+          medium_text: text,
+          long_text: text,
+        },
+      })
+      await client.type_families.create({ data: { id: 2 } })
+      return client.type_families.findMany({ orderBy: { id: 'asc' } })
+    },
+    expect: [
+      {
+        id: 1,
+        fixed: new Uint8Array([0, 127, 128, 255]),
+        variable: new Uint8Array([0, 127, 128, 255]),
+        tiny_blob: new Uint8Array([0, 127, 128, 255]),
+        blob_value: new Uint8Array([0, 127, 128, 255]),
+        medium_blob: new Uint8Array([0, 127, 128, 255]),
+        long_blob: new Uint8Array([0, 127, 128, 255]),
+        char_value: 'ABCD',
+        varchar_value: '金仓KES',
+        tiny_text: '金仓KES',
+        text_value: '金仓KES',
+        medium_text: '金仓KES',
+        long_text: '金仓KES',
+      },
+      {
+        id: 2,
+        fixed: null,
+        variable: null,
+        tiny_blob: null,
+        blob_value: null,
+        medium_blob: null,
+        long_blob: null,
+        char_value: null,
+        varchar_value: null,
+        tiny_text: null,
+        text_value: null,
+        medium_text: null,
+        long_text: null,
+      },
+    ],
+  },
+  {
+    name: 'TIME DATE and DATETIME filters bind the introspected temporal types',
+    up: `
+      CREATE TABLE temporal_filters (id INT PRIMARY KEY, d DATE NOT NULL, t TIME(3) NOT NULL, dt DATETIME(3) NOT NULL);
+    `,
+    do: async (client) => {
+      const data = {
+        id: 1,
+        d: new Date('2024-07-31T00:00:00.000Z'),
+        t: new Date('1970-01-01T12:34:56.789Z'),
+        dt: new Date('2024-07-31T12:34:56.789Z'),
+      }
+      await client.temporal_filters.create({ data })
+      return client.temporal_filters.findMany({ where: { d: data.d, t: data.t, dt: data.dt } })
+    },
+    expect: [
+      {
+        id: 1,
+        d: new Date('2024-07-31T00:00:00.000Z'),
+        t: new Date('1970-01-01T12:34:56.789Z'),
+        dt: new Date('2024-07-31T12:34:56.789Z'),
+      },
+    ],
+  },
+  {
+    name: 'createMany skipDuplicates respects a unique index',
+    up: `CREATE TABLE bulk_rows (id INT PRIMARY KEY, name VARCHAR(32) NOT NULL UNIQUE);`,
+    do: async (client) => {
+      const result = await client.bulk_rows.createMany({
+        data: [
+          { id: 1, name: 'Ada' },
+          { id: 2, name: 'Ada' },
+          { id: 3, name: 'Lin' },
+        ],
+        skipDuplicates: true,
+      })
+      const rows = await client.bulk_rows.findMany({ orderBy: { id: 'asc' } })
+      return { result, rows }
+    },
+    expect: {
+      result: { count: 2 },
+      rows: [
+        { id: 1, name: 'Ada' },
+        { id: 3, name: 'Lin' },
+      ],
+    },
+  },
+  {
+    // No-path root string filters are excluded: native MySQL reproduces the same issue.
+    name: 'JSON path filters bind MySQL JSON values',
+    up: `
+      CREATE TABLE json_filters (id INT PRIMARY KEY, payload JSON NOT NULL);
+      INSERT INTO json_filters VALUES (1, '{"kind":"fruit","tags":["apple"]}'), (2, '"hello world"'), (3, '"other"');
+    `,
+    do: async (client) => ({
+      path: await client.json_filters.findMany({
+        where: { payload: { path: '$.kind', equals: 'fruit' } },
+        select: { id: true },
+      }),
+    }),
+    expect: { path: [{ id: 1 }] },
+  },
+  {
+    name: 'full-text relevance cursor pagination preserves numeric scores',
+    previewFeatures: ['fullTextSearch'],
+    up: `
+      CREATE TABLE search_documents (id INT PRIMARY KEY, title VARCHAR(100) NOT NULL);
+      INSERT INTO search_documents VALUES (1, 'prisma prisma prisma'), (2, 'prisma prisma'), (3, 'prisma'), (4, 'other');
+    `,
+    do: (client) =>
+      client.search_documents.findMany({
+        where: { title: { search: 'prisma' } },
+        orderBy: [{ _relevance: { fields: ['title'], search: 'prisma', sort: 'desc' } }, { id: 'asc' }],
+        cursor: { id: 2 },
+        skip: 1,
+        take: 2,
+        select: { id: true },
+      }),
+    expect: [{ id: 3 }],
+  },
+  {
+    name: 'aggregate groupBy and batch transactions use MySQL models',
+    up: `CREATE TABLE team_scores (id INT PRIMARY KEY, team VARCHAR(32) NOT NULL, score INT NOT NULL);`,
+    do: async (client) => {
+      await client.$transaction([
+        client.team_scores.create({ data: { id: 1, team: 'A', score: 10 } }),
+        client.team_scores.create({ data: { id: 2, team: 'A', score: 20 } }),
+        client.team_scores.create({ data: { id: 3, team: 'B', score: 30 } }),
+      ])
+      return client.team_scores.groupBy({ by: ['team'], _sum: { score: true }, _count: true, orderBy: { team: 'asc' } })
+    },
+    expect: [
+      { team: 'A', _sum: { score: 30 }, _count: 2 },
+      { team: 'B', _sum: { score: 30 }, _count: 1 },
+    ],
+  },
 ] as Input['scenarios']
 
 function logKingbaseScenarioStep(step: string): void {

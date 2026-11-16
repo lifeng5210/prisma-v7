@@ -90,6 +90,38 @@ test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI).each([false, true])(
             : [[zero], [zero], [one], [one], [maxBytes], [null]]
         if (width === 64) expected.push([Buffer.from([0, 0, 0, 0, 0, 6, 107, 58])])
         expect(result.rows).toEqual(expected)
+        const bitType = { scalarType: 'bytes', dbType, arity: 'scalar' } as const
+        const number = (value: Buffer) => value.reduce((n, byte) => (n << 8n) | BigInt(byte), 0n)
+        for (const value of inputs.filter((value): value is Buffer => value !== null)) {
+          const matches = inputs.flatMap((input, id) =>
+            input !== null && number(input) === number(value) ? [[id]] : [],
+          )
+          const filtered = await transaction.queryRaw({
+            sql: `SELECT id FROM \`${table}\` WHERE value = ? ORDER BY id`,
+            args: [value],
+            argTypes: [bitType],
+          })
+          expect(filtered.rows).toEqual(matches)
+        }
+        const inResult = await transaction.queryRaw({
+          sql: `SELECT id FROM \`${table}\` WHERE value IN (?, ?) ORDER BY id`,
+          args: [Buffer.from([0]), maxBytes],
+          argTypes: [bitType, bitType],
+        })
+        expect(inResult.rows).toEqual(
+          inputs.flatMap((input, id) => (input !== null && [0n, maximum].includes(number(input)) ? [[id]] : [])),
+        )
+        await transaction.executeRaw({
+          sql: `UPDATE \`${table}\` SET value = ? WHERE id = 0`,
+          args: [maxBytes],
+          argTypes: [bitType],
+        })
+        const updated = await transaction.queryRaw({
+          sql: `SELECT id FROM \`${table}\` WHERE id = 0 AND value = ?`,
+          args: [maxBytes],
+          argTypes: [bitType],
+        })
+        expect(updated.rows).toEqual([[0]])
         if (width < 64) {
           const overflow = Buffer.from(
             (1n << BigInt(width)).toString(16).padStart(Math.ceil((width + 1) / 8) * 2, '0'),
@@ -642,6 +674,25 @@ describe('PrismaKbMysqlAdapterFactory', () => {
     expect(rewriteQuestionMarkPlaceholders("SELECT '?', `?`, /* ? */ id FROM t WHERE a = ? -- ?\nAND b = ?")).toBe(
       "SELECT '?', `?`, /* ? */ id FROM t WHERE a = $1 -- ?\nAND b = $2",
     )
+  })
+
+  test('binds only BIT parameters while preserving literals, comments, and parameter numbering', () => {
+    const argTypes: SqlQuery['argTypes'] = [
+      { scalarType: 'boolean', arity: 'scalar', dbType: 'BIT(1)' },
+      { scalarType: 'bytes', arity: 'scalar', dbType: 'Bit(64)' },
+      { scalarType: 'bytes', arity: 'scalar', dbType: 'VARBINARY(8)' },
+      { scalarType: 'bytes', arity: 'scalar', dbType: 'Bit' },
+    ]
+    expect(rewriteQuestionMarkPlaceholders("SELECT '?', `?`, $$?$$, ??, ? /* ? */, ?, ?, ? -- ?", argTypes)).toBe(
+      "SELECT '?', `?`, $$?$$, ?, CAST($1 AS BIT(1)) /* ? */, CAST($2 AS BIT(64)), $3, CAST($4 AS sys.bit) -- ?",
+    )
+    expect(
+      rewriteQuestionMarkPlaceholders('SELECT ?, ?, ?', [
+        { scalarType: 'boolean', arity: 'scalar' },
+        { scalarType: 'bytes', arity: 'scalar' },
+        { scalarType: 'bytes', arity: 'scalar', dbType: 'BIT(8)); SELECT 1; --' },
+      ]),
+    ).toBe('SELECT $1, $2, $3')
   })
 
   test('rewrites question marks while preserving hash comments, dollar quotes, and ?? escapes', () => {

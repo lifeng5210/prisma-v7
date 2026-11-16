@@ -1,5 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`introspection: BINARY_INTEGER retains its native type and signed boundaries: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model binary_integers {
+  id    Int  @id
+  value Int? @db.BinaryInteger
+}
+"
+`;
+
+exports[`introspection: BINARY_INTEGER retains its native type and signed boundaries: warnings 1`] = `null`;
+
+exports[`introspection: CHAR BYTE and VARCHAR2 BYTE preserve multibyte and NULL values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model byte_characters {
+  id       Int     @id
+  fixed    String? @db.CharByte(12)
+  variable String? @db.VarChar2Byte(24)
+}
+"
+`;
+
+exports[`introspection: CHAR BYTE and VARCHAR2 BYTE preserve multibyte and NULL values: warnings 1`] = `null`;
+
 exports[`introspection: CLOB, BLOB, and NUMBER round trip through the Oracle adapter: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -41,6 +80,69 @@ model json_documents {
 
 exports[`introspection: JSON paths and JSON field references use Oracle JSONB semantics: warnings 1`] = `null`;
 
+exports[`introspection: JSON root string filters use extracted Oracle JSON text: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model json_strings {
+  id      Int  @id
+  payload Json
+}
+"
+`;
+
+exports[`introspection: JSON root string filters use extracted Oracle JSON text: warnings 1`] = `null`;
+
+exports[`introspection: NUMBER DECIMAL binary floats and LOBs retain precision and bytes: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model numeric_lobs {
+  id            Int      @id
+  number_value  Decimal? @db.Number(30, 10)
+  decimal_value Decimal? @db.Number(30, 10)
+  float_value   Float?   @db.BinaryFloat
+  double_value  Float?
+  clob_value    String?  @db.Clob
+  nclob_value   String?  @db.NClob
+  blob_value    Bytes?
+}
+"
+`;
+
+exports[`introspection: NUMBER DECIMAL binary floats and LOBs retain precision and bytes: warnings 1`] = `null`;
+
+exports[`introspection: Oracle cursor pagination uses a deterministic unique order: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model cursor_rows {
+  id   Int    @id
+  name String @db.VarChar2(32)
+}
+"
+`;
+
+exports[`introspection: Oracle cursor pagination uses a deterministic unique order: warnings 1`] = `null`;
+
 exports[`introspection: Oracle enum values round trip: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -65,6 +167,104 @@ enum post_status {
 `;
 
 exports[`introspection: Oracle enum values round trip: warnings 1`] = `null`;
+
+exports[`introspection: Oracle groupBy having and count operate on NUMBER fields: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model grouped_scores {
+  id    Int    @id
+  team  String @db.VarChar2(32)
+  score Int
+}
+"
+`;
+
+exports[`introspection: Oracle groupBy having and count operate on NUMBER fields: warnings 1`] = `null`;
+
+exports[`introspection: Oracle native character temporal JSON UUID and XML types round trip: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model oracle_scalars {
+  id                Int       @id
+  tiny              Int?      @db.TinyInt
+  float_value       Float?    @db.BinaryFloat
+  fixed             String?   @db.Char(4)
+  variable          String?   @db.VarChar2(32)
+  national_fixed    String?   @db.Char(4)
+  national_variable String?   @db.VarChar2(32)
+  date_value        DateTime? @db.Date
+  timestamp_value   DateTime?
+  zoned             DateTime? @db.TimestampTz(3)
+  local_zoned       DateTime?
+  active            Boolean?
+  payload           Json?
+  uuid_value        String?   @db.Uuid
+  xml_value         String?   @db.Xml
+}
+"
+`;
+
+exports[`introspection: Oracle native character temporal JSON UUID and XML types round trip: warnings 1`] = `null`;
+
+exports[`introspection: Oracle unique and foreign-key violations retain Prisma error codes: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model children {
+  id        Int      @id
+  parent_id Int?
+  parents   parents? @relation(fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model parents {
+  id       Int        @id
+  name     String     @unique @db.VarChar2(32)
+  children children[]
+}
+"
+`;
+
+exports[`introspection: Oracle unique and foreign-key violations retain Prisma error codes: warnings 1`] = `null`;
+
+exports[`introspection: ROWID and UROWID bind and filter a real row identifier: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model row_identifiers {
+  id   Int     @id
+  rid  String? @db.RowId
+  urid String? @db.URowId(128)
+}
+"
+`;
+
+exports[`introspection: ROWID and UROWID bind and filter a real row identifier: warnings 1`] = `null`;
 
 exports[`introspection: batch transactions commit Oracle writes: datamodel 1`] = `
 "generator client {
@@ -205,6 +405,25 @@ model teams {
 `;
 
 exports[`introspection: createMany and aggregate: warnings 1`] = `null`;
+
+exports[`introspection: empty Oracle strings become NULL on nullable columns: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model empty_strings {
+  id    Int     @id
+  value String? @db.VarChar2(32)
+}
+"
+`;
+
+exports[`introspection: empty Oracle strings become NULL on nullable columns: warnings 1`] = `null`;
 
 exports[`introspection: executeRaw binds Oracle numbered parameters: datamodel 1`] = `
 "generator client {
@@ -396,6 +615,25 @@ model teams {
 
 exports[`introspection: interactive transactions roll back: warnings 1`] = `null`;
 
+exports[`introspection: native UUID equality and list filters preserve UUID values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model uuid_filters {
+  id    Int     @id
+  value String? @db.Uuid
+}
+"
+`;
+
+exports[`introspection: native UUID equality and list filters preserve UUID values: warnings 1`] = `null`;
+
 exports[`introspection: nested relation create uses Oracle RETURNING values: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -573,3 +811,30 @@ model events {
 `;
 
 exports[`introspection: timestamp and decimal filters bind Oracle values: warnings 1`] = `null`;
+
+exports[`introspection: unsupported Oracle interval types remain visible in introspection: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-oracle"
+}
+
+model unsupported_intervals {
+  id    Int                        @id
+  years Unsupported("yminterval")?
+  days  Unsupported("dsinterval")?
+}
+"
+`;
+
+exports[`introspection: unsupported Oracle interval types remain visible in introspection: warnings 1`] = `
+"*** WARNING ***
+
+These fields are not supported by Prisma Client, because Prisma currently does not support their types:
+  - Model: "unsupported_intervals", field: "years", original data type: "yminterval"
+  - Model: "unsupported_intervals", field: "days", original data type: "dsinterval"
+"
+`;

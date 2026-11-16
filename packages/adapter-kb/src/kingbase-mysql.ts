@@ -231,7 +231,7 @@ class KingbaseMysqlQueryable<Client extends KingbaseQueryableClient> implements 
 
     try {
       return await client.query({
-        text: rewriteQuestionMarkPlaceholders(query.sql),
+        text: rewriteQuestionMarkPlaceholders(query.sql, query.argTypes),
         values,
         rowMode: 'array',
         types: {
@@ -599,9 +599,10 @@ function normalizeConnectionString(connectionString: string): string {
 /**
  * The Kingbase MySQL query visitor emits `?` placeholders, while the
  * pg-compatible kingbasedb driver consumes numbered `$n` placeholders.
- * Rewrite only placeholders outside quoted SQL and comments.
+ * Rewrite only placeholders outside quoted SQL and comments. Bind BIT arguments
+ * explicitly because KES can otherwise select a text comparison overload.
  */
-export function rewriteQuestionMarkPlaceholders(sql: string): string {
+export function rewriteQuestionMarkPlaceholders(sql: string, argTypes: SqlQuery['argTypes'] = []): string {
   let result = ''
   let parameterNumber = 1
   let quote: "'" | '"' | '`' | undefined
@@ -688,7 +689,13 @@ export function rewriteQuestionMarkPlaceholders(sql: string): string {
         result += '?'
         index++
       } else {
-        result += `$${parameterNumber++}`
+        const argType = argTypes[parameterNumber - 1]
+        const bitType =
+          argType?.arity === 'scalar' && (argType.scalarType === 'boolean' || argType.scalarType === 'bytes')
+            ? argType.dbType?.match(/^bit(?:\((\d+)\))?$/i)
+            : undefined
+        const placeholder = `$${parameterNumber++}`
+        result += bitType ? `CAST(${placeholder} AS ${bitType[1] ? `BIT(${bitType[1]})` : 'sys.bit'})` : placeholder
       }
     } else {
       result += character

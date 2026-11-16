@@ -600,4 +600,282 @@ export const scenarios: Input['scenarios'] = [
       }),
     expect: [{ id: 1, title: 'Prisma ORM' }],
   },
+  {
+    name: 'BINARY_INTEGER retains its native type and signed boundaries',
+    up: `CREATE TABLE binary_integers (id INTEGER PRIMARY KEY, value BINARY_INTEGER);`,
+    do: async (client) => {
+      for (const [id, value] of [
+        [1, -2147483648],
+        [2, 0],
+        [3, 2147483647],
+      ]) {
+        await client.binary_integers.create({ data: { id, value } })
+      }
+      await client.binary_integers.create({ data: { id: 4 } })
+      return client.binary_integers.findMany({ orderBy: { id: 'asc' } })
+    },
+    expect: [
+      { id: 1, value: -2147483648 },
+      { id: 2, value: 0 },
+      { id: 3, value: 2147483647 },
+      { id: 4, value: null },
+    ],
+  },
+  {
+    name: 'CHAR BYTE and VARCHAR2 BYTE preserve multibyte and NULL values',
+    up: `CREATE TABLE byte_characters (id INTEGER PRIMARY KEY, fixed CHAR(12 BYTE), variable VARCHAR2(24 BYTE));`,
+    do: async (client) => {
+      await client.byte_characters.create({ data: { id: 1, fixed: 'abcdefghijkl', variable: '\u91d1\u4ed3KES' } })
+      await client.byte_characters.create({ data: { id: 2 } })
+      return client.byte_characters.findMany({ orderBy: { id: 'asc' } })
+    },
+    expect: [
+      { id: 1, fixed: 'abcdefghijkl', variable: '\u91d1\u4ed3KES' },
+      { id: 2, fixed: null, variable: null },
+    ],
+  },
+  {
+    name: 'ROWID and UROWID bind and filter a real row identifier',
+    up: `CREATE TABLE row_identifiers (id INTEGER PRIMARY KEY, rid ROWID, urid UROWID(128));`,
+    do: async (client) => {
+      const [source] = await client.$queryRaw`SELECT nextrowid() AS "rid"`
+      await client.row_identifiers.create({ data: { id: 1, rid: source.rid, urid: source.rid } })
+      const rows = await client.row_identifiers.findMany({ where: { rid: source.rid, urid: source.rid } })
+      return {
+        ids: rows.map((row) => row.id),
+        roundTrip: rows.length === 1 && rows[0].rid === source.rid && rows[0].urid === source.rid,
+      }
+    },
+    expect: { ids: [1], roundTrip: true },
+  },
+  {
+    name: 'NUMBER DECIMAL binary floats and LOBs retain precision and bytes',
+    up: `
+      CREATE TABLE numeric_lobs (
+        id INTEGER PRIMARY KEY, number_value NUMBER(30, 10), decimal_value DECIMAL(30, 10),
+        float_value BINARY_FLOAT, double_value BINARY_DOUBLE, clob_value CLOB, nclob_value NCLOB, blob_value BLOB
+      );
+    `,
+    do: async (client) => {
+      const value = new Decimal('12345678901234567890.1234567890')
+      const data = {
+        id: 1,
+        number_value: value,
+        decimal_value: value,
+        float_value: 1.5,
+        double_value: -12.5,
+        clob_value: '\u91d1\u4ed3KES',
+        nclob_value: '\u91d1\u4ed3KES',
+        blob_value: new Uint8Array([0, 127, 128, 255]),
+      }
+      await client.numeric_lobs.create({ data })
+      return client.numeric_lobs.findUnique({ where: { id: 1 } })
+    },
+    expect: {
+      id: 1,
+      number_value: new Decimal('12345678901234567890.1234567890'),
+      decimal_value: new Decimal('12345678901234567890.1234567890'),
+      float_value: 1.5,
+      double_value: -12.5,
+      clob_value: '\u91d1\u4ed3KES',
+      nclob_value: '\u91d1\u4ed3KES',
+      blob_value: new Uint8Array([0, 127, 128, 255]),
+    },
+  },
+  {
+    name: 'Oracle native character temporal JSON UUID and XML types round trip',
+    up: `
+      CREATE TABLE oracle_scalars (
+        id INTEGER PRIMARY KEY, tiny TINYINT, float_value FLOAT(24), fixed CHAR(4), variable VARCHAR2(32),
+        national_fixed NCHAR(4), national_variable NVARCHAR2(32), date_value DATE, timestamp_value TIMESTAMP(3),
+        zoned TIMESTAMP(3) WITH TIME ZONE, local_zoned TIMESTAMP(3) WITH LOCAL TIME ZONE,
+        active BOOLEAN, payload JSON, uuid_value UUID, xml_value XML
+      );
+    `,
+    do: async (client) => {
+      const date = new Date('2024-07-31T14:37:36.000Z')
+      const timestamp = new Date('2024-07-31T14:37:36.570Z')
+      const data = {
+        id: 1,
+        tiny: 1,
+        float_value: 1.5,
+        fixed: 'ABCD',
+        variable: '\u91d1\u4ed3KES',
+        national_fixed: 'ABCD',
+        national_variable: '\u91d1\u4ed3KES',
+        date_value: date,
+        timestamp_value: timestamp,
+        zoned: timestamp,
+        local_zoned: timestamp,
+        active: true,
+        payload: { hello: [1, true, null] },
+        uuid_value: '123e4567-e89b-12d3-a456-426614174000',
+        xml_value: '<hello>world</hello>',
+      }
+      await client.oracle_scalars.create({ data })
+      await client.oracle_scalars.create({ data: { id: 2 } })
+      return client.oracle_scalars.findMany({ orderBy: { id: 'asc' } })
+    },
+    expect: [
+      {
+        id: 1,
+        tiny: 1,
+        float_value: 1.5,
+        fixed: 'ABCD',
+        variable: '\u91d1\u4ed3KES',
+        national_fixed: 'ABCD',
+        national_variable: '\u91d1\u4ed3KES',
+        date_value: new Date('2024-07-31T14:37:36.000Z'),
+        timestamp_value: new Date('2024-07-31T14:37:36.570Z'),
+        zoned: new Date('2024-07-31T14:37:36.570Z'),
+        local_zoned: new Date('2024-07-31T14:37:36.570Z'),
+        active: true,
+        payload: { hello: [1, true, null] },
+        uuid_value: '123e4567-e89b-12d3-a456-426614174000',
+        xml_value: '<hello>world</hello>',
+      },
+      {
+        id: 2,
+        tiny: null,
+        float_value: null,
+        fixed: null,
+        variable: null,
+        national_fixed: null,
+        national_variable: null,
+        date_value: null,
+        timestamp_value: null,
+        zoned: null,
+        local_zoned: null,
+        active: null,
+        payload: null,
+        uuid_value: null,
+        xml_value: null,
+      },
+    ],
+  },
+  {
+    name: 'native UUID equality and list filters preserve UUID values',
+    up: `CREATE TABLE uuid_filters (id INTEGER PRIMARY KEY, value UUID);`,
+    do: async (client) => {
+      const first = '123e4567-e89b-12d3-a456-426614174000'
+      const second = '123e4567-e89b-12d3-a456-426614174001'
+      await client.uuid_filters.createMany({ data: [{ id: 1, value: first }, { id: 2, value: second }, { id: 3 }] })
+      return {
+        equals: await client.uuid_filters.findMany({ where: { value: first }, select: { id: true } }),
+        list: await client.uuid_filters.findMany({
+          where: { value: { in: [first, second] } },
+          orderBy: { id: 'asc' },
+          select: { id: true },
+        }),
+        nulls: await client.uuid_filters.findMany({ where: { value: null }, select: { id: true } }),
+      }
+    },
+    expect: { equals: [{ id: 1 }], list: [{ id: 1 }, { id: 2 }], nulls: [{ id: 3 }] },
+  },
+  {
+    name: 'JSON root string filters use extracted Oracle JSON text',
+    up: `
+      CREATE TABLE json_strings (id INTEGER PRIMARY KEY, payload JSON NOT NULL);
+      INSERT INTO json_strings VALUES (1, '"hello world"'), (2, '"other"'), (3, '{"value":"hello world"}');
+    `,
+    do: async (client) => ({
+      contains: await client.json_strings.findMany({
+        where: { payload: { string_contains: 'hello' } },
+        select: { id: true },
+      }),
+      starts: await client.json_strings.findMany({
+        where: { payload: { string_starts_with: 'hello' } },
+        select: { id: true },
+      }),
+      ends: await client.json_strings.findMany({
+        where: { payload: { string_ends_with: 'world' } },
+        select: { id: true },
+      }),
+    }),
+    expect: { contains: [{ id: 1 }], starts: [{ id: 1 }], ends: [{ id: 1 }] },
+  },
+  {
+    name: 'empty Oracle strings become NULL on nullable columns',
+    up: `CREATE TABLE empty_strings (id INTEGER PRIMARY KEY, value VARCHAR2(32));`,
+    do: async (client) => {
+      await client.empty_strings.create({ data: { id: 1, value: '' } })
+      return client.empty_strings.findMany({ where: { value: null } })
+    },
+    expect: [{ id: 1, value: null }],
+  },
+  {
+    name: 'Oracle groupBy having and count operate on NUMBER fields',
+    up: `
+      CREATE TABLE grouped_scores (id INTEGER PRIMARY KEY, team VARCHAR2(32) NOT NULL, score INTEGER NOT NULL);
+      INSERT INTO grouped_scores VALUES (1, 'A', 10), (2, 'A', 20), (3, 'B', 30);
+    `,
+    do: (client) =>
+      client.grouped_scores.groupBy({
+        by: ['team'],
+        _sum: { score: true },
+        _count: true,
+        having: { score: { _sum: { gte: 30 } } },
+        orderBy: { team: 'asc' },
+      }),
+    expect: [
+      { team: 'A', _sum: { score: 30 }, _count: 2 },
+      { team: 'B', _sum: { score: 30 }, _count: 1 },
+    ],
+  },
+  {
+    name: 'Oracle cursor pagination uses a deterministic unique order',
+    up: `
+      CREATE TABLE cursor_rows (id INTEGER PRIMARY KEY, name VARCHAR2(32) NOT NULL);
+      INSERT INTO cursor_rows VALUES (1, 'Ada'), (2, 'Grace'), (3, 'Lin'), (4, 'Prisma');
+    `,
+    do: async (client) => ({
+      forward: await client.cursor_rows.findMany({
+        cursor: { id: 2 },
+        skip: 1,
+        take: 2,
+        orderBy: { id: 'asc' },
+        select: { id: true },
+      }),
+      backward: await client.cursor_rows.findMany({
+        cursor: { id: 3 },
+        skip: 1,
+        take: -2,
+        orderBy: { id: 'asc' },
+        select: { id: true },
+      }),
+    }),
+    expect: { forward: [{ id: 3 }, { id: 4 }], backward: [{ id: 1 }, { id: 2 }] },
+  },
+  {
+    name: 'Oracle unique and foreign-key violations retain Prisma error codes',
+    up: `
+      CREATE TABLE parents (id INTEGER PRIMARY KEY, name VARCHAR2(32) NOT NULL UNIQUE);
+      CREATE TABLE children (id INTEGER PRIMARY KEY, parent_id INTEGER REFERENCES parents(id));
+      INSERT INTO parents VALUES (1, 'Ada');
+    `,
+    do: async (client) => {
+      async function code(operation: Promise<unknown>) {
+        try {
+          await operation
+          return 'NO_ERROR'
+        } catch (error) {
+          return (error as { code?: string }).code
+        }
+      }
+      return {
+        duplicate: await code(client.parents.create({ data: { id: 2, name: 'Ada' } })),
+        foreignKey: await code(client.children.create({ data: { id: 1, parent_id: 999 } })),
+      }
+    },
+    expect: { duplicate: 'P2002', foreignKey: 'P2003' },
+  },
+  {
+    name: 'unsupported Oracle interval types remain visible in introspection',
+    up: `
+      CREATE TABLE unsupported_intervals (id INTEGER PRIMARY KEY, years INTERVAL YEAR TO MONTH, days INTERVAL DAY TO SECOND);
+      INSERT INTO unsupported_intervals (id) VALUES (1);
+    `,
+    do: (client) => client.unsupported_intervals.findUnique({ where: { id: 1 } }),
+    expect: { id: 1 },
+  },
 ]

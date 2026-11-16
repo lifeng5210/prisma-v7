@@ -1,5 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`introspection: BIT Boolean and byte filters retain their values after updates: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model bit_filters {
+  id   Int      @id
+  flag Boolean? @db.Bit(1)
+  bits Bytes?   @db.Bit(8)
+}
+"
+`;
+
+exports[`introspection: BIT Boolean and byte filters retain their values after updates: warnings 1`] = `null`;
+
+exports[`introspection: JSON path filters bind MySQL JSON values: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model json_filters {
+  id      Int  @id
+  payload Json
+}
+"
+`;
+
+exports[`introspection: JSON path filters bind MySQL JSON values: warnings 1`] = `null`;
+
 exports[`introspection: Kingbase BIT(1) round trips as a Prisma Boolean through the driver adapter: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -69,6 +108,77 @@ model kingbase_raw_queries {
 
 exports[`introspection: Kingbase raw queries preserve literal and comment question marks: warnings 1`] = `null`;
 
+exports[`introspection: TIME DATE and DATETIME filters bind the introspected temporal types: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model temporal_filters {
+  id Int      @id
+  d  DateTime @db.Date
+  t  DateTime @db.Time(3)
+  dt DateTime
+}
+"
+`;
+
+exports[`introspection: TIME DATE and DATETIME filters bind the introspected temporal types: warnings 1`] = `null`;
+
+exports[`introspection: aggregate groupBy and batch transactions use MySQL models: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model team_scores {
+  id    Int    @id
+  team  String @db.VarChar(32)
+  score Int
+}
+"
+`;
+
+exports[`introspection: aggregate groupBy and batch transactions use MySQL models: warnings 1`] = `null`;
+
+exports[`introspection: binary and text type families preserve multibyte text and NULL: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model type_families {
+  id            Int     @id
+  fixed         Bytes?  @db.Binary(4)
+  variable      Bytes?  @db.VarBinary(32)
+  tiny_blob     Bytes?  @db.TinyBlob
+  blob_value    Bytes?  @db.Blob
+  medium_blob   Bytes?  @db.MediumBlob
+  long_blob     Bytes?
+  char_value    String? @db.Char(4)
+  varchar_value String? @db.VarChar(32)
+  tiny_text     String? @db.TinyText
+  text_value    String? @db.Text
+  medium_text   String? @db.MediumText
+  long_text     String? @db.LongText
+}
+"
+`;
+
+exports[`introspection: binary and text type families preserve multibyte text and NULL: warnings 1`] = `null`;
+
 exports[`introspection: create bigint data: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -124,6 +234,25 @@ model teams {
 `;
 
 exports[`introspection: create with empty data and SQL default: warnings 1`] = `null`;
+
+exports[`introspection: createMany skipDuplicates respects a unique index: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model bulk_rows {
+  id   Int    @id
+  name String @unique @db.VarChar(32)
+}
+"
+`;
+
+exports[`introspection: createMany skipDuplicates respects a unique index: warnings 1`] = `null`;
 
 exports[`introspection: delete where composite PK: datamodel 1`] = `
 "generator client {
@@ -1047,6 +1176,26 @@ model users {
 
 exports[`introspection: findUnique where unique: warnings 1`] = `null`;
 
+exports[`introspection: full-text relevance cursor pagination preserves numeric scores: datamodel 1`] = `
+"generator client {
+  provider        = "prisma-client-js"
+  output = "***"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model search_documents {
+  id    Int    @id
+  title String @db.VarChar(100)
+}
+"
+`;
+
+exports[`introspection: full-text relevance cursor pagination preserves numeric scores: warnings 1`] = `null`;
+
 exports[`introspection: interactive transaction rolls back: datamodel 1`] = `
 "generator client {
   provider = "prisma-client-js"
@@ -1065,6 +1214,32 @@ model teams {
 `;
 
 exports[`introspection: interactive transaction rolls back: warnings 1`] = `null`;
+
+exports[`introspection: signed and unsigned integer boundaries survive introspection and writes: datamodel 1`] = `
+"generator client {
+  provider = "prisma-client-js"
+  output = "***"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model integer_boundaries {
+  id              Int    @id
+  tiny            Int    @db.TinyInt
+  unsigned_tiny   Int    @db.UnsignedTinyInt
+  small           Int    @db.SmallInt
+  unsigned_small  Int    @db.UnsignedSmallInt
+  medium          Int    @db.MediumInt
+  unsigned_medium Int    @db.UnsignedMediumInt
+  integer_value   Int
+  big             BigInt
+}
+"
+`;
+
+exports[`introspection: signed and unsigned integer boundaries survive introspection and writes: warnings 1`] = `null`;
 
 exports[`introspection: update where composite PK: datamodel 1`] = `
 "generator client {
