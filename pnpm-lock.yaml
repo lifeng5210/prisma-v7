@@ -718,8 +718,8 @@ importers:
         specifier: workspace:*
         version: link:../engines-version
       '@prisma-kb/query-compiler-wasm':
-        specifier: 7.10.0-kb.4
-        version: 7.10.0-kb.4
+        specifier: 7.10.0-kb.5
+        version: 7.10.0-kb.5
       '@prisma-kb/query-plan-executor':
         specifier: workspace:*
         version: link:../query-plan-executor
@@ -1390,8 +1390,8 @@ importers:
   packages/get-dmmf:
     dependencies:
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.4
-        version: 7.10.0-kb.4
+        specifier: 7.10.0-kb.5
+        version: 7.10.0-kb.5
       '@prisma/debug':
         specifier: workspace:*
         version: link:../debug
@@ -1561,8 +1561,8 @@ importers:
         specifier: workspace:*
         version: link:../engines
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.4
-        version: 7.10.0-kb.4
+        specifier: 7.10.0-kb.5
+        version: 7.10.0-kb.5
       '@prisma/config':
         specifier: workspace:*
         version: link:../config
@@ -1900,8 +1900,8 @@ importers:
   packages/schema-files-loader:
     dependencies:
       '@prisma-kb/prisma-schema-wasm':
-        specifier: 7.10.0-kb.4
-        version: 7.10.0-kb.4
+        specifier: 7.10.0-kb.5
+        version: 7.10.0-kb.5
       fs-extra:
         specifier: 11.3.0
         version: 11.3.0
@@ -3857,11 +3857,11 @@ packages:
     peerDependencies:
       prettier: '*'
 
-  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.4':
-    resolution: {integrity: sha512-9/5zsmlkxwIKQwqhNo75ouh+r4Zyap5dwtdogxzpm+IWwCG08M+l1LOLuAUwyn/x2jZkQMJBFqMXSYkEeFmbiw==}
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.5':
+    resolution: {integrity: sha512-xHueHBaJ1HFUohy9u5ZwM0Zw45x0c7D2kh+DtbMk8oFy0Mu5ahSQAA+i/OICoFpcCfhf8P+dR54YmKOZssjAEg==}
 
-  '@prisma-kb/query-compiler-wasm@7.10.0-kb.4':
-    resolution: {integrity: sha512-P/J6jwoq8sDAZqlun3Yghgq5EodRo1tTD6mmBxLMpYFVKny0HAxTfeTnlgnSXwBCe4QWLR2Ti3z6Gnf6GQLmQA==}
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.5':
+    resolution: {integrity: sha512-/BZHMPxlwnQA3tKi6ru8ndms/W7Mj7ArsS99lnYfGatCymkSBpagfp73fenN0IhGEtI0nIVdgf+9UnCAEYxDVA==}
 
   '@prisma/client-runtime-utils@7.10.0':
     resolution: {integrity: sha512-cnCy7lUV8/CctgKVEmqAbSLAmwqJdE/qAlqTBk/0NDk59zEb2cZ0M0M0E4vVPnqbSEYudRroQDvOWfUZH6RIfw==}
@@ -10860,9 +10860,9 @@ snapshots:
       make-synchronized: 0.4.2
       prettier: 3.5.3
 
-  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.4': {}
+  '@prisma-kb/prisma-schema-wasm@7.10.0-kb.5': {}
 
-  '@prisma-kb/query-compiler-wasm@7.10.0-kb.4': {}
+  '@prisma-kb/query-compiler-wasm@7.10.0-kb.5': {}
 
   '@prisma/client-runtime-utils@7.10.0': {}
 

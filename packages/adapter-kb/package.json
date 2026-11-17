@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/adapter-kb",
-  "version": "7.10.0-kb.4",
+  "version": "7.10.0-kb.5",
   "description": "Prisma's driver adapter for KingbaseES",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

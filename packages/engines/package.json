@@ -1,6 +1,6 @@
 {
   "name": "@prisma-kb/engines",
-  "version": "7.10.0-kb.4",
+  "version": "7.10.0-kb.5",
   "description": "Native schema-engine downloader for the Prisma Kingbase distribution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
