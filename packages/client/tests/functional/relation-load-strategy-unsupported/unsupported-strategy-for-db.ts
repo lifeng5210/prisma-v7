@@ -11,50 +11,43 @@ testMatrix.setupTestSuite((suiteConfig, _suiteMeta, _clientMeta, cliMeta) => {
   const providerSupportsRelationJoins = providersSupportingRelationJoins.includes(suiteConfig.provider)
   const isKingbaseMysql = suiteConfig.provider === Providers.KINGBASE_MYSQL
 
-  // Kingbase MySQL exposes the strategy argument, then disables JOIN at runtime.
-  // Its query strategy remains available even though JOIN is not supported.
-  testIf(relationJoinsEnabled && isKingbaseMysql)('Kingbase MySQL supports query relation loading', async () => {
-    const user = await prisma.user.create({
-      data: {
-        login: 'query-strategy-user',
-        posts: {
-          create: {
-            title: 'Related post',
-            content: 'Loaded with the query strategy',
+  for (const relationLoadStrategy of ['query', 'join'] as const) {
+    testIf(relationJoinsEnabled && isKingbaseMysql)(
+      `Kingbase MySQL supports ${relationLoadStrategy} relation loading`,
+      async () => {
+        const user = await prisma.user.create({
+          data: {
+            login: `${relationLoadStrategy}-strategy-user`,
+            posts: {
+              create: {
+                title: 'Related post',
+                content: `Loaded with the ${relationLoadStrategy} strategy`,
+              },
+            },
           },
-        },
+        })
+
+        await expect(
+          prisma.user.findMany({
+            // @ts-test-if: previewFeatures.includes('relationJoins') && ['postgresql', 'cockroachdb', 'mysql', 'kingbase-mysql', 'kingbase-oracle'].includes(provider)
+            relationLoadStrategy,
+            where: { id: user.id },
+            select: {
+              login: true,
+              posts: { select: { title: true, content: true } },
+            },
+          }),
+        ).resolves.toEqual([
+          {
+            login: `${relationLoadStrategy}-strategy-user`,
+            posts: [{ title: 'Related post', content: `Loaded with the ${relationLoadStrategy} strategy` }],
+          },
+        ])
       },
-    })
+    )
+  }
 
-    await expect(
-      prisma.user.findMany({
-        // @ts-test-if: previewFeatures.includes('relationJoins') && ['postgresql', 'cockroachdb', 'mysql', 'kingbase-mysql', 'kingbase-oracle'].includes(provider)
-        relationLoadStrategy: 'query',
-        where: { id: user.id },
-        select: {
-          login: true,
-          posts: { select: { title: true, content: true } },
-        },
-      }),
-    ).resolves.toEqual([
-      {
-        login: 'query-strategy-user',
-        posts: [{ title: 'Related post', content: 'Loaded with the query strategy' }],
-      },
-    ])
-  })
-
-  testIf(relationJoinsEnabled && isKingbaseMysql)('Kingbase MySQL rejects join relation loading', async () => {
-    await expect(
-      prisma.user.findMany({
-        // @ts-test-if: previewFeatures.includes('relationJoins') && ['postgresql', 'cockroachdb', 'mysql', 'kingbase-mysql', 'kingbase-oracle'].includes(provider)
-        relationLoadStrategy: 'join',
-        include: { posts: true },
-      }),
-    ).rejects.toMatchObject({ name: 'PrismaClientKnownRequestError', code: 'P2019' })
-  })
-
-  testIf(relationJoinsEnabled && !providerSupportsRelationJoins && !isKingbaseMysql)(
+  testIf(relationJoinsEnabled && !providerSupportsRelationJoins)(
     'using load strategy that is not supported for provider',
     async () => {
       await expect(
