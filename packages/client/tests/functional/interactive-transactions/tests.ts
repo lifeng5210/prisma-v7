@@ -14,6 +14,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 testMatrix.setupTestSuite(
   ({ provider, driverAdapter }, _suiteMeta) => {
+    const runTransactionRegressions = [
+      Providers.POSTGRESQL,
+      Providers.KINGBASE_MYSQL,
+      Providers.KINGBASE_ORACLE,
+    ].includes(provider)
+
     // TODO: Technically, only "high concurrency" test requires larger timeout
     // but `jest.setTimeout` does not work inside of the test at the moment
     //  https://github.com/facebook/jest/issues/11543
@@ -194,11 +200,7 @@ testMatrix.setupTestSuite(
       expect(users.length).toBe(0)
     })
 
-    /**
-     * A transaction might fail if it's called inside another transaction
-     * //! this works only for postgresql
-     */
-    testIf(provider === Providers.POSTGRESQL)('postgresql: nested create', async () => {
+    testIf(runTransactionRegressions)('sql: nested create', async () => {
       const result = prisma.$transaction(async (tx) => {
         await tx.user.create({
           data: {
@@ -846,16 +848,24 @@ testMatrix.setupTestSuite(
               // @ts-test-if: provider !== Providers.MONGODB
               prisma.$executeRaw`INSERT INTO User (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
             ])
-          : prisma.$transaction([
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$queryRaw`DELETE FROM "User"`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
-              // @ts-test-if: provider !== Providers.MONGODB
-              prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
-            ])
+          : provider === Providers.KINGBASE_MYSQL
+            ? prisma.$transaction([
+                // Kingbase MySQL uses the MySQL backtick identifier syntax.
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
+                prisma.$queryRaw`DELETE FROM \`User\``,
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+                prisma.$executeRaw`INSERT INTO \`User\` (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+              ])
+            : prisma.$transaction([
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'2'}, ${'user_2@website.com'})`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$queryRaw`DELETE FROM "User"`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+                // @ts-test-if: provider !== Providers.MONGODB
+                prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${'1'}, ${'user_1@website.com'})`,
+              ])
 
       await expect(result).rejects.toMatchPrismaErrorSnapshot()
 
@@ -895,7 +905,7 @@ testMatrix.setupTestSuite(
      * Issues on the database side are to be expected though: for SQLite, MySQL 8+ and MongoDB, it sometimes causes DB lock up
      * and all subsequent tests fail for some time. On SQL Server, the database kills the connections.
      */
-    testIf(provider === Providers.POSTGRESQL)('high concurrency with write conflicts', async () => {
+    testIf(runTransactionRegressions)('high concurrency with write conflicts', async () => {
       jest.setTimeout(30_000)
 
       await prisma.user.create({
@@ -1069,7 +1079,7 @@ testMatrix.setupTestSuite(
      * Engine PR - https://github.com/prisma/prisma-engines/pull/2811
      * Issue - https://github.com/prisma/prisma/issues/11750
      */
-    testIf(provider === Providers.POSTGRESQL)('high concurrency with SET FOR UPDATE', async () => {
+    testIf(runTransactionRegressions)('high concurrency with SET FOR UPDATE', async () => {
       jest.setTimeout(60_000)
       const CONCURRENCY = 12
 
@@ -1084,8 +1094,12 @@ testMatrix.setupTestSuite(
       const promises = [...Array(CONCURRENCY)].map(() =>
         prisma.$transaction(
           async (transactionPrisma) => {
-            // @ts-test-if: provider !== Providers.MONGODB
-            await transactionPrisma.$queryRaw`SELECT id from "User" where email = 'x' FOR UPDATE`
+            if (provider === Providers.KINGBASE_MYSQL) {
+              await transactionPrisma.$queryRaw`SELECT id FROM \`User\` WHERE email = 'x' FOR UPDATE`
+            } else {
+              // @ts-test-if: provider !== Providers.MONGODB
+              await transactionPrisma.$queryRaw`SELECT id FROM "User" WHERE email = 'x' FOR UPDATE`
+            }
 
             const user = await transactionPrisma.user.findUniqueOrThrow({
               where: {
@@ -1150,14 +1164,14 @@ testMatrix.setupTestSuite(
 
       testIsolationLevel(
         'read uncommitted',
-        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB,
+        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB && provider !== Providers.KINGBASE_ORACLE,
         async () => {
           await prisma.$transaction(
             async (tx) => {
               await tx.user.create({ data: { email: 'user@example.com' } })
             },
             {
-              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb'].includes(provider)
+              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb', 'kingbase-oracle'].includes(provider)
               isolationLevel: Prisma.TransactionIsolationLevel.ReadUncommitted,
             },
           )
@@ -1167,14 +1181,14 @@ testMatrix.setupTestSuite(
 
       testIsolationLevel(
         'repeatable read',
-        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB,
+        provider !== Providers.SQLITE && provider !== Providers.COCKROACHDB && provider !== Providers.KINGBASE_ORACLE,
         async () => {
           await prisma.$transaction(
             async (tx) => {
               await tx.user.create({ data: { email: 'user@example.com' } })
             },
             {
-              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb'].includes(provider)
+              // @ts-test-if: !['mongodb', 'sqlite', 'cockroachdb', 'kingbase-oracle'].includes(provider)
               isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
             },
           )

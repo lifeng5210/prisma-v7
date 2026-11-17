@@ -126,7 +126,7 @@ async function collectFeedback(prompts: Prompts): Promise<NpsSurveyResult> {
 }
 
 function getConfigPath(): string {
-  return path.join(paths('prisma').config, 'nps.json')
+  return path.join(paths('prisma-kb').config, 'nps.json')
 }
 
 async function readConfig(): Promise<NpsConfig | undefined> {

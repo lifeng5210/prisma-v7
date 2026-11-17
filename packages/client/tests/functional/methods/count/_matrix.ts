@@ -12,7 +12,15 @@ export default defineMatrix(() => [
       foreignKeyId: 'String?',
     },
     {
+      provider: Providers.KINGBASE_ORACLE,
+      foreignKeyId: 'String?',
+    },
+    {
       provider: Providers.MYSQL,
+      foreignKeyId: 'String?',
+    },
+    {
+      provider: Providers.KINGBASE_MYSQL,
       foreignKeyId: 'String?',
     },
     {

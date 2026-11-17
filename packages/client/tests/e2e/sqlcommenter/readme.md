@@ -17,5 +17,5 @@ This test verifies that the SQL commenter plugin feature works correctly end-to-
 ## Running the test
 
 ```bash
-pnpm --filter @prisma/client test:e2e --verbose sqlcommenter
+pnpm --filter @prisma-kb/client test:e2e --verbose sqlcommenter
 ```

@@ -141,7 +141,7 @@ export async function getConfig(options: GetConfigOptions): Promise<ConfigMetaFo
         const panic = new RustPanic(
           /* message */ message,
           /* rustStack */ stack,
-          /* request */ '@prisma/prisma-schema-wasm get_config',
+          /* request */ '@prisma-kb/prisma-schema-wasm get_config',
           ErrorArea.FMT_CLI,
         )
         return panic

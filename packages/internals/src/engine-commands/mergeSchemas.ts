@@ -88,7 +88,7 @@ export function mergeSchemas(options: MergeSchemasOptions): string {
         const panic = new RustPanic(
           /* message */ message,
           /* rustStack */ stack,
-          /* request */ '@prisma/prisma-schema-wasm merge_schemas',
+          /* request */ '@prisma-kb/prisma-schema-wasm merge_schemas',
           ErrorArea.FMT_CLI,
         )
         return panic

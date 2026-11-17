@@ -5,7 +5,9 @@ export default defineMatrix(() => [
   [
     { provider: Providers.SQLITE, generatorType: 'prisma-client-js' },
     { provider: Providers.POSTGRESQL, generatorType: 'prisma-client-js' },
+    { provider: Providers.KINGBASE_ORACLE, generatorType: 'prisma-client-js' },
     { provider: Providers.MYSQL, generatorType: 'prisma-client-js' },
+    { provider: Providers.KINGBASE_MYSQL, generatorType: 'prisma-client-js' },
     { provider: Providers.MONGODB, generatorType: 'prisma-client-js' },
     { provider: Providers.COCKROACHDB, generatorType: 'prisma-client-js' },
     { provider: Providers.SQLSERVER, generatorType: 'prisma-client-js' },

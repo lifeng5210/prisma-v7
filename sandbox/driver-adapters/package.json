@@ -4,10 +4,10 @@
   "description": "Smoke tests for Prisma Driver Adapters",
   "main": "index.js",
   "scripts": {
-    "prisma:db:push:postgres": "prisma db push --schema ./prisma/postgres/schema.prisma --force-reset",
-    "prisma:db:execute:postgres": "prisma db execute --schema ./prisma/postgres/schema.prisma --file ./prisma/postgres/commands/type_test/insert.sql",
-    "prisma:db:push:mysql": "prisma db push --schema ./prisma/mysql/schema.prisma --force-reset",
-    "prisma:db:execute:mysql": "prisma db execute --schema ./prisma/mysql/schema.prisma --file ./prisma/mysql/commands/type_test/insert.sql",
+    "prisma:db:push:postgres": "prisma-kb db push --schema ./prisma/postgres/schema.prisma --force-reset",
+    "prisma:db:execute:postgres": "prisma-kb db execute --schema ./prisma/postgres/schema.prisma --file ./prisma/postgres/commands/type_test/insert.sql",
+    "prisma:db:push:mysql": "prisma-kb db push --schema ./prisma/mysql/schema.prisma --force-reset",
+    "prisma:db:execute:mysql": "prisma-kb db execute --schema ./prisma/mysql/schema.prisma --file ./prisma/mysql/commands/type_test/insert.sql",
     "prisma:neon": "DATABASE_URL=\"${JS_NEON_DATABASE_URL}\" \"pnpm prisma:db:push:postgres && pnpm prisma:db:execute:postgres\"",
     "neon:ws": "DATABASE_URL=\"${JS_NEON_DATABASE_URL}\" \"tsx ./src/neon.ws.ts\"",
     "neon:http": "DATABASE_URL=\"${JS_NEON_DATABASE_URL}\" \"tsx ./src/neon.http.ts\"",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/node": "~20.19.0",
     "@types/pg": "../../packages/adapter-pg/node_modules/@types/pg",
-    "prisma": "../../packages/cli",
+    "prisma-kb": "../../packages/cli",
     "tsx": "4.1.2",
     "typescript": "5.2.2"
   }

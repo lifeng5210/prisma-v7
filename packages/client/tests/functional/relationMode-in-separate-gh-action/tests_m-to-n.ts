@@ -204,6 +204,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`postId`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`postId`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_postId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -366,6 +368,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`postId`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`postId`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_postId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -459,6 +463,8 @@ testMatrix.setupTestSuite(
                   `Foreign key constraint violated`
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`categoryId`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`categoryId`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_categoryId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -655,6 +661,8 @@ testMatrix.setupTestSuite(
                   undefined
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_postId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -704,6 +712,8 @@ testMatrix.setupTestSuite(
                   undefined
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_categoryId_fkey`',
                       [Providers.COCKROACHDB]:
@@ -907,6 +917,8 @@ testMatrix.setupTestSuite(
                     undefined
                   : conditionalError.snapshot({
                       foreignKeys: {
+                        [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                        [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                         [Providers.POSTGRESQL]:
                           'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_postId_fkey`',
                         [Providers.COCKROACHDB]:
@@ -947,6 +959,8 @@ testMatrix.setupTestSuite(
                     undefined
                   : conditionalError.snapshot({
                       foreignKeys: {
+                        [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                        [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                         [Providers.POSTGRESQL]:
                           'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_categoryId_fkey`',
                         [Providers.COCKROACHDB]:
@@ -993,6 +1007,8 @@ testMatrix.setupTestSuite(
                   undefined
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_postId_fkey`',
                       [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`postId`)',
@@ -1033,6 +1049,8 @@ testMatrix.setupTestSuite(
                   undefined
                 : conditionalError.snapshot({
                     foreignKeys: {
+                      [AdapterProviders.JS_KB_MYSQL]: 'Foreign key constraint violated on the fields: (`id`)',
+                      [AdapterProviders.JS_KB_ORACLE]: 'Foreign key constraint violated on the fields: (`id`)',
                       [Providers.POSTGRESQL]:
                         'Foreign key constraint violated on the constraint: `CategoriesOnPostsManyToMany_categoryId_fkey`',
                       [Providers.MYSQL]: 'Foreign key constraint violated on the fields: (`categoryId`)',

@@ -4,7 +4,7 @@
 
 ```sh
 pnpm install
-cd packages/db && pnpm exec prisma generate
+cd packages/db && pnpm exec prisma-kb generate
 cd ../service && pnpm exec next build
 node .next/standalone/server.js
 ```

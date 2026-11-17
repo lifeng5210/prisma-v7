@@ -12,6 +12,7 @@ testMatrix.setupTestSuite(
   ({ provider, driverAdapter, clientEngineExecutor }, _suiteMeta, _clientMeta) => {
     const isSqlServer = provider === Providers.SQLSERVER
     const isCockroachDb = provider === Providers.COCKROACHDB
+    const isKingbaseOracle = provider === Providers.KINGBASE_ORACLE
     const usesJsDrivers = driverAdapter !== undefined || clientEngineExecutor === 'remote'
 
     const queries: string[] = []
@@ -58,9 +59,9 @@ testMatrix.setupTestSuite(
     }
 
     testIsolationLevel('ReadUncommitted', {
-      // @ts-test-if: !['cockroachdb'].includes(provider)
+      // @ts-test-if: !['cockroachdb', 'kingbase-oracle'].includes(provider)
       level: () => Prisma.TransactionIsolationLevel.ReadUncommitted,
-      onlyIf: () => !isCockroachDb,
+      onlyIf: () => !isCockroachDb && !isKingbaseOracle,
       expectSql: 'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED',
     })
 
@@ -70,9 +71,9 @@ testMatrix.setupTestSuite(
     })
 
     testIsolationLevel('RepeatableRead', {
-      // @ts-test-if: !['cockroachdb'].includes(provider)
+      // @ts-test-if: !['cockroachdb', 'kingbase-oracle'].includes(provider)
       level: () => Prisma.TransactionIsolationLevel.RepeatableRead,
-      onlyIf: () => !isCockroachDb,
+      onlyIf: () => !isCockroachDb && !isKingbaseOracle,
       expectSql: 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ',
     })
 

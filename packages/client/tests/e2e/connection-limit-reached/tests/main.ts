@@ -1,5 +1,5 @@
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 
 const url = new URL(process.env['MYSQL_URL']!)
 const { username: user, password, hostname: host, port } = url

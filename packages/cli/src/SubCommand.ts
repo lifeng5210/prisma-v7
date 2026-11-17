@@ -173,7 +173,7 @@ export class SubCommand implements Command {
       console.log(
         `\n${printError(`This subcommand is not supported in Deno.
         Please use Node.js to run this command.
-        E.g. via 'npx prisma <cmd>'.`)}`,
+        E.g. via 'npx prisma-kb <cmd>'.`)}`,
       )
       console.log(`
 Note: You can still use Prisma's generated code via the 'prisma-client' generator on Deno.

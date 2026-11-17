@@ -13,6 +13,17 @@ testMatrix.setupTestSuite(
   ({ provider, driverAdapter }) => {
     const isD1DriverAdapter = driverAdapter === 'js_d1'
 
+    function normalizeOracleRawNumberFields(rows: Array<Record<string, unknown>>) {
+      if (provider !== Providers.KINGBASE_ORACLE) {
+        return rows
+      }
+
+      // A raw Oracle NUMBER is represented as Prisma.Decimal. Model queries
+      // still deserialize the same column to the Prisma Int scalar.
+      expect(rows.map(({ age }) => age)).toEqual([new Prisma.Decimal('60'), new Prisma.Decimal('45')])
+      return rows.map(({ age, ...row }) => ({ ...row, age: Number(age) }))
+    }
+
     beforeAll(async () => {
       await prisma.user.create({
         data: {
@@ -53,6 +64,8 @@ testMatrix.setupTestSuite(
         postgresql: [{ '?column?': 1 }],
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
+        'kingbase-mysql': [{ '?column?': 1 }],
+        'kingbase-oracle': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -77,6 +90,8 @@ testMatrix.setupTestSuite(
         postgresql: [{ number: 1 }],
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
+        'kingbase-mysql': [{ number: 1 }],
+        'kingbase-oracle': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -93,6 +108,8 @@ testMatrix.setupTestSuite(
         postgresql: [{ number: 1 }],
         cockroachdb: [{ number: BigInt('1') }],
         mysql: [{ number: BigInt('1') }],
+        'kingbase-mysql': [{ number: 1 }],
+        'kingbase-oracle': [{ number: 1 }],
         sqlite: [{ number: isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ number: 1 }],
       }
@@ -110,6 +127,8 @@ testMatrix.setupTestSuite(
         postgresql: [{ '?column?': 1 }],
         cockroachdb: [{ '?column?': BigInt('1') }],
         mysql: [{ '1': BigInt('1') }],
+        'kingbase-mysql': [{ '?column?': 1 }],
+        'kingbase-oracle': [{ '?column?': 1 }],
         sqlite: [{ '1': isD1DriverAdapter ? 1 : BigInt('1') }],
         sqlserver: [{ '': 1 }],
       }
@@ -131,6 +150,10 @@ testMatrix.setupTestSuite(
         result = await prisma.$queryRawUnsafe(`
           SELECT * FROM User WHERE age >= ${45} AND age <= ${60}
         `)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRawUnsafe(`
+          SELECT * FROM \`User\` WHERE age >= ${45} AND age <= ${60}
+        `)
       } else {
         result = await prisma.$queryRawUnsafe(`
           SELECT * FROM "User" WHERE age >= ${45} AND age <= ${60}
@@ -138,6 +161,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -159,7 +183,11 @@ testMatrix.setupTestSuite(
 
     test('select * via queryRawUnsafe with values', async () => {
       let result: any[] = []
-      if (provider === Providers.MYSQL || driverAdapter === 'js_better_sqlite3') {
+      if (provider === Providers.MYSQL) {
+        result = await prisma.$queryRawUnsafe(`SELECT * FROM User WHERE age >= ? AND age <= ?`, 45, 60)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRawUnsafe(`SELECT * FROM \`User\` WHERE age >= ? AND age <= ?`, 45, 60)
+      } else if (driverAdapter === 'js_better_sqlite3') {
         result = await prisma.$queryRawUnsafe(`SELECT * FROM User WHERE age >= ? AND age <= ?`, 45, 60)
       } else if (provider === Providers.SQLSERVER) {
         result = await prisma.$queryRawUnsafe(`SELECT * FROM "User" WHERE age >= @P1 AND age <= @P2`, 45, 60)
@@ -168,6 +196,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -193,6 +222,10 @@ testMatrix.setupTestSuite(
         result = await prisma.$queryRaw`
           SELECT * FROM User WHERE age >= ${45} AND age <= ${60}
         `
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw`
+          SELECT * FROM \`User\` WHERE age >= ${45} AND age <= ${60}
+        `
       } else {
         result = await prisma.$queryRaw`
           SELECT * FROM "User" WHERE age >= ${45} AND age <= ${60}
@@ -200,6 +233,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -230,6 +264,14 @@ testMatrix.setupTestSuite(
             Prisma.raw('id'),
           ])} FROM User WHERE age IN (${Prisma.join([45, 60])})
         `
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw`
+          SELECT ${Prisma.join([
+            Prisma.raw('age'),
+            Prisma.raw('email'),
+            Prisma.raw('id'),
+          ])} FROM \`User\` WHERE age IN (${Prisma.join([45, 60])})
+        `
       } else {
         result = await prisma.$queryRaw`
           SELECT ${Prisma.join([
@@ -241,6 +283,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [
@@ -269,6 +312,14 @@ testMatrix.setupTestSuite(
             Prisma.raw('id'),
           ])} FROM User WHERE age IN (${Prisma.join([45, 60])})
         `)
+      } else if (provider === Providers.KINGBASE_MYSQL) {
+        result = await prisma.$queryRaw(Prisma.sql`
+          SELECT ${Prisma.join([
+            Prisma.raw('age'),
+            Prisma.raw('email'),
+            Prisma.raw('id'),
+          ])} FROM \`User\` WHERE age IN (${Prisma.join([45, 60])})
+        `)
       } else {
         result = await prisma.$queryRaw(Prisma.sql`
           SELECT ${Prisma.join([
@@ -280,6 +331,7 @@ testMatrix.setupTestSuite(
       }
 
       result.sort((a, b) => a.id.localeCompare(b.id))
+      result = normalizeOracleRawNumberFields(result)
 
       expect(result).toMatchInlineSnapshot(`
         [

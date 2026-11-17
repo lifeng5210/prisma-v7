@@ -7,7 +7,7 @@ import { isBun } from './is-bun'
 
 /**
  * Pinned version of the `skills` CLI (https://github.com/vercel-labs/skills)
- * used to install the Prisma skills catalog, so that `prisma init` behaves
+ * used to install the Prisma skills catalog, so that `prisma-kb init` behaves
  * the same regardless of upstream releases.
  */
 export const SKILLS_CLI_VERSION = '1.5.14'
@@ -37,7 +37,7 @@ export type Runner = {
 
 const runners: Record<PackageManager, Runner> = {
   // `--yes` skips npx's "Ok to proceed?" prompt, which would hang forever
-  // when `prisma init` runs without a TTY.
+  // when `prisma-kb init` runs without a TTY.
   npm: { packageManager: 'npm', command: 'npx', args: ['--yes'] },
   pnpm: { packageManager: 'pnpm', command: 'pnpm', args: ['dlx'] },
   yarn: { packageManager: 'yarn', command: 'yarn', args: ['dlx'] },
@@ -141,7 +141,7 @@ export function manualInstallCommand(cwd: string, options: DetectRunnerOptions =
 
 export type ExecFn = (command: string, args: string[], options: { cwd: string }) => Promise<unknown>
 
-// A hung installer (e.g. a stalled network call) must not hang `prisma init`
+// A hung installer (e.g. a stalled network call) must not hang `prisma-kb init`
 // itself: the killed process rejects, which resolves into the non-fatal
 // failure shape with the manual command.
 const defaultExec: ExecFn = (command, args, { cwd }) => execa(command, args, { cwd, stdio: 'ignore', timeout: 60_000 })

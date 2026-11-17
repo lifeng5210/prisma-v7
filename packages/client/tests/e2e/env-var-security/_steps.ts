@@ -10,9 +10,9 @@ void executeSteps({
     await $`pnpm exec tsc --noEmit tests/index.ts`
   },
   test: async () => {
-    await $`DATABASE_URL=${DATABASE_URL} pnpm prisma generate`
+    await $`DATABASE_URL=${DATABASE_URL} pnpm prisma-kb generate`
     await $`pnpm exec jest` // check output of generate
-    await $`DATABASE_URL=${DATABASE_URL} pnpm prisma migrate dev --name init`
+    await $`DATABASE_URL=${DATABASE_URL} pnpm prisma-kb migrate dev --name init`
     await $`pnpm exec jest` // check output of generate through migrate (did differ due to env vars handling differences!)
   },
   finish: async () => {

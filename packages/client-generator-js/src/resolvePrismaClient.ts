@@ -6,6 +6,8 @@ import { Debug } from '@prisma/debug'
 import { resolvePkg } from '@prisma/internals'
 import { bold, green } from 'kleur/colors'
 
+import clientPkg from '../../client/package.json'
+
 export const debug = Debug('prisma:generator')
 
 /**
@@ -18,9 +20,9 @@ export async function resolvePrismaClient(baseDir: string): Promise<string> {
 
   if (!prismaClientDir) {
     throw new Error(
-      `Could not resolve @prisma/client.
+      `Could not resolve ${clientPkg.name}.
 Please try to install it with ${bold(
-        green(await getPackageCmd(baseDir, 'install', '@prisma/client')),
+        green(await getPackageCmd(baseDir, 'install', clientPkg.name)),
       )} and rerun ${bold(await getPackageCmd(baseDir, 'execute', 'prisma generate'))} 🙏.`,
     )
   }
@@ -29,14 +31,14 @@ Please try to install it with ${bold(
 }
 
 /**
- * Tries to find a `@prisma/client` that is next to the `prisma` CLI
+ * Tries to find a `@prisma-kb/client` that is next to the `prisma` CLI
  * @param baseDir from where to start looking from
- * @returns `@prisma/client` location
+ * @returns `@prisma-kb/client` location
  */
 async function findPrismaClientDir(baseDir: string) {
   const resolveOpts = { basedir: baseDir, preserveSymlinks: true }
   const cliDir = await resolvePkg('prisma', resolveOpts)
-  const clientDir = await resolvePkg('@prisma/client', resolveOpts)
+  const clientDir = await resolvePkg(clientPkg.name, resolveOpts)
   const resolvedClientDir = clientDir && (await fs.realpath(clientDir))
 
   debug('prismaCliDir', cliDir)

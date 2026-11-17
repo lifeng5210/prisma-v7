@@ -1,0 +1,528 @@
+import { type ArgType, type ColumnType, ColumnTypeEnum, DriverAdapterError } from '@prisma-kb/driver-adapter-utils'
+
+import { FIRST_NORMAL_OBJECT_ID } from './constants'
+
+/**
+ * OIDs shared with PostgreSQL. The values come from postgres-types' generated
+ * `pg_type_gen.rs` and are also used by the existing adapter-pg package.
+ */
+const PostgresTypeId = {
+  BOOL: 16,
+  BYTEA: 17,
+  CHAR: 18,
+  NAME: 19,
+  INT8: 20,
+  INT2: 21,
+  INT4: 23,
+  TEXT: 25,
+  OID: 26,
+  JSON: 114,
+  XML: 142,
+  JSON_ARRAY: 199,
+  MONEY: 790,
+  MONEY_ARRAY: 791,
+  CIDR: 650,
+  CIDR_ARRAY: 651,
+  FLOAT4: 700,
+  FLOAT8: 701,
+  INET: 869,
+  BOOL_ARRAY: 1000,
+  BYTEA_ARRAY: 1001,
+  CHAR_ARRAY: 1002,
+  NAME_ARRAY: 1003,
+  INT2_ARRAY: 1005,
+  INT4_ARRAY: 1007,
+  INT8_ARRAY: 1016,
+  TEXT_ARRAY: 1009,
+  BPCHAR: 1042,
+  BPCHAR_ARRAY: 1014,
+  VARCHAR: 1043,
+  VARCHAR_ARRAY: 1015,
+  INET_ARRAY: 1041,
+  DATE: 1082,
+  DATE_ARRAY: 1182,
+  TIME: 1083,
+  TIME_ARRAY: 1183,
+  FLOAT4_ARRAY: 1021,
+  FLOAT8_ARRAY: 1022,
+  TIMESTAMP: 1114,
+  TIMESTAMP_ARRAY: 1115,
+  TIMESTAMPTZ: 1184,
+  TIMESTAMPTZ_ARRAY: 1185,
+  TIMETZ: 1266,
+  TIMETZ_ARRAY: 1270,
+  NUMERIC: 1700,
+  NUMERIC_ARRAY: 1231,
+  JSONB: 3802,
+  JSONB_ARRAY: 3807,
+  UUID: 2950,
+  UUID_ARRAY: 2951,
+  OID_ARRAY: 1028,
+  BIT: 1560,
+  BIT_ARRAY: 1561,
+  VARBIT: 1562,
+  VARBIT_ARRAY: 1563,
+  XML_ARRAY: 143,
+} as const
+
+/**
+ * Kingbase MySQL-compatible OIDs. These are not MySQL wire-protocol type
+ * numbers: Kingbase uses the PostgreSQL wire protocol and registers its
+ * compatibility types in its catalog and rust-kingbase's generated OID table.
+ */
+const KingbaseMysqlTypeId = {
+  BINARY: 3383,
+  VARBINARY: 3384,
+  BINARY_ARRAY: 3385,
+  VARBINARY_ARRAY: 3386,
+  SYS_BIT: 4655,
+  SYS_BIT_ARRAY: 4656,
+  // V9R3 MySQL JSON is a base type; sys.json (7024) is a domain over it.
+  MYSQL_JSON: 4802,
+  MYSQL_JSON_ARRAY: 4807,
+  ROWID: 6123,
+  ROWID_ARRAY: 6124,
+  INT1: 7014,
+  INT3: 7015,
+  MEDIUMINT: 7016,
+  MIDDLEINT: 7017,
+  LONGTEXT: 7018,
+  MEDIUMTEXT: 7019,
+  TINYTEXT: 7020,
+  LONGBLOB: 7021,
+  MEDIUMBLOB: 7022,
+  TINYBLOB: 7023,
+  SYS_JSON: 7024,
+  SYS_JSON_ARRAY: 12554,
+  YEAR: 7025,
+  UINT4: 7082,
+  UINT4_ARRAY: 7083,
+  UINT8: 7084,
+  UINT8_ARRAY: 7085,
+  SYS_DATE: 7944,
+  SYS_TIME: 7950,
+  SYS_TIME_ARRAY: 7951,
+  DATETIME: 7952,
+  DATETIME_ARRAY: 7953,
+  SYS_TIMESTAMP: 7954,
+  SYS_TIMESTAMP_ARRAY: 7955,
+  BLOB: 8013,
+  CLOB: 8014,
+  NCLOB: 8015,
+  BPCHARBYTE: 8016,
+  BPCHARBYTE_ARRAY: 8017,
+  VARCHARBYTE: 8018,
+  VARCHARBYTE_ARRAY: 8019,
+  TINYINT: 8100,
+  TINYINT_ARRAY: 8101,
+} as const
+
+const typeNames: Record<number, string> = Object.fromEntries(
+  [...Object.entries(PostgresTypeId), ...Object.entries(KingbaseMysqlTypeId)].map(([name, value]) => [
+    value,
+    name.toLowerCase(),
+  ]),
+)
+
+export class UnsupportedNativeDataType extends Error {
+  readonly type: string
+
+  constructor(typeId: number) {
+    super(`Unsupported column type ${typeNames[typeId] ?? typeId}`)
+    this.name = 'UnsupportedNativeDataType'
+    this.type = typeNames[typeId] ?? String(typeId)
+  }
+}
+
+// Keep known SQL-array OIDs only to reject them, including empty/NULL arrays.
+const sqlArrayTypeIds = new Set<number>(
+  [...Object.entries(PostgresTypeId), ...Object.entries(KingbaseMysqlTypeId)]
+    .filter(([name]) => name.endsWith('_ARRAY'))
+    .map(([, oid]) => oid),
+)
+
+export function fieldToColumnType(fieldTypeId: number, typeModifier?: number): ColumnType {
+  if (sqlArrayTypeIds.has(fieldTypeId)) {
+    throw new UnsupportedNativeDataType(fieldTypeId)
+  }
+  switch (fieldTypeId) {
+    case PostgresTypeId.INT2:
+    case PostgresTypeId.INT4:
+    case KingbaseMysqlTypeId.INT1:
+    case KingbaseMysqlTypeId.INT3:
+    case KingbaseMysqlTypeId.MEDIUMINT:
+    case KingbaseMysqlTypeId.MIDDLEINT:
+    case KingbaseMysqlTypeId.YEAR:
+    case KingbaseMysqlTypeId.TINYINT:
+      return ColumnTypeEnum.Int32
+    case PostgresTypeId.INT8:
+    case PostgresTypeId.OID:
+    case KingbaseMysqlTypeId.UINT4:
+    case KingbaseMysqlTypeId.UINT8:
+      return ColumnTypeEnum.Int64
+    case PostgresTypeId.FLOAT4:
+      return ColumnTypeEnum.Float
+    case PostgresTypeId.FLOAT8:
+      return ColumnTypeEnum.Double
+    case PostgresTypeId.BOOL:
+      return ColumnTypeEnum.Boolean
+    case PostgresTypeId.DATE:
+    case KingbaseMysqlTypeId.SYS_DATE:
+      return ColumnTypeEnum.Date
+    case PostgresTypeId.TIME:
+    case PostgresTypeId.TIMETZ:
+    case KingbaseMysqlTypeId.SYS_TIME:
+      return ColumnTypeEnum.Time
+    case PostgresTypeId.TIMESTAMP:
+    case PostgresTypeId.TIMESTAMPTZ:
+    case KingbaseMysqlTypeId.DATETIME:
+    case KingbaseMysqlTypeId.SYS_TIMESTAMP:
+      return ColumnTypeEnum.DateTime
+    case PostgresTypeId.NUMERIC:
+    case PostgresTypeId.MONEY:
+      return ColumnTypeEnum.Numeric
+    case PostgresTypeId.JSON:
+    case PostgresTypeId.JSONB:
+    case KingbaseMysqlTypeId.MYSQL_JSON:
+    case KingbaseMysqlTypeId.SYS_JSON:
+      return ColumnTypeEnum.Json
+    case PostgresTypeId.UUID:
+      return ColumnTypeEnum.Uuid
+    case PostgresTypeId.BYTEA:
+    case KingbaseMysqlTypeId.BINARY:
+    case KingbaseMysqlTypeId.VARBINARY:
+    case KingbaseMysqlTypeId.LONGBLOB:
+    case KingbaseMysqlTypeId.MEDIUMBLOB:
+    case KingbaseMysqlTypeId.TINYBLOB:
+    case KingbaseMysqlTypeId.BLOB:
+      return ColumnTypeEnum.Bytes
+    case KingbaseMysqlTypeId.SYS_BIT:
+      // In Quaint, BIT(1) is Boolean and wider BIT values are Bytes. The
+      // Kingbase driver exposes the PostgreSQL typmod as dataTypeModifier.
+      return typeModifier === 1 ? ColumnTypeEnum.Boolean : ColumnTypeEnum.Bytes
+    case PostgresTypeId.CHAR:
+      return ColumnTypeEnum.Character
+    case PostgresTypeId.BPCHAR:
+    case PostgresTypeId.TEXT:
+    case PostgresTypeId.VARCHAR:
+    case PostgresTypeId.BIT:
+    case PostgresTypeId.VARBIT:
+    case PostgresTypeId.INET:
+    case PostgresTypeId.CIDR:
+    case PostgresTypeId.XML:
+    case PostgresTypeId.NAME:
+    case KingbaseMysqlTypeId.ROWID:
+    case KingbaseMysqlTypeId.LONGTEXT:
+    case KingbaseMysqlTypeId.MEDIUMTEXT:
+    case KingbaseMysqlTypeId.TINYTEXT:
+    case KingbaseMysqlTypeId.CLOB:
+    case KingbaseMysqlTypeId.NCLOB:
+    case KingbaseMysqlTypeId.BPCHARBYTE:
+    case KingbaseMysqlTypeId.VARCHARBYTE:
+      return ColumnTypeEnum.Text
+
+    default:
+      // User-defined and enum types are returned as text. The query schema
+      // decides whether the value should be surfaced as an enum.
+      if (fieldTypeId >= FIRST_NORMAL_OBJECT_ID) {
+        return ColumnTypeEnum.Text
+      }
+      throw new UnsupportedNativeDataType(fieldTypeId)
+  }
+}
+
+export function mapArg<A>(arg: A | Date, argType: ArgType): null | string | Uint8Array | A {
+  if (argType.arity === 'list') {
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
+  }
+  if (arg === null) {
+    return null
+  }
+
+  if (Array.isArray(arg)) {
+    if (argType.scalarType === 'json') return JSON.stringify(arg)
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
+  }
+
+  if (typeof arg === 'string' && argType.scalarType === 'datetime') {
+    arg = new Date(arg)
+  }
+
+  if (arg instanceof Date) {
+    switch (argType.dbType) {
+      case 'TIME':
+      case 'TIMETZ':
+      case 'SYS_TIME':
+        return formatTime(arg)
+      case 'DATE':
+      case 'SYS_DATE':
+        return formatDate(arg)
+      default:
+        return formatDateTime(arg)
+    }
+  }
+
+  const bitType = argType.dbType?.match(/^bit(?:\((\d+)\))?$/i)
+  const bitWidth = bitType?.[1] === undefined ? undefined : Number(bitType[1])
+
+  if (typeof arg === 'boolean' && argType.scalarType === 'boolean' && bitType) {
+    return encodeMysqlBit(new Uint8Array([arg ? 1 : 0]), bitWidth ?? 1)
+  }
+
+  if (typeof arg === 'string' && argType.scalarType === 'bytes') {
+    const bytes = Buffer.from(arg, 'base64')
+    return bitType ? encodeMysqlBit(bytes, bitWidth) : bytes
+  }
+
+  if (ArrayBuffer.isView(arg)) {
+    const bytes = new Uint8Array(arg.buffer, arg.byteOffset, arg.byteLength)
+
+    // BIT uses a length-prefixed, MSB-first payload; ordinary binary values
+    // keep their byte representation.
+    if (argType.scalarType === 'bytes' && bitType) {
+      return encodeMysqlBit(bytes, bitWidth)
+    }
+
+    return bytes
+  }
+
+  return arg
+}
+
+function encodeMysqlBit(bytes: Uint8Array, bitWidth?: number): Buffer {
+  if (bitWidth !== undefined) {
+    if (!Number.isInteger(bitWidth) || bitWidth < 1 || bitWidth > 64) {
+      throw new DriverAdapterError({ kind: 'ValueOutOfRange', cause: 'BIT width must be between 1 and 64.' })
+    }
+    let value = 0n
+    for (const byte of bytes) value = (value << 8n) | BigInt(byte)
+    if (bytes.byteLength > 8 || value >= 1n << BigInt(bitWidth)) {
+      throw new DriverAdapterError({ kind: 'LengthMismatch', column: undefined })
+    }
+
+    const size = Math.ceil(bitWidth / 8)
+    const encoded = Buffer.alloc(8 + size)
+    encoded.writeBigUInt64BE(BigInt(bitWidth), 0)
+    // Prisma bytes are a big-endian integer; KES BIT payloads are left-aligned.
+    let payload = value << BigInt(size * 8 - bitWidth)
+    for (let index = encoded.length - 1; index >= 8; index--) {
+      encoded[index] = Number(payload & 0xffn)
+      payload >>= 8n
+    }
+    return encoded
+  }
+
+  // Older query compilers and direct adapter calls may omit the declared
+  // width. Keep the existing numeric encoding for those callers.
+  // Prisma/MySQL Bytes are a big-endian numeric value. Leading byte padding
+  // must not make that value too wide for a non-byte-aligned BIT column.
+  const first = bytes.findIndex((byte) => byte !== 0)
+  if (first === -1) return encodeMysqlBitBoolean(false)
+
+  const leading = Math.clz32(bytes[first]) - 24
+  const size = bytes.byteLength - first
+  const encoded = Buffer.allocUnsafe(8 + size)
+  encoded.writeBigUInt64BE(BigInt(size * 8 - leading), 0)
+  for (let index = 0; index < size; index++) {
+    encoded[8 + index] = (bytes[first + index] << leading) | ((bytes[first + index + 1] ?? 0) >>> (8 - leading))
+  }
+  return encoded
+}
+
+function encodeMysqlBitBoolean(value: boolean): Buffer {
+  const encoded = Buffer.allocUnsafe(9)
+  encoded.writeBigUInt64BE(1n, 0)
+  encoded[8] = value ? 0x80 : 0x00
+  return encoded
+}
+
+type ResultField = {
+  dataTypeID: number
+  dataTypeModifier?: number
+}
+
+export const jsonTypeIds = new Set<number>([
+  PostgresTypeId.JSON,
+  PostgresTypeId.JSONB,
+  KingbaseMysqlTypeId.MYSQL_JSON,
+  KingbaseMysqlTypeId.SYS_JSON,
+])
+const dateTypeIds = new Set<number>([PostgresTypeId.DATE, KingbaseMysqlTypeId.SYS_DATE])
+const timeTypeIds = new Set<number>([PostgresTypeId.TIME, PostgresTypeId.TIMETZ, KingbaseMysqlTypeId.SYS_TIME])
+const dateTimeTypeIds = new Set<number>([
+  PostgresTypeId.TIMESTAMP,
+  PostgresTypeId.TIMESTAMPTZ,
+  KingbaseMysqlTypeId.DATETIME,
+  KingbaseMysqlTypeId.SYS_TIMESTAMP,
+])
+const binaryTypeIds = new Set<number>([
+  PostgresTypeId.BYTEA,
+  KingbaseMysqlTypeId.BINARY,
+  KingbaseMysqlTypeId.VARBINARY,
+  KingbaseMysqlTypeId.SYS_BIT,
+  KingbaseMysqlTypeId.TINYBLOB,
+  KingbaseMysqlTypeId.MEDIUMBLOB,
+  KingbaseMysqlTypeId.LONGBLOB,
+  KingbaseMysqlTypeId.BLOB,
+])
+
+function pad(n: number, z = 2): string {
+  return String(n).padStart(z, '0')
+}
+
+function formatDateTime(date: Date): string {
+  const ms = date.getUTCMilliseconds()
+  return (
+    pad(date.getUTCFullYear(), 4) +
+    '-' +
+    pad(date.getUTCMonth() + 1) +
+    '-' +
+    pad(date.getUTCDate()) +
+    ' ' +
+    pad(date.getUTCHours()) +
+    ':' +
+    pad(date.getUTCMinutes()) +
+    ':' +
+    pad(date.getUTCSeconds()) +
+    (ms ? '.' + String(ms).padStart(3, '0') : '')
+  )
+}
+
+function formatDate(date: Date): string {
+  return pad(date.getUTCFullYear(), 4) + '-' + pad(date.getUTCMonth() + 1) + '-' + pad(date.getUTCDate())
+}
+
+function formatTime(date: Date): string {
+  const ms = date.getUTCMilliseconds()
+  return (
+    pad(date.getUTCHours()) +
+    ':' +
+    pad(date.getUTCMinutes()) +
+    ':' +
+    pad(date.getUTCSeconds()) +
+    (ms ? '.' + String(ms).padStart(3, '0') : '')
+  )
+}
+
+export function mapRow(row: unknown[] | Record<string, unknown>, fields?: ResultField[]): unknown[] {
+  const values = Array.isArray(row) ? row : Object.values(row)
+
+  return values.map((value, index) =>
+    mapResultValue(value, fields?.[index]?.dataTypeID, fields?.[index]?.dataTypeModifier),
+  )
+}
+
+function mapResultValue(value: unknown, typeId?: number, typeModifier?: number): unknown {
+  if (typeId !== undefined && sqlArrayTypeIds.has(typeId)) {
+    throw new UnsupportedNativeDataType(typeId)
+  }
+  if (value === null || value === undefined) {
+    return value
+  }
+
+  if (Array.isArray(value)) {
+    if (typeId !== undefined && jsonTypeIds.has(typeId)) {
+      // Kingbase's MySQL JSON parser can expose a JSON array as a native JS
+      // array. The client-engine expects the JSON column value as JSON text.
+      return JSON.stringify(value)
+    }
+    throw new Error('Arrays are not supported in Kingbase MySQL.')
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString()
+  }
+
+  // `sys.bit` with typmod 1 is declared Boolean, not Bytes. Decode the bit
+  // value to a boolean so it matches the column type reported to the engine.
+  if (typeId === KingbaseMysqlTypeId.SYS_BIT && typeModifier === 1) {
+    return normalizeBitBooleanResult(value)
+  }
+
+  if (typeId !== undefined && jsonTypeIds.has(typeId)) {
+    return normalizeJsonResult(value)
+  }
+
+  if (typeId !== undefined && dateTypeIds.has(typeId)) {
+    return value instanceof Date ? formatDate(value) : String(value).slice(0, 10)
+  }
+
+  if (typeId !== undefined && timeTypeIds.has(typeId)) {
+    return value instanceof Date ? formatTime(value) : String(value)
+  }
+
+  if (typeId !== undefined && dateTimeTypeIds.has(typeId)) {
+    return normalizeDateTimeResult(value)
+  }
+
+  if (typeId !== undefined && binaryTypeIds.has(typeId)) {
+    return normalizeBytesResult(value)
+  }
+
+  return value
+}
+
+function normalizeJsonResult(value: unknown): string {
+  // Query-local JSON parsers return complete JSON text, including the quotes
+  // around a scalar string. Never infer its type from the string contents.
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
+
+function normalizeDateTimeResult(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+
+  const text = String(value).replace(' ', 'T')
+  if (/[zZ]|[+-]\d{2}(?::?\d{2})?$/.test(text)) {
+    return text
+  }
+
+  return `${text}+00:00`
+}
+
+function normalizeBytesResult(value: unknown): unknown {
+  if (ArrayBuffer.isView(value)) {
+    return Buffer.from(value.buffer, value.byteOffset, value.byteLength)
+  }
+
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  // Kingbase's MySQL-compatibility binary types arrive as `0x…` hex literals
+  // (unlike PostgreSQL BYTEA, which uses the `\x…` form). Accept both prefixes
+  // so the data mapper receives a byte array rather than text.
+  if (value.startsWith('0x') || value.startsWith('0X') || value.startsWith('\\x')) {
+    return Buffer.from(value.slice(2), 'hex')
+  }
+
+  return value
+}
+
+function normalizeBitBooleanResult(value: unknown): boolean {
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  if (typeof value === 'number') {
+    return value !== 0
+  }
+
+  // `kingbasedb` requests text results by default. Kingbase renders a
+  // `sys.bit` value in that format as a MySQL-style numeric hex literal
+  // (`0x01` for BIT(1) true), rather than as the binary wire payload.
+  if (typeof value === 'string' && /^0x/i.test(value)) {
+    return /[1-9a-f]/i.test(value.slice(2))
+  }
+
+  const bytes = normalizeBytesResult(value)
+  if (Buffer.isBuffer(bytes)) {
+    // The PostgreSQL binary representation has an 8-byte bit-length header.
+    // Text results (`0x80`/`0x00`) contain only the payload.
+    const payload = bytes.byteLength >= 9 && bytes.readBigUInt64BE(0) === 1n ? bytes.subarray(8) : bytes
+    return ((payload[0] ?? 0) & 0x80) !== 0
+  }
+
+  return value === 'true' || value === '1'
+}

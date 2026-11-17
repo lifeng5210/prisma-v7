@@ -16,7 +16,7 @@ import { bold, dim, red, underline } from 'kleur/colors'
 import { getRootCacheDir } from '../../fetch-engine/src/utils'
 
 /**
- * $ prisma debug
+ * $ prisma-kb debug
  */
 export class DebugInfo implements Command {
   static new(): DebugInfo {
@@ -28,7 +28,7 @@ export class DebugInfo implements Command {
 
   ${bold('Usage')}
 
-    ${dim('$')} prisma debug [options]
+    ${dim('$')} prisma-kb debug [options]
 
   ${bold('Options')}
 

@@ -117,7 +117,7 @@ model User {
   test('detects seed script in prisma.config.ts', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'prisma.config.ts'),
-      `import { defineConfig } from 'prisma/config'\nexport default defineConfig({ migrations: { seed: 'tsx ./prisma/seed.ts' } })`,
+      `import { defineConfig } from 'prisma-kb/config'\nexport default defineConfig({ migrations: { seed: 'tsx ./prisma/seed.ts' } })`,
       'utf-8',
     )
     const state = detectProjectState(tmpDir)

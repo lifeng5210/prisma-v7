@@ -9,7 +9,12 @@ import testMatrix from './_matrix'
 // @ts-ignore
 import type { Prisma as PrismaNamespace, PrismaClient } from './generated/prisma/client'
 
-let prisma: PrismaClient<'query'>
+// @only-ts-generator
+type LogPrismaClient = PrismaClient<'query'>
+// @only-js-generator
+type LogPrismaClient = PrismaClient<{ log: [{ emit: 'event'; level: 'query' }] }>
+
+let prisma: LogPrismaClient
 declare const newPrismaClient: NewPrismaClient<typeof prisma, typeof PrismaClient>
 
 testMatrix.setupTestSuite(
@@ -46,7 +51,7 @@ testMatrix.setupTestSuite(
         const lateralJoinQueryMatcher = expect.stringMatching('LEFT JOIN LATERAL')
 
         const relationJoinQueryMatcher = match(suiteConfig.provider)
-          .with(Providers.MYSQL, () => {
+          .with(Providers.MYSQL, Providers.KINGBASE_MYSQL, () => {
             // For MySQL, JSON_OBJECT is the only available indicator. We use correlated subqueries
             // rather than lateral joins, and 1:1 queries don't even have JSON aggregations or the
             // `__prisma_data__` column.

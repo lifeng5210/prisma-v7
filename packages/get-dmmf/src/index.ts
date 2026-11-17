@@ -1,6 +1,6 @@
 import { Debug } from '@prisma/debug'
 import type * as DMMF from '@prisma/dmmf'
-import prismaSchemaWasm from '@prisma/prisma-schema-wasm'
+import prismaSchemaWasm from '@prisma-kb/prisma-schema-wasm'
 import { JSONParser } from '@streamparser/json'
 import pluralize from 'pluralize'
 
@@ -102,7 +102,7 @@ export function externalToInternalDmmf(document: DMMF.Document): DMMF.Document {
  * the DMMF as Uint8Array chunks from a caller-owned DmmfBuffer handle.
  *
  * Requires `get_dmmf_buffered()` (returns a `DmmfBuffer` handle) from
- * `@prisma/prisma-schema-wasm`. The handle exposes `.len()`, `.read_chunk()`,
+ * `@prisma-kb/prisma-schema-wasm`. The handle exposes `.len()`, `.read_chunk()`,
  * and `.free()` — no implicit global state.
  *
  * See: https://github.com/prisma/prisma/issues/29111
@@ -115,7 +115,7 @@ function getDMMFBuffered(params: string): DMMF.Document | GetDMMFError {
       type: 'wasm-error' as const,
       reason: '(get-dmmf-buffered wasm)',
       error: new Error(
-        "Buffered DMMF API not available. It's required for schemas that do not fit within the default V8 memory limit. Ensure you are using latest @prisma/prisma-schema-wasm.",
+        "Buffered DMMF API not available. It's required for schemas that do not fit within the default V8 memory limit. Ensure you are using the latest @prisma-kb/prisma-schema-wasm.",
       ),
     }
   }

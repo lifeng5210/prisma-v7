@@ -7,7 +7,6 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import { BasicTracerProvider } from '@opentelemetry/sdk-trace-base'
 import { defaultConfig, InjectFormatters } from '@prisma/config'
 import { Debug } from '@prisma/debug'
-import { enginesVersion } from '@prisma/engines'
 import { download } from '@prisma/fetch-engine'
 import { arg, handlePanic, HelpError, isError, isRustPanic, link } from '@prisma/internals'
 import {
@@ -26,6 +25,7 @@ import {
   MigrateResolve,
   MigrateStatus,
 } from '@prisma/migrate'
+import { enginesVersion } from '@prisma-kb/engines'
 import { bold, dim, red, yellow } from 'kleur/colors'
 
 import { Bootstrap } from './bootstrap/Bootstrap'
@@ -244,7 +244,7 @@ function handleIndividualError(error: Error): void {
 /**
  * Annotations for `pkg` so it bundles things correctly with yarn's hoisting
  * `node_modules/prisma/build/index.js` needs to get to:
- * `node_modules/@prisma/engines`
+ * `node_modules/@prisma-kb/engines`
  */
 
 // macOS

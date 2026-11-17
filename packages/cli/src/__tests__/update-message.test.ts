@@ -30,8 +30,8 @@ describe('update available message', () => {
         },
       })
       const message = ctx.mocked['console.error'].mock.calls[0][0]
-      expect(message).toContain('npm i --save-dev prisma@dev')
-      expect(message).toContain('npm i @prisma/client@dev')
+      expect(message).toContain('npm i --save-dev prisma-kb@dev')
+      expect(message).toContain('npm i @prisma-kb/client@dev')
       expect(message).toMatchSnapshot()
     })
 
@@ -49,8 +49,8 @@ describe('update available message', () => {
       })
       const message = ctx.mocked['console.error'].mock.calls[0][0]
       expect(message).toContain('This is a major update')
-      expect(message).toContain('npm i --save-dev prisma@dev')
-      expect(message).toContain('npm i @prisma/client@dev')
+      expect(message).toContain('npm i --save-dev prisma-kb@dev')
+      expect(message).toContain('npm i @prisma-kb/client@dev')
       expect(message).toMatchSnapshot()
     })
 
@@ -67,8 +67,8 @@ describe('update available message', () => {
         },
       })
       const message = ctx.mocked['console.error'].mock.calls[0][0]
-      expect(message).toContain('npm i --save-dev prisma@latest')
-      expect(message).toContain('npm i @prisma/client@latest')
+      expect(message).toContain('npm i --save-dev prisma-kb@latest')
+      expect(message).toContain('npm i @prisma-kb/client@latest')
       expect(message).toMatchSnapshot()
     })
 
@@ -86,8 +86,8 @@ describe('update available message', () => {
       })
       const message = ctx.mocked['console.error'].mock.calls[0][0]
       expect(message).toContain('This is a major update')
-      expect(message).toContain('npm i --save-dev prisma@latest')
-      expect(message).toContain('npm i @prisma/client@latest')
+      expect(message).toContain('npm i --save-dev prisma-kb@latest')
+      expect(message).toContain('npm i @prisma-kb/client@latest')
       expect(message).toMatchSnapshot()
     })
   })

@@ -221,7 +221,7 @@ testMatrix.setupTestSuite(
       await waitFor(() => expect(queriesExecuted).toBeGreaterThan(1))
     })
 
-    testIf(provider === Providers.POSTGRESQL)(
+    testIf([Providers.POSTGRESQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider))(
       'interactive transactions: batches findUnique for a single model',
       async () => {
         const requestCount = 10
@@ -285,7 +285,7 @@ testMatrix.setupTestSuite(
       },
     )
 
-    testIf(provider === Providers.POSTGRESQL)(
+    testIf([Providers.POSTGRESQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider))(
       'interactive transactions: batches findUnique for multiple models',
       async () => {
         const requestCount = 10

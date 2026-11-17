@@ -10,7 +10,7 @@ export interface CommandState {
 }
 
 function getCommandStatePath(): string {
-  return path.join(paths('prisma').config, 'commands.json')
+  return path.join(paths('prisma-kb').config, 'commands.json')
 }
 
 /*

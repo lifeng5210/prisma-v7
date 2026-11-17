@@ -8,7 +8,7 @@ import { stopProcess, waitForWranglerReady } from '../_utils/wrangler'
 void executeSteps({
   setup: async () => {
     await $`pnpm install`
-    await $`pnpm prisma generate`
+    await $`pnpm prisma-kb generate`
   },
   test: async () => {
     const wranglerProcess = $`pnpm wrangler dev --ip 127.0.0.1 --port 8787`.nothrow()

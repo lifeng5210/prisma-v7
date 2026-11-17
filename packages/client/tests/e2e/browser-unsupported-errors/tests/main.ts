@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client/index-browser'
+import { Prisma } from '@prisma-kb/client/index-browser'
 
 describe('import from browser bundle should error', () => {
   test('Prisma.sql', () => {

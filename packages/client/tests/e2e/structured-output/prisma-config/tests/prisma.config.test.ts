@@ -13,7 +13,7 @@ describe('diagnostics related to prisma.config.ts should not influence structure
 
   test('prisma migrate diff --script', async () => {
     const { stdout, stderr, exitCode } =
-      await $`pnpm prisma migrate diff --from-empty --to-schema ./prisma/schema.prisma --script`
+      await $`pnpm prisma-kb migrate diff --from-empty --to-schema ./prisma/schema.prisma --script`
     expect(exitCode).toBe(0)
     expect(stdout).toMatchInlineSnapshot(`
       "-- CreateTable
@@ -35,7 +35,7 @@ describe('diagnostics related to prisma.config.ts should not influence structure
   })
 
   test('prisma version --json', async () => {
-    const { stdout, stderr, exitCode } = await $`pnpm prisma version --json`
+    const { stdout, stderr, exitCode } = await $`pnpm prisma-kb version --json`
 
     expect(exitCode).toBe(0)
     expect(() => JSON.parse(stdout)).not.toThrow()

@@ -82,7 +82,7 @@ testMatrix.setupTestSuite(
       describe('modelName is not returned on error.meta', () => {
         it('should not return modelName when performing queryRaw', async () => {
           const createTwoUserWithSameEmail = async () => {
-            if (suiteConfig.provider === Providers.MYSQL) {
+            if (suiteConfig.provider === Providers.MYSQL || suiteConfig.provider === Providers.KINGBASE_MYSQL) {
               await prisma.$queryRaw`INSERT INTO \`User\` (\`id\`, \`email\`) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`
             } else {
               await prisma.$queryRaw`INSERT INTO "User" (id, email) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`
@@ -105,7 +105,7 @@ testMatrix.setupTestSuite(
 
         it('should not return modelName when performing executeRaw', async () => {
           const createTwoUserWithSameEmail = async () => {
-            if (suiteConfig.provider === Providers.MYSQL) {
+            if (suiteConfig.provider === Providers.MYSQL || suiteConfig.provider === Providers.KINGBASE_MYSQL) {
               await prisma.$executeRaw`INSERT INTO \`User\` (\`id\`, \`email\`) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`
             } else {
               await prisma.$executeRaw`INSERT INTO "User" (id, email) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`
@@ -128,7 +128,7 @@ testMatrix.setupTestSuite(
 
         it('should not return modelName when performing transactions with raw queries', async () => {
           const createTwoUserWithSameEmail = async () => {
-            if (suiteConfig.provider === Providers.MYSQL) {
+            if (suiteConfig.provider === Providers.MYSQL || suiteConfig.provider === Providers.KINGBASE_MYSQL) {
               await prisma.$transaction([
                 prisma.$executeRaw`INSERT INTO \`User\` (\`id\`, \`email\`) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`,
                 prisma.$executeRaw`INSERT INTO \`User\` (\`id\`, \`email\`) VALUES (${user2_cuid}, ${suiteConfig.testEmail});`,

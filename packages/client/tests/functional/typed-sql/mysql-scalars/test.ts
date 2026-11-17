@@ -1,5 +1,8 @@
 import { expectTypeOf } from 'expect-type'
 
+// Used by the @ts-test-if directives below when generating type tests.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Providers } from '../../_utils/providers'
 import testMatrix from './_matrix'
 // @ts-ignore
 import type { Prisma as PrismaNamespace, PrismaClient } from './generated/prisma/client'
@@ -16,7 +19,9 @@ const dateTime = new Date('2024-07-31T14:37:36.570Z')
 const date = new Date('2024-07-31T00:00:00.000Z')
 const time = new Date('1970-01-01T14:37:36.000Z')
 testMatrix.setupTestSuite(
-  () => {
+  // `provider` is consumed by the @ts-test-if directives in this fixture.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ({ provider }) => {
     beforeAll(async () => {
       await prisma.testModel.create({
         data: {
@@ -40,6 +45,9 @@ testMatrix.setupTestSuite(
     test('int - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getInt(id))
       expect(result[0].int).toBe(123)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].int).toEqualTypeOf<number | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].int).toBeNumber()
     })
 
@@ -52,6 +60,9 @@ testMatrix.setupTestSuite(
       const result = await prisma.$queryRawTyped(sql.getFloat(id))
       // Account for potential precision loss when storing the value as a FLOAT
       expect(result[0].float).toBeOneOf([new Float32Array([12.3])[0], 12.3])
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].float).toEqualTypeOf<number | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].float).toBeNumber()
     })
 
@@ -63,6 +74,9 @@ testMatrix.setupTestSuite(
     test('double - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getDouble(id))
       expect(result[0].double).toBe(12.3)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].double).toEqualTypeOf<number | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].double).toBeNumber()
     })
 
@@ -74,6 +88,9 @@ testMatrix.setupTestSuite(
     test('string - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getString(id))
       expect(result[0].string).toEqual('hello')
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].string).toEqualTypeOf<string | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].string).toBeString()
     })
 
@@ -85,6 +102,9 @@ testMatrix.setupTestSuite(
     test('BigInt - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getBigInt(id))
       expect(result[0].bigInt).toEqual(bigInt)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].bigInt).toEqualTypeOf<bigint | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].bigInt).toEqualTypeOf<bigint>()
     })
 
@@ -99,6 +119,9 @@ testMatrix.setupTestSuite(
     test('DateTime - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getDateTime(id))
       expect(result[0].dateTime).toEqual(dateTime)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].dateTime).toEqualTypeOf<Date | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].dateTime).toEqualTypeOf<Date>()
     })
 
@@ -110,6 +133,9 @@ testMatrix.setupTestSuite(
     test('Date - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getDate(id))
       expect(result[0].date).toEqual(date)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].date).toEqualTypeOf<Date | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].date).toEqualTypeOf<Date>()
     })
 
@@ -121,6 +147,9 @@ testMatrix.setupTestSuite(
     test('Time - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getTime(id))
       expect(result[0].time).toEqual(time)
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].time).toEqualTypeOf<Date | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].time).toEqualTypeOf<Date>()
     })
 
@@ -133,6 +162,10 @@ testMatrix.setupTestSuite(
       const result = await prisma.$queryRawTyped(sql.getDecimal(id))
       expect(result[0].decimal).toBeInstanceOf(Prisma.Decimal)
       expect(result[0].decimal).toEqual(new Prisma.Decimal('12.34'))
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+      expectTypeOf(result[0].decimal).toEqualTypeOf<PrismaNamespace.Decimal | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].decimal).toEqualTypeOf<PrismaNamespace.Decimal>()
     })
 
@@ -147,6 +180,13 @@ testMatrix.setupTestSuite(
     test('bytes - output', async () => {
       const result = await prisma.$queryRawTyped(sql.getBytes(id))
       expect(result[0].bytes).toEqual(Uint8Array.of(1, 2, 3))
+
+      // The PostgreSQL-wire describe protocol used by Kingbase does not carry
+      // source-column NOT NULL metadata, so Typed SQL conservatively marks it
+      // nullable even though this fixture's model field is required.
+      // @ts-test-if: provider === Providers.KINGBASE_MYSQL
+      expectTypeOf(result[0].bytes).toEqualTypeOf<Uint8Array | null>()
+      // @ts-test-if: provider !== Providers.KINGBASE_MYSQL
       expectTypeOf(result[0].bytes).toEqualTypeOf<Uint8Array>()
     })
 

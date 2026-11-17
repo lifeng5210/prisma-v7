@@ -12,11 +12,19 @@ export default defineMatrix(() => [
       testEmail: 'mysql-user@example.com',
     },
     {
+      provider: Providers.KINGBASE_MYSQL,
+      testEmail: 'mysql-user@example.com',
+    },
+    {
       provider: Providers.SQLSERVER,
       testEmail: 'sqlserver-user@example.com',
     },
     {
       provider: Providers.POSTGRESQL,
+      testEmail: 'postgres-user@example.com',
+    },
+    {
+      provider: Providers.KINGBASE_ORACLE,
       testEmail: 'postgres-user@example.com',
     },
     {

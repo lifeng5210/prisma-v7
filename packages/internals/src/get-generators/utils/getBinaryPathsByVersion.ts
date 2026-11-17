@@ -1,8 +1,8 @@
-import { enginesVersion } from '@prisma/engines'
 import type { BinaryDownloadConfiguration, DownloadOptions } from '@prisma/fetch-engine'
 import { download } from '@prisma/fetch-engine'
 import type { BinaryPaths, BinaryTargetsEnvValue } from '@prisma/generator'
 import type { BinaryTarget } from '@prisma/get-platform'
+import { enginesVersion } from '@prisma-kb/engines'
 import { ensureDir } from 'fs-extra'
 import path from 'path'
 
