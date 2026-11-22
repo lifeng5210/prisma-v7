@@ -22,22 +22,20 @@ To help maintainers triage efficiently:
 
 ## General Prerequisites
 
-1. Install a Node.js version allowed by the root `package.json`: `^20.19 || ^22.12 || >=24.0`.
+1. Install Node.js `>=20.19` minimum, [latest LTS is recommended](https://nodejs.org/en/about/releases/)
    - Recommended: use [`nvm`](https://github.com/nvm-sh/nvm) for managing Node.js versions
 
-1. Install the [`pnpm`](https://pnpm.io/) version pinned by `packageManager` in the root `package.json` (currently `11.13.1`).
+1. Install [`pnpm`](https://pnpm.io/) (for installing npm dependencies, using pnpm workspaces)
 1. Install [`docker`](https://www.docker.com/products/docker-desktop) (for managing databases for our tests)
-1. Use the repository's local TypeScript script runners after installing workspace dependencies.
+1. Install [`ts-node`](https://github.com/TypeStrong/ts-node) (for running Node.js scripts written in TypeScript)
 
-For example, with `nvm` already installed, Node.js 24 can run both the workspace and pnpm 11:
+Copy paste these commands to install the global dependencies:
 
 ```bash
-nvm install 24
-nvm use 24
-npm install --global pnpm@11.13.1
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+nvm install 18
+npm install --global pnpm@10 ts-node
 ```
-
-When testing other supported Node.js versions, keep the package manager's own runtime requirements separate from the test runtime. CI uses standalone pnpm for this purpose; see [the setup action](./.github/actions/setup/action.yml).
 
 ### For Windows Users
 
@@ -140,10 +138,10 @@ pnpm prisma generate && pnpm ts-node index.ts # Try it out
 
 ```sh
 cd packages/client
-pnpm exec ts-node fixtures/generate.ts ./fixtures/blog/
+ts-node fixtures/generate.ts ./fixtures/blog/
 cd fixtures/blog
 npx prisma db push --skip-generate
-pnpm exec ts-node main.ts # Try it out
+ts-node main.ts # Try it out
 ```
 
 </details>
