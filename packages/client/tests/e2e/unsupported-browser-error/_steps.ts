@@ -5,7 +5,7 @@ import { executeSteps } from '../_utils/executeSteps'
 void executeSteps({
   setup: async () => {
     await $`pnpm install`
-    await $`pnpm prisma generate`
+    await $`pnpm prisma-kb generate`
   },
   test: async () => {
     await $`pnpm esbuild src/new-client.ts --bundle --minify --target=chrome58 --outfile=dist/new-client.js --format=cjs`

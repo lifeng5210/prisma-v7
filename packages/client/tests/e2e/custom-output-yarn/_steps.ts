@@ -29,7 +29,7 @@ void executeSteps({
         throw e
       }
     }, 3)
-    await $`yarn prisma generate`
+    await $`yarn prisma-kb generate`
     patchGeneratedPackageJson()
     await $`yarn add db@link:./prisma/client`
   },

@@ -6,5 +6,11 @@ export default defineMatrix(() => [
     {
       provider: Providers.POSTGRESQL,
     },
+    {
+      provider: Providers.KINGBASE_MYSQL,
+    },
+    {
+      provider: Providers.KINGBASE_ORACLE,
+    },
   ],
 ])

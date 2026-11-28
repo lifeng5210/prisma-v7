@@ -120,6 +120,24 @@ testMatrix.setupTestSuite(({ provider, driverAdapter, clientEngineExecutor }, _s
         }
         break
 
+      case Providers.KINGBASE_MYSQL:
+        if (cliMeta.previewFeatures.includes('relationJoins')) {
+          expect(executedBatchQuery).toMatchInlineSnapshot(
+            `"SELECT \`t0\`.\`id\`, \`t0\`.\`email\`, \`t0\`.\`age\`, \`t0\`.\`name\` FROM \`\`.\`User\` AS \`t0\` WHERE \`t0\`.\`email\` IN (?,?,?,?)"`,
+          )
+        } else {
+          expect(executedBatchQuery).toMatchInlineSnapshot(
+            `"SELECT \`\`.\`User\`.\`id\`, \`\`.\`User\`.\`email\`, \`\`.\`User\`.\`age\`, \`\`.\`User\`.\`name\` FROM \`\`.\`User\` WHERE \`\`.\`User\`.\`email\` IN (?,?,?,?)"`,
+          )
+        }
+        break
+
+      case Providers.KINGBASE_ORACLE:
+        expect(executedBatchQuery).toMatchInlineSnapshot(
+          `"SELECT \"\".\"User\".\"id\", \"\".\"User\".\"email\", \"\".\"User\".\"age\", \"\".\"User\".\"name\" FROM \"\".\"User\" WHERE \"\".\"User\".\"email\" IN ($1,$2,$3,$4) OFFSET $5 ROWS"`,
+        )
+        break
+
       case Providers.SQLITE:
         expect(executedBatchQuery).toMatchInlineSnapshot(
           `"SELECT \`main\`.\`User\`.\`id\`, \`main\`.\`User\`.\`email\`, \`main\`.\`User\`.\`age\`, \`main\`.\`User\`.\`name\` FROM \`main\`.\`User\` WHERE \`main\`.\`User\`.\`email\` IN (?,?,?,?) LIMIT ? OFFSET ?"`,

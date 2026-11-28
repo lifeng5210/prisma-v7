@@ -1,7 +1,6 @@
 import path from 'node:path'
 
 import type { PrismaConfigInternal } from '@prisma/config'
-import { enginesVersion } from '@prisma/engines'
 import {
   arg,
   BinaryType,
@@ -17,6 +16,7 @@ import {
   resolveEngine,
   wasm,
 } from '@prisma/internals'
+import { enginesVersion } from '@prisma-kb/engines'
 import { bold, dim, red } from 'kleur/colors'
 import os from 'os'
 
@@ -25,7 +25,7 @@ import { getInstalledPrismaClientVersion } from './utils/getClientVersion'
 const packageJson = require('../package.json')
 
 /**
- * $ prisma version
+ * $ prisma-kb version
  */
 export class Version implements Command {
   static new(): Version {
@@ -38,7 +38,7 @@ export class Version implements Command {
   ${bold('Usage')}
 
     ${dim('$')} prisma -v [options]
-    ${dim('$')} prisma version [options]
+    ${dim('$')} prisma-kb version [options]
 
   ${bold('Options')}
 
@@ -84,13 +84,13 @@ export class Version implements Command {
 
     const rows = [
       [packageJson.name, packageJson.version],
-      ['@prisma/client', prismaClientVersion ?? 'Not found'],
+      ['@prisma-kb/client', prismaClientVersion ?? 'Not found'],
       ['Operating System', os.platform()],
       ['Architecture', os.arch()],
       ['Node.js', process.version],
       ['TypeScript', typescriptVersion],
       ['Query Compiler', 'enabled'],
-      ['PSL', `@prisma/prisma-schema-wasm ${wasm.prismaSchemaWasmVersion}`],
+      ['PSL', `@prisma-kb/prisma-schema-wasm ${wasm.prismaSchemaWasmVersion}`],
       ...schemaEngineRows,
 
       ['Default Engines Hash', enginesVersion],

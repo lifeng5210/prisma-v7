@@ -1,6 +1,12 @@
 import { allProviders, Providers } from '../_utils/providers'
 
-export const providersSupportingRelationJoins = [Providers.POSTGRESQL, Providers.COCKROACHDB, Providers.MYSQL]
+export const providersSupportingRelationJoins = [
+  Providers.POSTGRESQL,
+  Providers.COCKROACHDB,
+  Providers.MYSQL,
+  Providers.KINGBASE_MYSQL,
+  Providers.KINGBASE_ORACLE,
+]
 
 export const providersNotSupportingRelationJoins = allProviders
   .filter((provider) => !providersSupportingRelationJoins.includes(provider.provider))

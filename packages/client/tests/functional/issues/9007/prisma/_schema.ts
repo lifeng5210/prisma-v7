@@ -15,6 +15,8 @@ export default testMatrix.setupSchema(({ provider }) => {
     model User {
       id ${idForProvider(provider)}
       uuid String @default(uuid()) @db.Uuid
+      nullableUuid String? @db.Uuid
+      name String @default("alpha-middle-tail")
     }
   `
 })

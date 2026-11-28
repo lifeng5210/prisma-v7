@@ -1,7 +1,7 @@
 import { PrismaPlanetScale } from '@prisma/adapter-planetscale'
-import { PrismaClient } from '@prisma/client'
-import { PrismaClientKnownRequestError as E1 } from '@prisma/client/runtime/client'
-import { PrismaClientKnownRequestError as E2 } from '@prisma/client/runtime/client.js'
+import { PrismaClient } from '@prisma-kb/client'
+import { PrismaClientKnownRequestError as E1 } from '@prisma-kb/client/runtime/client'
+import { PrismaClientKnownRequestError as E2 } from '@prisma-kb/client/runtime/client.js'
 // import { withAccelerate } from '@prisma/extension-accelerate'
 // import { readReplicas } from '@prisma/extension-read-replicas'
 

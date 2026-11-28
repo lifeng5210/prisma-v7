@@ -8,7 +8,15 @@ export default defineMatrix(() => [
       relationMode: 'prisma',
     },
     {
+      provider: Providers.KINGBASE_ORACLE,
+      relationMode: 'prisma',
+    },
+    {
       provider: Providers.POSTGRESQL,
+      relationMode: '', // empty means default (foreignKeys)
+    },
+    {
+      provider: Providers.KINGBASE_ORACLE,
       relationMode: '', // empty means default (foreignKeys)
     },
     {
@@ -16,7 +24,15 @@ export default defineMatrix(() => [
       relationMode: 'prisma',
     },
     {
+      provider: Providers.KINGBASE_MYSQL,
+      relationMode: 'prisma',
+    },
+    {
       provider: Providers.MYSQL,
+      relationMode: '', // empty means default (foreignKeys)
+    },
+    {
+      provider: Providers.KINGBASE_MYSQL,
       relationMode: '', // empty means default (foreignKeys)
     },
   ],

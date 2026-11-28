@@ -26,7 +26,7 @@ const cliLifecyclePlugin: esbuild.Plugin = {
       // the schema Wasm packages are dependencies of @prisma/internals, so we resolve them from there
       const internalsPath = path.join(__dirname, '..', '..', 'internals')
 
-      const prismaWasmFile = require.resolve('@prisma/prisma-schema-wasm/src/prisma_schema_build_bg.wasm', {
+      const prismaWasmFile = require.resolve('@prisma-kb/prisma-schema-wasm/src/prisma_schema_build_bg.wasm', {
         paths: [internalsPath],
       })
       await fs.promises.copyFile(prismaWasmFile, './build/prisma_schema_build_bg.wasm')
@@ -52,7 +52,15 @@ async function copyClientWasmRuntime() {
   const clientPath = path.join(__dirname, '..', '..', 'client')
   const clientRuntimePath = path.join(clientPath, 'runtime')
 
-  for (const provider of ['cockroachdb', 'mysql', 'postgresql', 'sqlite', 'sqlserver']) {
+  for (const provider of [
+    'cockroachdb',
+    'kingbase-mysql',
+    'kingbase-oracle',
+    'mysql',
+    'postgresql',
+    'sqlite',
+    'sqlserver',
+  ]) {
     for (const build of ['fast', 'small']) {
       const baseName = `query_compiler_${build}_bg.${provider}`
 
@@ -60,10 +68,13 @@ async function copyClientWasmRuntime() {
         await fs.promises.copyFile(path.join(clientRuntimePath, file), `./build/${file}`)
       }
 
-      // @prisma/query-compiler-wasm is a dependency of @prisma/client, so we resolve it from there
-      const wasmFilePath = require.resolve(`@prisma/query-compiler-wasm/${provider}/query_compiler_${build}_bg.wasm`, {
-        paths: [clientPath],
-      })
+      // @prisma-kb/query-compiler-wasm is a dependency of @prisma-kb/client, so we resolve it from there
+      const wasmFilePath = require.resolve(
+        `@prisma-kb/query-compiler-wasm/${provider}/query_compiler_${build}_bg.wasm`,
+        {
+          paths: [clientPath],
+        },
+      )
 
       await fs.promises.copyFile(wasmFilePath, `./build/${baseName}.wasm`)
     }
@@ -89,7 +100,7 @@ async function buildStudioFrontend() {
 }
 
 /**
- * Setup `import type { ... } from 'prisma'`.
+ * Setup `import type { ... } from 'prisma-kb'`.
  */
 const cliTypesBuildConfig: BuildOptions = {
   name: 'cliTypes',
@@ -101,7 +112,7 @@ const cliTypesBuildConfig: BuildOptions = {
 }
 
 /**
- * Setup `import { ... } from 'prisma/config'`.
+ * Setup `import { ... } from 'prisma-kb/config'`.
  */
 const cliConfigBuildConfig: BuildOptions = {
   name: 'cliConfig',

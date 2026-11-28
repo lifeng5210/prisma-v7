@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 
 const prisma = new PrismaClient({ errorFormat: 'minimal', log: ['query'] })
 

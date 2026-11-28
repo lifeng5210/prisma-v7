@@ -11,6 +11,8 @@ export function computeMatrix({ relationMode }: ComputeMatrix) {
     Providers.SQLSERVER,
     Providers.SQLITE,
     Providers.MYSQL,
+    Providers.KINGBASE_MYSQL,
+    Providers.KINGBASE_ORACLE,
   ] as const
 
   // Note: SetDefault is not implemented in the emulation (relationMode="prisma")
@@ -88,7 +90,12 @@ export function computeMatrix({ relationMode }: ComputeMatrix) {
     // So we only run it
     // when the datasource property relationMode is not set (default) or set to `prisma`.
     // Which also matches the error expectations in our test suite
-    if (!relationMode || relationMode === RelationModes.PRISMA) {
+    // Keep the existing MongoDB entries when adding the Kingbase SQL providers.
+    if (
+      (!relationMode || relationMode === RelationModes.PRISMA) &&
+      entry.provider !== Providers.KINGBASE_MYSQL &&
+      entry.provider !== Providers.KINGBASE_ORACLE
+    ) {
       const mongoDBMatrixBase = {
         provider: Providers.MONGODB,
         id: 'String @id @map("_id")',

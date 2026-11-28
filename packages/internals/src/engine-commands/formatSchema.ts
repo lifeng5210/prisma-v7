@@ -71,7 +71,7 @@ function handleFormatPanic<T>(tryCb: () => T) {
     const panic = new RustPanic(
       /* message */ message,
       /* rustStack */ stack,
-      /* request */ '@prisma/prisma-schema-wasm format',
+      /* request */ '@prisma-kb/prisma-schema-wasm format',
       ErrorArea.FMT_CLI,
     )
 

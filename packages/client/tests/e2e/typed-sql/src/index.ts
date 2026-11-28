@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
-import { getEmail } from '@prisma/client/sql'
+import { PrismaClient } from '@prisma-kb/client'
+import { getEmail } from '@prisma-kb/client/sql'
 
 async function main() {
   const adapter = new PrismaPg({

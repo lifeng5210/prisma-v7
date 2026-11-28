@@ -85,7 +85,7 @@ function mapWasmPanicToGetDmmfError(error: Error | WasmPanic, reason: string): G
     const panic = new RustPanic(
       /* message */ message,
       /* rustStack */ stack,
-      /* request */ '@prisma/prisma-schema-wasm get_dmmf',
+      /* request */ '@prisma-kb/prisma-schema-wasm get_dmmf',
       ErrorArea.FMT_CLI,
     )
     return panic

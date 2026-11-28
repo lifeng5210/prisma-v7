@@ -12,11 +12,11 @@ declare let prisma: PrismaClient
 testMatrix.setupTestSuite(
   ({ provider }) => {
     beforeAll(async () => {
-      if (provider !== Providers.MYSQL) {
+      if (![Providers.MYSQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider)) {
         await prisma.resource.create({
           data: {
             enumValue: 'A',
-            // @ts-test-if: provider !== Providers.MYSQL
+            // @ts-test-if: ![Providers.MYSQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider)
             enumArray: ['A'],
           },
         })
@@ -43,13 +43,15 @@ testMatrix.setupTestSuite(
       `)
     })
 
-    testIf(provider !== Providers.MYSQL)('groupBy on enumArray field', async () => {
-      const result = await prisma.resource.groupBy({
-        // @ts-test-if: provider !== Providers.MYSQL
-        by: ['enumArray'],
-      })
+    testIf(![Providers.MYSQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider))(
+      'groupBy on enumArray field',
+      async () => {
+        const result = await prisma.resource.groupBy({
+          // @ts-test-if: ![Providers.MYSQL, Providers.KINGBASE_MYSQL, Providers.KINGBASE_ORACLE].includes(provider)
+          by: ['enumArray'],
+        })
 
-      expect(result).toMatchInlineSnapshot(`
+        expect(result).toMatchInlineSnapshot(`
         [
           {
             "enumArray": [
@@ -58,7 +60,8 @@ testMatrix.setupTestSuite(
           },
         ]
       `)
-    })
+      },
+    )
   },
   {
     optOut: {

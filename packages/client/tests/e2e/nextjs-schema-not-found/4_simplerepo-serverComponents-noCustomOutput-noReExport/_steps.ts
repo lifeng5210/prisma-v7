@@ -6,8 +6,8 @@ import { testServerComponents } from '../_shared/test'
 void executeSteps({
   setup: async () => {
     await $`pnpm install`
-    await $`pnpm exec prisma db push --force-reset`
-    await $`pnpm prisma generate`
+    await $`pnpm exec prisma-kb db push --force-reset`
+    await $`pnpm prisma-kb generate`
   },
   test: async () => {
     await testServerComponents({ monorepo: false })

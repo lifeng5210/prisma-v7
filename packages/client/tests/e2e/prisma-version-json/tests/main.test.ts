@@ -5,7 +5,7 @@ import { expect, test } from 'vitest'
 test('prisma version --json outputs valid JSON', () => {
   // Run prisma version --json | jq and check exit code
   // jq will exit with code 0 if JSON is valid, non-zero otherwise
-  const output = execSync('pnpm exec prisma version --json | jq .', {
+  const output = execSync('pnpm exec prisma-kb version --json | jq .', {
     encoding: 'utf-8',
     shell: '/bin/sh',
   })

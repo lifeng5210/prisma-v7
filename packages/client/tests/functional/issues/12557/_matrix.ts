@@ -16,7 +16,15 @@ export default defineMatrix(() => [
       relationMode,
     },
     {
+      provider: Providers.KINGBASE_MYSQL,
+      relationMode,
+    },
+    {
       provider: Providers.POSTGRESQL,
+      relationMode,
+    },
+    {
+      provider: Providers.KINGBASE_ORACLE,
       relationMode,
     },
   ],

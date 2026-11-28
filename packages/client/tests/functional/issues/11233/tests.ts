@@ -40,6 +40,8 @@ testMatrix.setupTestSuite(
         case Providers.POSTGRESQL:
         case Providers.COCKROACHDB:
         case Providers.SQLSERVER:
+        case Providers.KINGBASE_MYSQL:
+        case Providers.KINGBASE_ORACLE:
           expect(result).toEqual(0)
           break
 
@@ -83,6 +85,8 @@ testMatrix.setupTestSuite(
         case Providers.POSTGRESQL:
         case Providers.COCKROACHDB:
         case Providers.SQLSERVER:
+        case Providers.KINGBASE_MYSQL:
+        case Providers.KINGBASE_ORACLE:
           expect(result).toEqual([])
           break
 

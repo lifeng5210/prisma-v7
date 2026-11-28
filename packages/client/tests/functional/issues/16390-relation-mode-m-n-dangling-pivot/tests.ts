@@ -5,10 +5,17 @@ import testMatrix from './_matrix'
 
 // @ts-ignore this is just for type checks
 declare let prisma: import('./generated/prisma/client').PrismaClient
+// @ts-ignore this is just for type checks
+declare let Prisma: typeof import('./generated/prisma/client').Prisma
 
 testMatrix.setupTestSuite(
   ({ provider, relationMode }, suiteMeta) => {
-    const isMySql = provider === Providers.MYSQL
+    const isMySql = provider === Providers.MYSQL || provider === Providers.KINGBASE_MYSQL
+
+    const expectedPivot = (id: number) =>
+      provider === Providers.KINGBASE_ORACLE
+        ? { a: new Prisma.Decimal(id), b: new Prisma.Decimal(id) }
+        : { A: id, B: id }
 
     describe('issue 16390', () => {
       afterEach(async () => {
@@ -60,14 +67,7 @@ testMatrix.setupTestSuite(
         } else {
           pivotTable = await prisma.$queryRaw`SELECT * FROM "_CategoryToItem";`
         }
-        expect(pivotTable).toMatchInlineSnapshot(`
-          [
-            {
-              "A": 1,
-              "B": 1,
-            },
-          ]
-        `)
+        expect(pivotTable).toStrictEqual([expectedPivot(1)])
 
         // Delete the item
         expect(
@@ -125,12 +125,7 @@ testMatrix.setupTestSuite(
         // ... the pivot table entry is still there!
         // This is a bug in the relationMode="prisma" emulation
         if (relationMode === RelationModes.PRISMA) {
-          expect(pivotTableAfterDelete).toStrictEqual([
-            {
-              A: 1,
-              B: 1,
-            },
-          ])
+          expect(pivotTableAfterDelete).toStrictEqual([expectedPivot(1)])
         } else {
           // This is the expected behavior for prisma and foreignKeys
           // once this bug is fixed
@@ -177,14 +172,7 @@ testMatrix.setupTestSuite(
       } else {
         pivotTable = await prisma.$queryRaw`SELECT * FROM "_CategoryToItem";`
       }
-      expect(pivotTable).toMatchInlineSnapshot(`
-        [
-          {
-            "A": 2,
-            "B": 2,
-          },
-        ]
-      `)
+      expect(pivotTable).toStrictEqual([expectedPivot(2)])
 
       // Delete the category
       expect(
@@ -245,12 +233,7 @@ testMatrix.setupTestSuite(
       // TODO once the bug is fixed: remove conditional
       // pivot table should be empty
       if (relationMode === RelationModes.PRISMA) {
-        expect(pivotTableAfterDelete).toStrictEqual([
-          {
-            A: 2,
-            B: 2,
-          },
-        ])
+        expect(pivotTableAfterDelete).toStrictEqual([expectedPivot(2)])
       } else {
         // This is the expected behavior for prisma and foreignKeys
         // once this bug is fixed

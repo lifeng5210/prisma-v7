@@ -7,8 +7,8 @@ const { executeSteps } = executeStepsModule
 void executeSteps({
   setup: async () => {
     await $`pnpm install`
-    await $`pnpm prisma generate`
-    await $`pnpm prisma db push --force-reset`
+    await $`pnpm prisma-kb generate`
+    await $`pnpm prisma-kb db push --force-reset`
   },
   test: async () => {
     await $`pnpm tsoa routes`

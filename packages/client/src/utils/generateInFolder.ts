@@ -41,9 +41,11 @@ export async function generateInFolder({ projectDir, packageSource }: GenerateIn
 
   const config = await getConfig({ datamodel: schemas })
 
-  const outputDir = path.join(projectDir, 'node_modules/@prisma/client')
+  const outputDir = path.join(projectDir, 'node_modules/@prisma-kb/client')
+  const legacyOutputDir = path.join(projectDir, 'node_modules/@prisma/client')
 
   await fs.promises.rm(outputDir, { force: true, recursive: true })
+  await fs.promises.rm(legacyOutputDir, { force: true, recursive: true })
 
   if (packageSource) {
     await copy({
@@ -54,8 +56,14 @@ export async function generateInFolder({ projectDir, packageSource }: GenerateIn
       overwrite: true,
     })
   } else {
-    await getPackedPackage('@prisma/client', outputDir)
+    await getPackedPackage('@prisma-kb/client', outputDir)
   }
+
+  // The upstream compatibility fixtures still import @prisma/client. Point that
+  // legacy test-only entry at the real @prisma-kb/client package so both the
+  // generated declarations and their runtime type imports resolve correctly.
+  await fs.promises.mkdir(path.dirname(legacyOutputDir), { recursive: true })
+  await fs.promises.symlink(outputDir, legacyOutputDir, process.platform === 'win32' ? 'junction' : 'dir')
 
   // TODO: use engine.getDmmf()
   const dmmf = await getDMMF({ datamodel: schemas })

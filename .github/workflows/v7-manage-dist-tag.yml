@@ -45,11 +45,11 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
 
           echo "The following commands will be executed, for example:"
-          echo "npm dist-tag '${{ env.ACTION }}' '@prisma/client${{ env.VERSION }}' '${{ env.TAG_NAME }}'"
+          echo "npm dist-tag '${{ env.ACTION }}' '@prisma-kb/client${{ env.VERSION }}' '${{ env.TAG_NAME }}'"
 
           sleep 10
 
-          npm dist-tag "${{ env.ACTION }}" "@prisma/client${{ env.VERSION }}" "${{ env.TAG_NAME }}"
+          npm dist-tag "${{ env.ACTION }}" "@prisma-kb/client${{ env.VERSION }}" "${{ env.TAG_NAME }}"
           npm dist-tag "${{ env.ACTION }}" "prisma${{ env.VERSION }}" "${{ env.TAG_NAME }}"
 
           npm dist-tag "${{ env.ACTION }}" "@prisma/adapter-d1${{ env.VERSION }}" "${{ env.TAG_NAME }}"

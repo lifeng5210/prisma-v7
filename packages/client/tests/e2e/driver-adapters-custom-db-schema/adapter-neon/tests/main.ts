@@ -1,6 +1,6 @@
 import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma-kb/client'
 import { WebSocket } from 'undici'
 
 test('neon supports custom database schema (default is: "public".<TABLE>)', async () => {

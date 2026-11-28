@@ -9,25 +9,189 @@
   <br />
   <br />
   <a href="https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres">Quickstart</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/">Website</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/docs/">Docs</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://github.com/prisma/prisma-examples/">Examples</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/blog">Blog</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/discord?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Discord</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/x?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Twitter</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/youtube?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Youtube</a>
   <br />
   <hr />
 </div>
 
 > **This is the Prisma ORM 7.x line, maintained on the `v7` branch.** The default branch of this repository now hosts [Prisma Next](https://github.com/prisma/prisma/tree/main), a TypeScript rewrite of Prisma ORM. The `prisma` and `@prisma/*` packages on npm are published from here.
+
+## KingbaseES（KB）适配
+
+本仓库是基于 Prisma ORM 7.10.0 的金仓 KingbaseES 社区适配版本。KB 项目使用本节中的包名、命令和配置；下方保留的上游 Prisma 文档使用官方包名。
+
+用户通过 npm 安装配套的 `prisma-kb`、`@prisma-kb/client` 和 `@prisma-kb/adapter-kb`，无需拉取源码仓库或自行编译。已有官方 Prisma 项目接入 KingbaseES 时，应将 CLI 和 Client 切换为本适配发行版的配套包，并按照下方示例配置 provider 和适配器。
+
+Kingbase provider 和 SQL 方言支持已包含在适配发行版的配套组件中：CLI 和引擎根据 schema 中的 `kingbase-mysql` 或 `kingbase-oracle` 选择对应连接器及方言；应用导入 `PrismaKbMysql` 或 `PrismaKbOracle`，将适配器通过 `new PrismaClient({ adapter })` 传入客户端。内部依赖随 npm 安装，原生 Schema Engine 按下方说明下载，用户无需手工注册方言或修改框架源码。
+
+| 数据库模式      | Prisma provider   | 驱动适配器       | 适配验证环境    |
+| --------------- | ----------------- | ---------------- | --------------- |
+| MySQL 兼容模式  | `kingbase-mysql`  | `PrismaKbMysql`  | R3 V009R003C018 |
+| Oracle 兼容模式 | `kingbase-oracle` | `PrismaKbOracle` | R2 V009R002C016 |
+
+两个适配器均使用 `kingbasedb` Node.js 驱动。查询由 Rust Query Compiler 编译，通过 TypeScript 查询解释器和驱动适配器执行；迁移和内省使用配套的原生 Schema Engine。
+
+### 安装与初始化
+
+应用运行环境要求 Node.js `^20.19 || ^22.12 || >=24.0`。以下命令不固定版本号，按 npm 的 `latest` 标签安装；CLI、Client 和适配器应使用相互兼容的适配发行版本。请在新项目目录中执行：
+
+```sh
+npm init -y
+npm install --save-dev typescript tsx @types/node prisma-kb
+npm install @prisma-kb/client @prisma-kb/adapter-kb dotenv
+npx tsc --init
+npm pkg set type=module
+```
+
+下面以 MySQL 兼容模式为例：
+
+```sh
+npx prisma-kb init --datasource-provider kingbase-mysql --output ../generated/prisma
+```
+
+在 `.env` 中设置连接地址，并将占位内容替换为实际连接信息：
+
+```dotenv
+DATABASE_URL="kingbase-mysql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA"
+```
+
+`prisma.config.ts` 负责 CLI 的数据库连接配置：
+
+```ts
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma-kb/config'
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  migrations: { path: 'prisma/migrations' },
+  datasource: { url: env('DATABASE_URL') },
+})
+```
+
+`prisma/schema.prisma` 中配置 provider 和模型，数据库 URL 放在配置文件中：
+
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "kingbase-mysql"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}
+```
+
+创建数据库对象并生成 Client：
+
+```sh
+npx prisma-kb migrate dev --name init
+npx prisma-kb generate
+```
+
+在项目根目录创建 `index.ts`：
+
+```ts
+import 'dotenv/config'
+import { PrismaKbMysql } from '@prisma-kb/adapter-kb'
+import { PrismaClient } from './generated/prisma/client'
+
+const adapter = new PrismaKbMysql(process.env.DATABASE_URL!)
+const prisma = new PrismaClient({ adapter })
+
+try {
+  console.log(await prisma.user.findMany())
+} finally {
+  await prisma.$disconnect()
+}
+```
+
+运行应用：
+
+```sh
+npx tsx index.ts
+```
+
+使用 Oracle 兼容模式时，初始化命令改为：
+
+```sh
+npx prisma-kb init --datasource-provider kingbase-oracle --output ../generated/prisma
+```
+
+同时使用 `provider = "kingbase-oracle"`、`kingbase-oracle://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA` 连接地址，以及 `PrismaKbOracle` 适配器：
+
+```ts
+import { PrismaKbOracle } from '@prisma-kb/adapter-kb'
+
+const adapter = new PrismaKbOracle(process.env.DATABASE_URL!)
+```
+
+`PrismaKb` 和 `PrismaKbOptions` 分别保留为 `PrismaKbMysql` 和 `PrismaKbMysqlOptions` 的兼容别名。`db pull`、`migrate`、`generate` 和 `validate` 等 CLI 操作使用 `prisma-kb` 命令。
+
+### 使用限制
+
+Prisma Studio 不支持这两个 Kingbase provider。
+
+适配器的其他限制及 BIT 位宽、无符号类型、日期时间处理等细节，见[适配器说明](./packages/adapter-kb/README.md)。
+
+### 全文检索
+
+两个模式的 `search` 和 `_relevance.search` 都接受金仓原生 `tsquery` 表达式。参数原样传递，不转换 MySQL Boolean Mode 表达式。
+
+```ts
+await prisma.user.findMany({
+  where: { name: { search: 'John & !Smith' } },
+  orderBy: { _relevance: { fields: ['name'], search: 'John | April', sort: 'desc' } },
+})
+```
+
+使用 `&` 表示 AND、`|` 表示 OR、`!` 表示 NOT、`<->` 表示短语、`:*` 表示前缀匹配；无效表达式由数据库报错。MySQL 兼容模式使用固定的 `simple` 配置，与 Prisma 管理的 `@@fulltext` 索引保持一致。Oracle 兼容模式使用数据库默认配置，不提供 `@@fulltext`；两种模式的分词和相关性分数可能不同。
+
+### 配套包与引擎
+
+KB 发行包包括 `prisma-kb`、`@prisma-kb/client`、`@prisma-kb/adapter-kb`、`@prisma-kb/driver-adapter-utils`、`@prisma-kb/prisma-schema-wasm`、`@prisma-kb/query-compiler-wasm`、`@prisma-kb/engines` 和 `@prisma-kb/engines-version`。内部依赖由包依赖关系及 lockfile 确定，无需全部手动安装。
+
+`@prisma-kb/engines` 默认从 [https://lifeng5210.github.io/prisma-engines-binaries](https://lifeng5210.github.io/prisma-engines-binaries) 下载对应修订的原生 Schema Engine；`PRISMA_ENGINES_MIRROR` 或 `PRISMA_BINARIES_MIRROR` 可指定其他镜像。引擎修订由 `@prisma-kb/engines-version` 决定。
+
+Rust 引擎与 Wasm 构建说明见[金仓引擎仓库](https://github.com/lifeng5210/prisma-engines/tree/kingbase)。
+
+### 源码构建
+
+以下步骤用于适配开发和自行构建发行包。
+
+```sh
+git clone --branch kingbase https://github.com/lifeng5210/prisma-v7.git
+cd prisma-v7
+```
+
+本仓库开发推荐 Node.js 24，使用根 `package.json` 固定的 pnpm 11.13.1。安装依赖并构建：
+
+```sh
+pnpm install
+pnpm build
+```
+
+下方上游文档中的包名和命令保留原样，开发 KB 分支时以本节为准。
+
+---
 
 ## What is Prisma?
 
@@ -246,7 +410,7 @@ After you change your data model, you'll need to manually re-generate Prisma Cli
 npx prisma generate
 ```
 
-Refer to the documentation for more information about ["generating the Prisma client"](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/generating-prisma-client).
+Refer to the documentation for more information about [&#34;generating the Prisma client&#34;](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/generating-prisma-client).
 
 #### Step 5: Use Prisma Client to send queries to your database
 

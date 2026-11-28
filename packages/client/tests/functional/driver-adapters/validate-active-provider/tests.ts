@@ -20,6 +20,16 @@ declare const newPrismaClient: NewPrismaClient<PrismaClient, typeof PrismaClient
 // https://github.com/prisma/prisma/issues/21864
 testMatrix.setupTestSuite(
   ({ driverAdapter, provider }) => {
+    testIf(provider === Providers.KINGBASE_MYSQL || provider === Providers.KINGBASE_ORACLE)(
+      'rejects a PostgreSQL adapter for a KES provider',
+      () => {
+        const adapter = new PrismaPg({ connectionString: datasourceInfo.databaseUrl })
+        expect(() => newPrismaClient({ adapter })).toThrow(
+          `The Driver Adapter \`@prisma/adapter-pg\`, based on \`postgres\`, is not compatible with the provider \`${provider}\` specified in the Prisma schema.`,
+        )
+      },
+    )
+
     testIf(driverAdapter === 'js_pg' && provider === Providers.MYSQL)(
       '@prisma/adapter-pg cannot be used with `provider = "mysql"`',
       () => {

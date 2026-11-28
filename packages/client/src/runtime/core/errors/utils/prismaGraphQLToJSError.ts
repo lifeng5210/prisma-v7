@@ -28,7 +28,11 @@ export function prismaGraphQLToJSError(
 function getKnownErrorMessage(userFacingError: RequestError['user_facing_error'], activeProvider: string) {
   let message = userFacingError.message
   if (
-    (activeProvider === 'postgresql' || activeProvider === 'postgres' || activeProvider === 'mysql') &&
+    (activeProvider === 'postgresql' ||
+      activeProvider === 'postgres' ||
+      activeProvider === 'mysql' ||
+      activeProvider === 'kingbase-mysql' ||
+      activeProvider === 'kingbase-oracle') &&
     userFacingError.error_code === TOO_MANY_CONNECTIONS_ERROR
   ) {
     message +=

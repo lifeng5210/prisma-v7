@@ -13,6 +13,12 @@ export default defineMatrix(() => [
       provider: Providers.MYSQL,
     },
     {
+      provider: Providers.KINGBASE_MYSQL,
+    },
+    {
+      provider: Providers.KINGBASE_ORACLE,
+    },
+    {
       provider: Providers.COCKROACHDB,
     },
   ],

@@ -17,7 +17,7 @@ export function createHelp({ subcommands, examples }: HelpOptions): string {
 
   ${bold('Usage')}
 
-    ${dim('$')} prisma platform [command]
+    ${dim('$')} prisma-kb platform [command]
 
   ${bold('Commands')}
 

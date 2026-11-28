@@ -8,6 +8,9 @@ declare let prisma: PrismaClient
 const describeIf = (condition: boolean) => (condition ? describe : describe.skip)
 
 testMatrix.setupTestSuite(({ provider }) => {
+  const supportsEmptyStrings = provider !== Providers.KINGBASE_ORACLE
+  const expectedAllRows = supportsEmptyStrings ? 6 : 5
+
   beforeAll(async () => {
     await prisma.testModel.createMany({
       data: [
@@ -15,7 +18,7 @@ testMatrix.setupTestSuite(({ provider }) => {
         { value: 'foo' },
         { value: 'baz' },
         { value: 'bar' },
-        { value: '' },
+        ...(supportsEmptyStrings ? [{ value: '' }] : []),
         { value: 'completely different' },
       ],
     })
@@ -39,12 +42,12 @@ testMatrix.setupTestSuite(({ provider }) => {
     expect(results).toHaveLength(0)
   })
 
-  test('startsWith with empty string matches all', async () => {
+  testIf(supportsEmptyStrings)('startsWith with empty string matches all', async () => {
     const results = await prisma.testModel.findMany({
       where: { value: { startsWith: '' } },
     })
 
-    expect(results).toHaveLength(6)
+    expect(results).toHaveLength(expectedAllRows)
   })
 
   test('endsWith matches suffix', async () => {
@@ -65,12 +68,12 @@ testMatrix.setupTestSuite(({ provider }) => {
     expect(results).toHaveLength(0)
   })
 
-  test('endsWith with empty string matches all', async () => {
+  testIf(supportsEmptyStrings)('endsWith with empty string matches all', async () => {
     const results = await prisma.testModel.findMany({
       where: { value: { endsWith: '' } },
     })
 
-    expect(results).toHaveLength(6)
+    expect(results).toHaveLength(expectedAllRows)
   })
 
   test('contains matches substring', async () => {
@@ -91,12 +94,12 @@ testMatrix.setupTestSuite(({ provider }) => {
     expect(results).toHaveLength(0)
   })
 
-  test('contains with empty string matches all', async () => {
+  testIf(supportsEmptyStrings)('contains with empty string matches all', async () => {
     const results = await prisma.testModel.findMany({
       where: { value: { contains: '' } },
     })
 
-    expect(results).toHaveLength(6)
+    expect(results).toHaveLength(expectedAllRows)
   })
 
   test('combined startsWith + endsWith', async () => {
@@ -135,8 +138,10 @@ testMatrix.setupTestSuite(({ provider }) => {
       orderBy: { value: 'asc' },
     })
 
-    expect(results).toHaveLength(4)
-    expect(results.map((r) => r.value)).toEqual(['', 'bar', 'baz', 'completely different'])
+    expect(results).toHaveLength(supportsEmptyStrings ? 4 : 3)
+    expect(results.map((r) => r.value)).toEqual(
+      supportsEmptyStrings ? ['', 'bar', 'baz', 'completely different'] : ['bar', 'baz', 'completely different'],
+    )
   })
 
   test('NOT contains', async () => {
@@ -145,8 +150,10 @@ testMatrix.setupTestSuite(({ provider }) => {
       orderBy: { value: 'asc' },
     })
 
-    expect(results).toHaveLength(4)
-    expect(results.map((r) => r.value)).toEqual(['', 'baz', 'completely different', 'foo'])
+    expect(results).toHaveLength(supportsEmptyStrings ? 4 : 3)
+    expect(results.map((r) => r.value)).toEqual(
+      supportsEmptyStrings ? ['', 'baz', 'completely different', 'foo'] : ['baz', 'completely different', 'foo'],
+    )
   })
 
   test('NOT endsWith', async () => {
@@ -155,45 +162,49 @@ testMatrix.setupTestSuite(({ provider }) => {
       orderBy: { value: 'asc' },
     })
 
-    expect(results).toHaveLength(4)
-    expect(results.map((r) => r.value)).toEqual(['', 'bar', 'completely different', 'foo'])
+    expect(results).toHaveLength(supportsEmptyStrings ? 4 : 3)
+    expect(results.map((r) => r.value)).toEqual(
+      supportsEmptyStrings ? ['', 'bar', 'completely different', 'foo'] : ['bar', 'completely different', 'foo'],
+    )
   })
 
-  describeIf(provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.MONGODB)(
-    'mode: insensitive',
-    () => {
-      beforeAll(async () => {
-        await prisma.testModel.createMany({
-          data: [{ value: 'FOO BAR BAZ' }, { value: 'Foo' }],
-        })
+  describeIf(
+    provider === Providers.POSTGRESQL ||
+      provider === Providers.COCKROACHDB ||
+      provider === Providers.KINGBASE_ORACLE ||
+      provider === Providers.MONGODB,
+  )('mode: insensitive', () => {
+    beforeAll(async () => {
+      await prisma.testModel.createMany({
+        data: [{ value: 'FOO BAR BAZ' }, { value: 'Foo' }],
+      })
+    })
+
+    test('contains case-insensitive', async () => {
+      const results = await prisma.testModel.findMany({
+        // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE || provider === Providers.MONGODB
+        where: { value: { contains: 'bar', mode: 'insensitive' } },
       })
 
-      test('contains case-insensitive', async () => {
-        const results = await prisma.testModel.findMany({
-          // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.MONGODB
-          where: { value: { contains: 'bar', mode: 'insensitive' } },
-        })
+      expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'bar', 'foo bar baz'])
+    })
 
-        expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'bar', 'foo bar baz'])
+    test('startsWith case-insensitive', async () => {
+      const results = await prisma.testModel.findMany({
+        // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE || provider === Providers.MONGODB
+        where: { value: { startsWith: 'foo', mode: 'insensitive' } },
       })
 
-      test('startsWith case-insensitive', async () => {
-        const results = await prisma.testModel.findMany({
-          // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.MONGODB
-          where: { value: { startsWith: 'foo', mode: 'insensitive' } },
-        })
+      expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'Foo', 'foo', 'foo bar baz'])
+    })
 
-        expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'Foo', 'foo', 'foo bar baz'])
+    test('endsWith case-insensitive', async () => {
+      const results = await prisma.testModel.findMany({
+        // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.KINGBASE_ORACLE || provider === Providers.MONGODB
+        where: { value: { endsWith: 'baz', mode: 'insensitive' } },
       })
 
-      test('endsWith case-insensitive', async () => {
-        const results = await prisma.testModel.findMany({
-          // @ts-test-if: provider === Providers.POSTGRESQL || provider === Providers.COCKROACHDB || provider === Providers.MONGODB
-          where: { value: { endsWith: 'baz', mode: 'insensitive' } },
-        })
-
-        expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'baz', 'foo bar baz'])
-      })
-    },
-  )
+      expect(results.map((r) => r.value).sort()).toEqual(['FOO BAR BAZ', 'baz', 'foo bar baz'])
+    })
+  })
 })

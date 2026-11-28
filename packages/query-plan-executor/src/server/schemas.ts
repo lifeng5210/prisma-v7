@@ -1,4 +1,4 @@
-import { ConnectionInfo, Provider } from '@prisma/driver-adapter-utils'
+import { ConnectionInfo, Provider } from '@prisma-kb/driver-adapter-utils'
 import { z } from 'zod'
 
 import { ExportableLogEvent } from '../log/event'
