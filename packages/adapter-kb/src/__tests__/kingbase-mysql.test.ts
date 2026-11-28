@@ -52,6 +52,40 @@ function createPool(): { pool: MockPool; connection: MockConnection } {
   return { pool, connection }
 }
 
+test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI)(
+  'real MYSQL rejects Oracle ROWID and preserves database error codes',
+  async () => {
+    const adapter = await new PrismaKbMysqlAdapterFactory({
+      connectionString: process.env.TEST_KINGBASE_MYSQL_URI!,
+      max: 1,
+    }).connect()
+    const sqlQuery = (sql: string, args: SqlQuery['args'] = []): SqlQuery => ({
+      sql,
+      args,
+      argTypes: args.map(() => ({ scalarType: 'string', arity: 'scalar' })),
+    })
+    try {
+      const catalog = await adapter.queryRaw(sqlQuery("SELECT oid FROM pg_catalog.pg_type WHERE typname = 'rowid'"))
+      expect(catalog.rows).toEqual([])
+      for (const { sql, args, code } of [
+        { sql: 'SELECT CAST(NULL AS ROWID) AS value', args: [], code: '42704' },
+        { sql: 'SELECT CAST(? AS ROWID) AS value', args: ['AAAAAAAAAAABAAAAAAAAAAA'], code: '42704' },
+        { sql: 'SELECT nextrowid() AS value', args: [], code: '42883' },
+      ]) {
+        await expect(adapter.queryRaw(sqlQuery(sql, args))).rejects.toMatchObject({
+          cause: { originalCode: code, code },
+        })
+      }
+      const result = await adapter.queryRaw(sqlQuery('SELECT 1 AS value'))
+      expect(result.columnTypes).toEqual([ColumnTypeEnum.Int32])
+      expect(result.rows).toEqual([[1]])
+    } finally {
+      await adapter.dispose()
+    }
+  },
+  20000,
+)
+
 test.skipIf(!process.env.TEST_KINGBASE_MYSQL_URI).each([false, true])(
   'real MYSQL BIT byte parameters preserve numeric values with declared width: %s',
   async (declaredWidth) => {

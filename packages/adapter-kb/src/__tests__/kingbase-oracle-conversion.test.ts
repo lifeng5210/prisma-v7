@@ -25,6 +25,8 @@ describe('Kingbase Oracle field conversion', () => {
     [8014, ColumnTypeEnum.Text],
     [8015, ColumnTypeEnum.Text],
     [8016, ColumnTypeEnum.Text],
+    [6123, ColumnTypeEnum.Text],
+    [6125, ColumnTypeEnum.Text],
     [18, ColumnTypeEnum.Character],
   ])('maps Oracle type id %s to %s', (typeId, expected) => {
     expect(fieldToOracleColumnType(typeId)).toBe(expected)
@@ -44,6 +46,11 @@ describe('Kingbase Oracle field conversion', () => {
       expect(() => fieldToOracleColumnType(typeId)).toThrow(`Unsupported column type`)
     },
   )
+
+  test.each([6123, 6125])('preserves ROWID text and SQL NULL for Oracle type id %s', (dataTypeID) => {
+    const identifier = 'AAAAAAAAAAABAAAAAAAAAAA'
+    expect(mapOracleRow([identifier, null], [{ dataTypeID }, { dataTypeID }])).toEqual([identifier, null])
+  })
 
   test('maps Oracle rows to protocol values', () => {
     expect(mapOracleRow({ id: 1, name: 'Alice' })).toEqual([1, 'Alice'])

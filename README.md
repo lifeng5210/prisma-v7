@@ -9,19 +9,19 @@
   <br />
   <br />
   <a href="https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres">Quickstart</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/">Website</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/docs/">Docs</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://github.com/prisma/prisma-examples/">Examples</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://www.prisma.io/blog">Blog</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/discord?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Discord</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/x?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Twitter</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <span>  •  </span>
   <a href="https://pris.ly/youtube?utm_source=github&utm_medium=prisma&utm_content=repo_readme">Youtube</a>
   <br />
   <hr />
@@ -33,6 +33,10 @@
 
 本仓库是基于 Prisma ORM 7.10.0 的金仓 KingbaseES 社区适配版本。KB 项目使用本节中的包名、命令和配置；下方保留的上游 Prisma 文档使用官方包名。
 
+用户通过 npm 安装配套的 `prisma-kb`、`@prisma-kb/client` 和 `@prisma-kb/adapter-kb`，无需拉取源码仓库或自行编译。已有官方 Prisma 项目接入 KingbaseES 时，应将 CLI 和 Client 切换为本适配发行版的配套包，并按照下方示例配置 provider 和适配器。
+
+Kingbase provider 和 SQL 方言支持已包含在适配发行版的配套组件中：CLI 和引擎根据 schema 中的 `kingbase-mysql` 或 `kingbase-oracle` 选择对应连接器及方言；应用导入 `PrismaKbMysql` 或 `PrismaKbOracle`，将适配器通过 `new PrismaClient({ adapter })` 传入客户端。内部依赖随 npm 安装，原生 Schema Engine 按下方说明下载，用户无需手工注册方言或修改框架源码。
+
 | 数据库模式      | Prisma provider   | 驱动适配器       | 适配验证环境    |
 | --------------- | ----------------- | ---------------- | --------------- |
 | MySQL 兼容模式  | `kingbase-mysql`  | `PrismaKbMysql`  | R3 V009R003C018 |
@@ -42,12 +46,12 @@
 
 ### 安装与初始化
 
-应用运行环境要求 Node.js `^20.19 || ^22.12 || >=24.0`。在新项目目录中安装配套的 CLI、Client 和适配器：
+应用运行环境要求 Node.js `^20.19 || ^22.12 || >=24.0`。以下命令不固定版本号，按 npm 的 `latest` 标签安装；CLI、Client 和适配器应使用相互兼容的适配发行版本。请在新项目目录中执行：
 
 ```sh
 npm init -y
-npm install --save-dev typescript tsx @types/node prisma-kb@7.10.0-kb.5
-npm install @prisma-kb/client@7.10.0-kb.5 @prisma-kb/adapter-kb@7.10.0-kb.5 dotenv
+npm install --save-dev typescript tsx @types/node prisma-kb
+npm install @prisma-kb/client @prisma-kb/adapter-kb dotenv
 npx tsc --init
 npm pkg set type=module
 ```
@@ -165,11 +169,13 @@ await prisma.user.findMany({
 
 KB 发行包包括 `prisma-kb`、`@prisma-kb/client`、`@prisma-kb/adapter-kb`、`@prisma-kb/driver-adapter-utils`、`@prisma-kb/prisma-schema-wasm`、`@prisma-kb/query-compiler-wasm`、`@prisma-kb/engines` 和 `@prisma-kb/engines-version`。内部依赖由包依赖关系及 lockfile 确定，无需全部手动安装。
 
-`@prisma-kb/engines` 默认从 <https://lifeng5210.github.io/prisma-engines-binaries> 下载对应修订的原生 Schema Engine；`PRISMA_ENGINES_MIRROR` 或 `PRISMA_BINARIES_MIRROR` 可指定其他镜像。引擎修订由 `@prisma-kb/engines-version` 决定。
+`@prisma-kb/engines` 默认从 [https://lifeng5210.github.io/prisma-engines-binaries](https://lifeng5210.github.io/prisma-engines-binaries) 下载对应修订的原生 Schema Engine；`PRISMA_ENGINES_MIRROR` 或 `PRISMA_BINARIES_MIRROR` 可指定其他镜像。引擎修订由 `@prisma-kb/engines-version` 决定。
 
 Rust 引擎与 Wasm 构建说明见[金仓引擎仓库](https://github.com/lifeng5210/prisma-engines/tree/kingbase)。
 
 ### 源码构建
+
+以下步骤用于适配开发和自行构建发行包。
 
 ```sh
 git clone --branch kingbase https://github.com/lifeng5210/prisma-v7.git
@@ -404,7 +410,7 @@ After you change your data model, you'll need to manually re-generate Prisma Cli
 npx prisma generate
 ```
 
-Refer to the documentation for more information about ["generating the Prisma client"](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/generating-prisma-client).
+Refer to the documentation for more information about [&#34;generating the Prisma client&#34;](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/generating-prisma-client).
 
 #### Step 5: Use Prisma Client to send queries to your database
 
